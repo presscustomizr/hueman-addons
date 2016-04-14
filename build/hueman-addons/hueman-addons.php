@@ -83,7 +83,7 @@ class HU_addons_plugin {
               'type'      => 'checkbox'
         ),
         'twitter-username' => array(
-              'default'   => 0,
+              'default'   => '',
               'control'   => 'HU_controls',
               'label'     => __('Twitter Username (whithout "@")', 'hueman'),
               'notice'    => __('Simply enter your username without the "@" prefix. Your username will be added to share-tweets of your posts (optional).', 'hueman'),

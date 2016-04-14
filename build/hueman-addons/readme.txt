@@ -42,6 +42,10 @@ The plugin includes the Share bar and shortcodes for the Hueman theme.
 
 
 == Changelog ==
+= 1.0.1 : April 14th, 2016 =
+* updated : sharrre Jquery plugin to the latest version (2.0.1) https://github.com/Julienh/Sharrre
+* fixed : undefined var _gaq in sharre
+* fixed : Google Plus sharing button not showing up
 
 = 1.0.0 : April 13th, 2016 =
 * First offical release
