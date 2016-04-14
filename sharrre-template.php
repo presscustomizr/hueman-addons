@@ -8,21 +8,21 @@
 
 <script type="text/javascript">
 	// Sharrre
-	jQuery(document).ready(function(){
-		jQuery('#twitter').sharrre({
+	jQuery(function($){
+		$('#twitter').sharrre({
 			share: {
 				twitter: true
 			},
 			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fa fa-twitter"></i></div></a>',
 			enableHover: false,
 			enableTracking: true,
-			buttons: { twitter: {via: '<?php echo esc_attr( ot_get_option('twitter-username') ); ?>'}},
+			buttons: { twitter: {via: '<?php echo esc_attr( hu_get_option("twitter-username") ); ?>'}},
 			click: function(api, options){
 				api.simulateClick();
 				api.openPopup('twitter');
 			}
 		});
-		jQuery('#facebook').sharrre({
+		$('#facebook').sharrre({
 			share: {
 				facebook: true
 			},
@@ -34,20 +34,20 @@
 				api.openPopup('facebook');
 			}
 		});
-		jQuery('#googleplus').sharrre({
+		$('#googleplus').sharrre({
 			share: {
 				googlePlus: true
 			},
 			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fa fa-google-plus-square"></i></div></a>',
 			enableHover: false,
 			enableTracking: true,
-			urlCurl: '<?php echo dirname( __FILE__ ) . '/assets/front/js/sharrre.php'; ?>',
+			urlCurl: '<?php echo dirname( __FILE__ ) . "/assets/front/js/sharrre.php"; ?>',
 			click: function(api, options){
 				api.simulateClick();
 				api.openPopup('googlePlus');
 			}
 		});
-		jQuery('#pinterest').sharrre({
+		$('#pinterest').sharrre({
 			share: {
 				pinterest: true
 			},
@@ -65,45 +65,50 @@
 			}
 		});
 
-		<?php if ( hu_is_checked( 'sharrre-scrollable' ) ): ?>
-			// Scrollable sharrre bar, contributed by Erik Frye. Awesome!
-			var shareContainer = jQuery(".sharrre-container"),
-			header = jQuery('#header'),
-			postEntry = jQuery('.entry'),
-			$window = jQuery(window),
-			distanceFromTop = 20,
-			startSharePosition = shareContainer.offset(),
-			contentBottom = postEntry.offset().top + postEntry.outerHeight(),
-			topOfTemplate = header.offset().top;
-			getTopSpacing();
+		<?php if ( hu_is_checked( 'sharrre-scrollable' ) ) : ?>
 
+			// Scrollable sharrre bar, contributed by Erik Frye. Awesome!
+			var $_shareContainer = $(".sharrre-container"),
+			    $_header         = $('#header'),
+			    $_postEntry      = $('.entry'),
+    			$window          = $(window),
+    			startSharePosition = $_shareContainer.offset(),//object
+    			contentBottom    = $_postEntry.offset().top + $_postEntry.outerHeight(),
+    			topOfTemplate    = $_header.offset().top,
+          topSpacing       = _setTopSpacing();
+
+      //triggered on scroll
 			shareScroll = function(){
-				if($window.width() > 719){
-					var scrollTop = $window.scrollTop() + topOfTemplate,
-					stopLocation = contentBottom - (shareContainer.outerHeight() + topSpacing);
-					if(scrollTop > stopLocation){
-						shareContainer.offset({top: contentBottom - shareContainer.outerHeight(),left: startSharePosition.left});
-					}
-					else if(scrollTop >= postEntry.offset().top-topSpacing){
-						shareContainer.offset({top: scrollTop + topSpacing, left: startSharePosition.left});
-					}else if(scrollTop < startSharePosition.top+(topSpacing-1)){
-						shareContainer.offset({top: startSharePosition.top,left:startSharePosition.left});
-					}
+				if( ! $window.width() > 719)
+          return;
+
+				var scrollTop     = $window.scrollTop() + topOfTemplate,
+				    stopLocation  = contentBottom - ($_shareContainer.outerHeight() + topSpacing);
+
+				if(scrollTop > stopLocation){
+					$_shareContainer.offset({top: contentBottom - $_shareContainer.outerHeight(),left: startSharePosition.left});
+				}
+				else if(scrollTop >= $_postEntry.offset().top-topSpacing){
+					$_shareContainer.offset({top: scrollTop + topSpacing, left: startSharePosition.left});
+				}else if(scrollTop < startSharePosition.top+(topSpacing-1)){
+					$_shareContainer.offset({top: startSharePosition.top,left:startSharePosition.left});
 				}
 			},
 
-			shareMove = function(){
-				startSharePosition = shareContainer.offset();
-				contentBottom = postEntry.offset().top + postEntry.outerHeight();
-				topOfTemplate = header.offset().top;
-				getTopSpacing();
+      //triggered on resize
+			shareMove = function() {
+				startSharePosition = $_shareContainer.offset();
+				contentBottom = $_postEntry.offset().top + $_postEntry.outerHeight();
+				topOfTemplate = $_header.offset().top;
+				_setTopSpacing();
 			};
 
 			/* As new images load the page content body gets longer. The bottom of the content area needs to be adjusted in case images are still loading. */
 			setTimeout(function() {
-				contentBottom = postEntry.offset().top + postEntry.outerHeight();
+				contentBottom = $_postEntry.offset().top + $_postEntry.outerHeight();
 			}, 2000);
 
+      //setup event listeners
 			if (window.addEventListener) {
 				window.addEventListener('scroll', shareScroll, false);
 				window.addEventListener('resize', shareMove, false);
@@ -112,11 +117,14 @@
 				window.attachEvent('onresize', shareMove);
 			}
 
-			function getTopSpacing(){
+			function _setTopSpacing(){
+        var distanceFromTop  = 20;
+
 				if($window.width() > 1024)
-					topSpacing = distanceFromTop + jQuery('.nav-wrap').outerHeight();
+					topSpacing = distanceFromTop + $('.nav-wrap').outerHeight();
 				else
 					topSpacing = distanceFromTop;
+        return topSpacing;
 			}
 		<?php endif; ?>
 
