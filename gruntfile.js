@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 	var path  = require('path');
   var _     = require('lodash');
 	var global_config = {
-		// path to task.js files, defaults to grunt dir
+		  //path to task.js files, defaults to grunt dir
       configPath: path.join(process.cwd(), 'grunt-tasks-config/'),
       // auto grunt.initConfig
       init: true,
@@ -11,35 +11,13 @@ module.exports = function(grunt) {
       data: {
         pkg: grunt.file.readJSON( 'package.json' ),
         paths : {
-        //front_css : 'assets/front/css/',
         front_js : 'assets/front/js/',
-        //global_js : 'assets/global/',
-        //admin_css : 'assets/back/css/',
-        //admin_js : 'assets/back/js/',
-        //lang : 'languages/'
       },
-			//default less modifiers
-			//is_rtl: 'true',
-			//https://www.npmjs.org/package/grunt-ssh
-			//Check if the context var is set and == travis => avoid travis error with ftpauth no found
-			//credentials : 'travis' == grunt.option('context') ? {} : grunt.file.readJSON('.ftpauth'),
 			tasks : {
-				//DEV : clean the build and watch changes (see watch task)
 				'dev': [ 'watch'],
-        //'common_css' : ['less:dev_common' , 'cssmin:dev_common' ],
 
 				//PROD
-				// 'prod_front_css': ['multi:prod_skins', 'less:prod_common' , 'less:prod_common_rtl', 'cssmin:prod_skins' , 'cssmin:prod_common', 'cssmin:prod_common_rtl'],
-				// 'prod_front_js': ['jshint', 'concat:front_main_parts_js', 'concat:front_js',  'uglify:part_front_js' , 'uglify:main_front_js'],
-				// 'prod_admin_css_js' : ['cssmin:prod_admin_css' , 'concat:admin_control_js', 'uglify:prod_admin_js'],
-				// //https://www.npmjs.org/package/grunt-gitinfo
-				// //Get Git info from a working copy and populate grunt.config with the data
 				'build':  [ 'jshint:front_js','uglify:front_js', 'replace', 'clean', 'copy', 'compress'],
-				// //final build meta task
-				// 'hueman_build' : ['prod_front_css', 'prod_front_js', 'prod_admin_css_js', 'prod_build'],
-
-				//TRAVIS ci virtual machine build check on js @todo check other resources?
-				//'travis' : ['jshint'],
 			},
 			uglify_requested_paths : {
 				src : '' || grunt.option('src'),
@@ -52,9 +30,6 @@ module.exports = function(grunt) {
 	// https://www.npmjs.org/package/load-grunt-config
 	require( 'load-grunt-config' )( grunt , global_config );
 
-	//http://www.thomasboyt.com/2013/09/01/maintainable-grunt.html
-	//http://gruntjs.com/api/grunt.task#grunt.task.loadtasks
-	//grunt.loadTasks('grunt-tasks');
 	// REGISTER TASKS
 	_.map( grunt.config('tasks'), function(task, name) {
 		grunt.registerTask(name, task);

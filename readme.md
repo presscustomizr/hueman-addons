@@ -1,13 +1,13 @@
 # Hueman Addons #
-Contributors: nikeo
-Author URI: http://presscustomizr.com
-Plugin URI: https://github.com/presscustomizr/hueman-addons
-Tags: hueman theme, hueman
-Requires at least: 3.4
-Tested up to: 4.5
-Stable tag: 1.0.0
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+* Contributors: nikeo
+* Author URI: http://presscustomizr.com
+* Plugin URI: https://github.com/presscustomizr/hueman-addons
+* Tags: hueman theme, hueman
+* Requires at least: 3.4
+* Tested up to: 4.5
+* Stable tag: 1.0.1
+* License: GPLv2 or later
+* License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Addons for the Hueman WordPress theme
 
@@ -99,6 +99,10 @@ The plugin includes the Share bar and shorcodes for the Hueman theme.
 
 
 ## Changelog ##
+= 1.0.1 : April 14th, 2016 =
+* updated : sharrre Jquery plugin to the latest version (2.0.1) https://github.com/Julienh/Sharrre
+* fixed : undefined var _gaq in sharre
+* fixed : Google Plus sharing button not showing up
 
 = 1.0.0 : April 13th, 2016 =
 * First offical release
