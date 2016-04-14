@@ -29,6 +29,7 @@
 			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fa fa-facebook-square"></i></div></a>',
 			enableHover: false,
 			enableTracking: true,
+      buttons:{layout: 'box_count'},
 			click: function(api, options){
 				api.simulateClick();
 				api.openPopup('facebook');
@@ -41,7 +42,8 @@
 			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fa fa-google-plus-square"></i></div></a>',
 			enableHover: false,
 			enableTracking: true,
-			urlCurl: '<?php echo dirname( __FILE__ ) . "/assets/front/js/sharrre.php"; ?>',
+      buttons:{size: 'tall'},
+			urlCurl: '<?php echo plugins_url( basename( __DIR__ ) ) . "/assets/front/js/sharrre.php"; ?>',
 			click: function(api, options){
 				api.simulateClick();
 				api.openPopup('googlePlus');
