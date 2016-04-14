@@ -64,24 +64,24 @@ class HU_addons_plugin {
         'sharrre' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Single &mdash; Share Bar', 'hueman'),
-              'description' => __('Social sharing buttons for each article', 'hueman'),
+              'label'     => __('Single Posts Share Bar', 'hueman'),
+              'notice'    => __('Social sharing buttons for each article.', 'hueman'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox'
         ),
         'sharrre-scrollable' => array(
               'default'   => 0,
               'control'   => 'HU_controls',
-              'label'     => __('Single &mdash; Scrollable Share Bar', 'hueman'),
-              'description' => __('Make social links stick to browser window when scrolling down', 'hueman'),
+              'label'     => __('Make the Share Bar "sticky"', 'hueman'),
+              'notice'    => __('Make the social share bar stick to the browser window when scrolling down a post.', 'hueman'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox'
         ),
         'twitter-username' => array(
               'default'   => 0,
-              //'control'   => 'HU_controls',
-              'label'     => __('Twitter Username', 'hueman'),
-              'description' => __('Your @username will be added to share-tweets of your posts (optional)', 'hueman'),
+              'control'   => 'HU_controls',
+              'label'     => __('Twitter Username (whithout "@")', 'hueman'),
+              'notice'    => __('Simply enter your username without the "@" prefix. Your username will be added to share-tweets of your posts (optional).', 'hueman'),
               'section'   => 'social_links_sec',
               'type'      => 'text',
               'transport' => 'postMessage'
