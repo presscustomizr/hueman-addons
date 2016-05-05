@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 1.0.1
+* Version: 1.0.2
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
 * License: GPLv2 or later
@@ -52,14 +52,10 @@ class HU_addons_plugin {
       add_filter( 'hu_social_links_sec', array( $this, 'hu_register_sharrre_settings'));
       add_action( 'wp', array($this, 'hu_sharrre_front_actions') );
 
-
-      //DEV MODE SCRIPT
-      //Grunt Live reload script on DEV mode (HU_DEV constant has to be defined. In wp_config for example)
-      if ( defined('TC_DEV') && true === TC_DEV && apply_filters('hu_live_reload_in_dev_mode' , true ) ) {
-        add_action( 'wp_head', array($this,'hu_add_livereload_script' ) );
-      }
-
+      //CUSTOMIZER PANEL JS
+      add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_add_visibilities' ), 100 );
     }//end of construct
+
 
 
 
@@ -69,27 +65,71 @@ class HU_addons_plugin {
         'sharrre' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Single Posts Share Bar', 'hueman'),
-              'notice'    => __('Social sharing buttons for each article.', 'hueman'),
+              'label'     => __('Display social sharing buttons in your single posts', 'hueman'),
+              'title'     => __('Social Sharring Bar Setttings', 'hueman'),
+              'notice'    => __('Display social sharing buttons in each single articles.', 'hueman'),
               'section'   => 'social_links_sec',
-              'type'      => 'checkbox'
+              'type'      => 'checkbox',
+              'priority'  => 40
         ),
         'sharrre-scrollable' => array(
-              'default'   => 0,
+              'default'   => 1,
               'control'   => 'HU_controls',
               'label'     => __('Make the Share Bar "sticky"', 'hueman'),
               'notice'    => __('Make the social share bar stick to the browser window when scrolling down a post.', 'hueman'),
               'section'   => 'social_links_sec',
-              'type'      => 'checkbox'
+              'type'      => 'checkbox',
+              'priority'  => 50
+        ),
+        'sharrre-twitter-on' => array(
+              'default'   => 1,
+              'control'   => 'HU_controls',
+              'label'     => __('Enable Twitter Button', 'hueman'),
+              'section'   => 'social_links_sec',
+              'type'      => 'checkbox',
+              'priority'  => 60
         ),
         'twitter-username' => array(
               'default'   => '',
               'control'   => 'HU_controls',
-              'label'     => __('Twitter Username (whithout "@")', 'hueman'),
+              'label'     => __('Twitter Username (without "@")', 'hueman'),
               'notice'    => __('Simply enter your username without the "@" prefix. Your username will be added to share-tweets of your posts (optional).', 'hueman'),
               'section'   => 'social_links_sec',
               'type'      => 'text',
-              'transport' => 'postMessage'
+              'transport' => 'postMessage',
+              'priority'  => 70
+        ),
+        'sharrre-facebook-on' => array(
+              'default'   => 1,
+              'control'   => 'HU_controls',
+              'label'     => __('Enable Facebook Button', 'hueman'),
+              'section'   => 'social_links_sec',
+              'type'      => 'checkbox',
+              'priority'  => 80
+        ),
+        'sharrre-google-on' => array(
+              'default'   => 1,
+              'control'   => 'HU_controls',
+              'label'     => __('Enable Google Plus Button', 'hueman'),
+              'section'   => 'social_links_sec',
+              'type'      => 'checkbox',
+              'priority'  => 90
+        ),
+        'sharrre-pinterest-on' => array(
+              'default'   => 0,
+              'control'   => 'HU_controls',
+              'label'     => __('Enable Pinterest Button', 'hueman'),
+              'section'   => 'social_links_sec',
+              'type'      => 'checkbox',
+              'priority'  => 100
+        ),
+        'sharrre-linkedin-on' => array(
+              'default'   => 0,
+              'control'   => 'HU_controls',
+              'label'     => __('Enable LinkedIn Button', 'hueman'),
+              'section'   => 'social_links_sec',
+              'type'      => 'checkbox',
+              'priority'  => 100
         )
       );
 
@@ -102,7 +142,7 @@ class HU_addons_plugin {
     ** SHORTCODES
     **************************************************************/
     function hu_shortcodes_actions() {
-      load_template( dirname( __FILE__ ) . '/shortcodes.php' );
+      load_template( dirname( __FILE__ ) . '/inc/shortcodes.php' );
     }
 
 
@@ -114,26 +154,28 @@ class HU_addons_plugin {
       if ( ! is_single() )
         return;
       //alter the single entry wrapper class
-      add_filter( 'hu_single_entry_class', array($this, 'hu_add_sharrre_class'));
+      add_filter( 'hu_single_entry_class', array($this, 'hu_maybe_add_sharrre_class'));
 
       //hook the sharrre content to the single post template
-      add_action( 'hu_after_single_entry_inner', array($this, 'hu_print_sharrre_template') );
+      add_action( 'hu_after_single_entry_inner', array($this, 'hu_maybe_print_sharrre_template') );
     }
 
 
     //@param $classes = array of classes
     //hook : hu_single_entry_class
     function hu_add_sharrre_class( $classes ) {
+      if ( ! hu_are_share_buttons_enabled() )
+        return $classes;
       $classes[] = 'share';
       return $classes;
     }
 
     //hook : hu_after_single_entry_inner
-    function hu_print_sharrre_template() {
-      if ( ! hu_is_checked('sharrre') )
+    function hu_maybe_print_sharrre_template() {
+      if ( ! hu_are_share_buttons_enabled() )
         return;
 
-      load_template( dirname( __FILE__ ) . '/sharrre-template.php' );
+      load_template( dirname( __FILE__ ) . '/inc/sharrre-template.php' );
     }
 
 
@@ -155,6 +197,40 @@ class HU_addons_plugin {
     }
 
 
+    //hook : 'customize_controls_enqueue_scripts'
+    function hu_add_visibilities() {
+      ?>
+      <script type="text/javascript">
+        (function (api, $, _) {
+          var _oldDeps = api.HU_visibilities.prototype.controlDeps;
+          api.HU_visibilities.prototype.controlDeps = _.extend( _oldDeps, {
+              'sharrre' : {
+                  controls: [
+                    'sharrre-scrollable',
+                    'sharrre-twitter-on',
+                    'twitter-username',
+                    'sharrre-facebook-on',
+                    'sharrre-google-on',
+                    'sharrre-pinterest-on',
+                    'sharrre-linkedin-on'
+                  ],
+                  callback : function (to) {
+                    return '0' !== to && false !== to && 'off' !== to;
+                  }
+              },
+              'sharrre-twitter-on' : {
+                  controls: [
+                    'twitter-username'
+                  ],
+                  callback : function (to) {
+                    return '0' !== to && false !== to && 'off' !== to;
+                  }
+              }
+          });
+        }) ( wp.customize, jQuery, _);
+      </script>
+      <?php
+    }
 
 
 
@@ -233,25 +309,18 @@ class HU_addons_plugin {
       return isset( $_POST['customized'] ) && ( defined( 'DOING_AJAX' ) && DOING_AJAX );
     }
 
-
-
-    /*
-    * Writes the livereload script in dev mode (Grunt watch livereload enabled)
-    */
-    function hu_add_livereload_script() {
-      ?>
-      <script id="hu-addons-dev-live-reload" type="text/javascript">
-          document.write('<script src="http://'
-              + ('localhost').split(':')[0]
-              + ':35729/livereload.js?snipver=1" type="text/javascript"><\/script>')
-          console.log('When WP_DEBUG mode is enabled, activate the watch Grunt task to enable live reloading. This script can be disabled with the following code to paste in your functions.php file : add_filter("hu_live_reload_in_dev_mode" , "__return_false")');
-      </script>
-      <?php
-    }
-
 } //end of class
 
 //Creates a new instance of front and admin
 new HU_addons_plugin;
 
 endif;
+
+//@return bool
+function hu_are_share_buttons_enabled() {
+  if ( ! hu_is_checked('sharrre') )
+    return;
+  if ( ! hu_is_checked('sharrre-twitter-on') && ! hu_is_checked('sharrre-facebook-on') && ! hu_is_checked('sharrre-google-on') && ! hu_is_checked('sharrre-pinterest-on') && ! hu_is_checked('sharrre-linkedin-on') )
+    return;
+  return true;
+}

@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.5
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -99,6 +99,15 @@ The plugin includes the Share bar and shorcodes for the Hueman theme.
 
 
 ## Changelog ##
+= 1.0.2 : May 5th, 2016 =
+* fixed : Share bar blocking view in mobile
+* fixed : Add Share Class Only When Sharebar Active
+* fixed : when the sticky option is enabled, the bar can be on top of the attachments slideshow
+* fixed : disabled social share buttons : there is still block area stolen from the content
+* added : LinkedIn share button
+* added : options to select which button(s) to activate
+* removed : grunt reload script
+
 = 1.0.1 : April 14th, 2016 =
 * updated : sharrre Jquery plugin to the latest version (2.0.1) https://github.com/Julienh/Sharrre
 * fixed : undefined var _gaq in sharre

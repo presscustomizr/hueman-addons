@@ -2,12 +2,14 @@
 header('content-type: application/json');
 //Sharrre by Julien Hany
 $json        = array('url' => '', 'count' => 0);
-$json['url'] = $_GET['url'];
-$url         = urlencode($_GET['url']);
-$type        = urlencode($_GET['type']);
+$_pre_url    = isset($_GET['url']) ? $_GET['url'] : '';
+$_pre_type   = isset($_GET['type']) ? $_GET['type'] : '';
+$json['url'] = $_pre_url;
+$url         = urlencode($_pre_url);
+$type        = urlencode($_pre_type);
 $proxy       = null;
 $proxyAuth   = array();
-if (filter_var($_GET['url'], FILTER_VALIDATE_URL)) {
+if (filter_var($_pre_url, FILTER_VALIDATE_URL)) {
     if ($type == 'googlePlus') { //source http://www.helmutgranda.com/2011/11/01/get-a-url-google-count-via-php/
         $contents = parse('https://plusone.google.com/u/0/_/+1/fastbutton?url=' . $url . '&count=true');
 
