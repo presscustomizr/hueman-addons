@@ -1,19 +1,19 @@
 <div class="sharrre-container">
-	<span><?php _e('Share','hueman'); ?></span>
+	<span><?php _e('Share','hueman-addons'); ?></span>
   <?php if ( hu_is_checked('sharrre-twitter-on') ) : ?>
-	   <div id="twitter" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="Tweet"><a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fa fa-twitter"></i></div></a></div>
+	   <div id="twitter" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="<?php _e('Tweet', 'hueman-addons'); ?>"><a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fa fa-twitter"></i></div></a></div>
   <?php endif; ?>
   <?php if ( hu_is_checked('sharrre-facebook-on') ) : ?>
-	   <div id="facebook" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="Like"></div>
+	   <div id="facebook" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="<?php _e('Like', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
   <?php if ( hu_is_checked('sharrre-google-on') ) : ?>
-	   <div id="googleplus" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="+1"></div>
+	   <div id="googleplus" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="<?php _e('+1', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
   <?php if ( hu_is_checked('sharrre-pinterest-on') ) : ?>
-	   <div id="pinterest" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="Pin It"></div>
+	   <div id="pinterest" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="<?php _e('Pin It', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
   <?php if ( hu_is_checked('sharrre-linkedin-on') ) : ?>
-    <div id="linkedin" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="Publish on Linked In"></div>
+    <div id="linkedin" data-url="<?php echo the_permalink(); ?>" data-text="<?php echo the_title(); ?>" data-title="<?php _e('Publish on Linked In', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
 </div><!--/.sharrre-container-->
 

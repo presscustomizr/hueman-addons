@@ -11,7 +11,8 @@ module.exports = function(grunt) {
       data: {
         pkg: grunt.file.readJSON( 'package.json' ),
         paths : {
-        front_js : 'assets/front/js/',
+          front_js : 'assets/front/js/',
+          lang : 'lang/'
       },
 			tasks : {
 				'dev': [ 'watch'],

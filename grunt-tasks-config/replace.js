@@ -18,5 +18,15 @@ module.exports = {
 			from: /^.*Stable tag: .*$/m,
 			to: 'Stable tag: <%= pkg.version %>'
 		} ]
-	}
+	},
+  lang : {
+    src: [
+      '<%= paths.lang %>*.po'
+    ],
+    overwrite: true,
+    replacements: [ {
+      from: /^.* Hueman Addons v.*$/m,
+      to: '"Project-Id-Version: Hueman Addons v<%= pkg.version %>\\n"'
+    } ]
+  },
 };

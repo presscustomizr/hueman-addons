@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.5
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ Addons for the Hueman WordPress theme
 The plugin includes the Share bar and shorcodes for the Hueman theme.
 
 ## Download link ##
-[hueman-addons.zip](http://08bcf6c59e1667b0c11e-d508f833103a9ef76bbbec804d0292d4.r24.cf1.rackcdn.com/hueman-addons.zip)
+[hueman-addons.zip](https://github.com/presscustomizr/hueman-addons/releases/download/v1.0.3/hueman-addons.zip)
 
 
 ## How to use the shortcodes ##
@@ -99,6 +99,9 @@ The plugin includes the Share bar and shorcodes for the Hueman theme.
 
 
 ## Changelog ##
+= 1.0.3 : May 5th, 2016 =
+* added : lang domain for plugin translation
+
 = 1.0.2 : May 5th, 2016 =
 * fixed : Share bar blocking view in mobile
 * fixed : Add Share Class Only When Sharebar Active

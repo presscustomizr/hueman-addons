@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 1.0.2
+* Version: 1.0.3
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
 * License: GPLv2 or later
@@ -40,6 +40,10 @@ class HU_addons_plugin {
         return;
       }
 
+      //TEXT DOMAIN
+      //adds plugin text domain
+      add_action( 'plugins_loaded', array( $this , 'hu_plugin_lang' ) );
+
       //SHORTCODES
       // Load custom shortcodes
       // @fromfull => should me moved in a plugin
@@ -65,9 +69,9 @@ class HU_addons_plugin {
         'sharrre' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Display social sharing buttons in your single posts', 'hueman'),
-              'title'     => __('Social Sharring Bar Setttings', 'hueman'),
-              'notice'    => __('Display social sharing buttons in each single articles.', 'hueman'),
+              'label'     => __('Display social sharing buttons in your single posts', 'hueman-addons'),
+              'title'     => __('Social Sharring Bar Setttings', 'hueman-addons'),
+              'notice'    => __('Display social sharing buttons in each single articles.', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 40
@@ -75,8 +79,8 @@ class HU_addons_plugin {
         'sharrre-scrollable' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Make the Share Bar "sticky"', 'hueman'),
-              'notice'    => __('Make the social share bar stick to the browser window when scrolling down a post.', 'hueman'),
+              'label'     => __('Make the Share Bar "sticky"', 'hueman-addons'),
+              'notice'    => __('Make the social share bar stick to the browser window when scrolling down a post.', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 50
@@ -84,7 +88,7 @@ class HU_addons_plugin {
         'sharrre-twitter-on' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Enable Twitter Button', 'hueman'),
+              'label'     => __('Enable Twitter Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 60
@@ -92,8 +96,8 @@ class HU_addons_plugin {
         'twitter-username' => array(
               'default'   => '',
               'control'   => 'HU_controls',
-              'label'     => __('Twitter Username (without "@")', 'hueman'),
-              'notice'    => __('Simply enter your username without the "@" prefix. Your username will be added to share-tweets of your posts (optional).', 'hueman'),
+              'label'     => __('Twitter Username (without "@")', 'hueman-addons'),
+              'notice'    => __('Simply enter your username without the "@" prefix. Your username will be added to share-tweets of your posts (optional).', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'text',
               'transport' => 'postMessage',
@@ -102,7 +106,7 @@ class HU_addons_plugin {
         'sharrre-facebook-on' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Enable Facebook Button', 'hueman'),
+              'label'     => __('Enable Facebook Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 80
@@ -110,7 +114,7 @@ class HU_addons_plugin {
         'sharrre-google-on' => array(
               'default'   => 1,
               'control'   => 'HU_controls',
-              'label'     => __('Enable Google Plus Button', 'hueman'),
+              'label'     => __('Enable Google Plus Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 90
@@ -118,7 +122,7 @@ class HU_addons_plugin {
         'sharrre-pinterest-on' => array(
               'default'   => 0,
               'control'   => 'HU_controls',
-              'label'     => __('Enable Pinterest Button', 'hueman'),
+              'label'     => __('Enable Pinterest Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 100
@@ -126,7 +130,7 @@ class HU_addons_plugin {
         'sharrre-linkedin-on' => array(
               'default'   => 0,
               'control'   => 'HU_controls',
-              'label'     => __('Enable LinkedIn Button', 'hueman'),
+              'label'     => __('Enable LinkedIn Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
               'priority'  => 100
@@ -136,7 +140,9 @@ class HU_addons_plugin {
       return array_merge( $sharrre_settings, $settings );
     }
 
-
+    function hu_plugin_lang() {
+      load_plugin_textdomain( 'hueman-addons' , false, basename( dirname( __FILE__ ) ) . '/lang' );
+    }
 
     /**************************************************************
     ** SHORTCODES
@@ -163,7 +169,7 @@ class HU_addons_plugin {
 
     //@param $classes = array of classes
     //hook : hu_single_entry_class
-    function hu_add_sharrre_class( $classes ) {
+    function hu_maybe_add_sharrre_class( $classes ) {
       if ( ! hu_are_share_buttons_enabled() )
         return $classes;
       $classes[] = 'share';
@@ -267,13 +273,13 @@ class HU_addons_plugin {
 
 
     function hu_admin_notice() {
-        $what = __( 'works only with the Hueman theme', 'hueman' );
+        $what = __( 'works only with the Hueman theme', 'hueman-addons' );
 
        ?>
         <div class="error">
             <p>
               <?php
-              printf( __( 'The <strong>%1$s</strong> plugin %2$s.' ,'hueman' ),
+              printf( __( 'The <strong>%1$s</strong> plugin %2$s.' ,'hueman-addons' ),
                 'Hueman Addons',
                 $what
               );

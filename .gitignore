@@ -16,7 +16,7 @@ node_modules/
 
 
 # BUILD
-build/*.zip
+build/
 
 
 # WPCS
