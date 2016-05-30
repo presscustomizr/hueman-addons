@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.5
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -99,6 +99,9 @@ The plugin includes the Share bar and shorcodes for the Hueman theme.
 
 
 ## Changelog ##
+= 1.0.4 : May 30th, 2016 =
+* Fix : disapppearing sharebar, added function scope to jQuerySharre.js to avoid 3rd party plugin conflicts
+
 = 1.0.3 : May 5th, 2016 =
 * added : lang domain for plugin translation
 
