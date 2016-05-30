@@ -57,7 +57,7 @@ class HU_addons_plugin {
       add_action( 'wp', array($this, 'hu_sharrre_front_actions') );
 
       //CUSTOMIZER PANEL JS
-      add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_add_visibilities' ), 100 );
+      add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_extend_visibilities' ), 100 );
     }//end of construct
 
 
@@ -204,12 +204,12 @@ class HU_addons_plugin {
 
 
     //hook : 'customize_controls_enqueue_scripts'
-    function hu_add_visibilities() {
+    function hu_extend_visibilities() {
       ?>
       <script type="text/javascript">
         (function (api, $, _) {
-          var _oldDeps = api.HU_visibilities.prototype.controlDeps;
-          api.HU_visibilities.prototype.controlDeps = _.extend( _oldDeps, {
+          var _oldDeps = api.CZR_visibilities.prototype.controlDeps;
+          api.CZR_visibilities.prototype.controlDeps = _.extend( _oldDeps, {
               'sharrre' : {
                   controls: [
                     'sharrre-scrollable',
