@@ -1,5 +1,3 @@
-var $ = $ || jQuery;
-
 /*!
  *  Sharrre.com - Make your sharing widget!
  *  Version: 2.0.1
@@ -7,396 +5,407 @@ var $ = $ || jQuery;
  *  License: MIT http://en.wikipedia.org/wiki/MIT_License or GPLv2 http://en.wikipedia.org/wiki/GNU_General_Public_License
  */
 var SharrrePlatform = SharrrePlatform || (function () {
-    var platforms = {};
+        var platforms = {};
 
-    return {
-        'register': function (name, constructor) {
-            platforms[name] = constructor;
-        },
-        'get': function (name, options) {
-            if (!platforms[name]) {
-                console.error("Sharrre - No platform found for " + name);
-                return false;
+        return {
+            'register': function (name, constructor) {
+                platforms[name] = constructor;
+            },
+            'get': function (name, options) {
+                if (!platforms[name]) {
+                    console.error("Sharrre - No platform found for " + name);
+                    return false;
+                }
+                return new platforms[name](options);
             }
-            return new platforms[name](options);
-        }
-    };
-})();
+        };
+    })();
+
+// noConflict Scope
+(function($, SharrrePlatform){
+
+    // check jQuery
+    if (typeof $ == 'undefined'){
+        return;
+    }
+
+    SharrrePlatform.register("linkedin", function (options) {
+        defaultSettings = {  //http://developer.linkedin.com/plugins/share-button
+            url: '',  //if you need to personalize url button
+            urlCount: false,  //if you want to use personnalize button url on global counter
+            counter: '',
+            count: true,
+            popup: {
+                width: 550,
+                height: 550
+            }
+        };
+
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+        return {
+            settings: defaultSettings,
+            url: function (test) {
+                return "https://www.linkedin.com/countserv/count/share?format=jsonp&url={url}&callback=?";
+            },
+            trackingAction: {site: 'linkedin', action: 'share'},
+            load: function (self) {
+                var sett = this.settings;
+                $(self.element).find('.buttons').append('<div class="button linkedin"><script type="IN/share" data-url="' + (sett.url !== '' ? sett.url : self.options.url) + '" data-counter="' + sett.counter + '"></script></div>');
+                var loading = 0;
+                if (typeof window.IN === 'undefined' && loading === 0) {
+                    loading = 1;
+                    (function () {
+                        var li = document.createElement('script');
+                        li.type = 'text/javascript';
+                        li.async = true;
+                        li.src = 'https://platform.linkedin.com/in.js';
+                        var s = document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(li, s);
+                    })();
+                }
+                else if (typeof window.IN !== 'undefined' && window.IN.parse) {
+                    IN.parse(document);
+                }
+            },
+            tracking: function () {
+                function LinkedInShare() {
+                    _gaq.push(['_trackSocial', 'linkedin', 'share']);
+                }
+            },
+            popup: function (opt) {
+                window.open('https://www.linkedin.com/cws/share?url=' +
+                    encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
+                    '&token=&isFramed=true', 'linkedin', 'toolbar=no, width=' + this.settings.popup.width + ", height=" + this.settings.popup.height);
+            }
+        };
+    });
 
 
-SharrrePlatform.register("linkedin", function (options) {
-    defaultSettings = {  //http://developer.linkedin.com/plugins/share-button
-        url: '',  //if you need to personalize url button
-        urlCount: false,  //if you want to use personnalize button url on global counter
-        counter: '',
-        count: true,
-        popup: {
-            width: 550,
-            height: 550
-        }
-    };
+    SharrrePlatform.register("facebook", function (options) {
+        defaultSettings = { //http://developers.facebook.com/docs/reference/plugins/like/
+            url: '',  //if you need to personalize url button
+            urlCount: false,  //if you want to use personnalize button url on global counter
+            action: 'like',
+            layout: 'button_count',
+            count: true,
+            width: '',
+            send: 'false',
+            faces: 'false',
+            colorscheme: '',
+            font: '',
+            lang: 'en_US',
+            share: '',
+            appId: '',
+            popup: {
+                width: 900,
+                height: 500
+            }
+        };
 
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-    return {
-        settings: defaultSettings,
-        url: function (test) {
-            return "https://www.linkedin.com/countserv/count/share?format=jsonp&url={url}&callback=?";
-        },
-        trackingAction: {site: 'linkedin', action: 'share'},
-        load: function (self) {
-            var sett = this.settings;
-            $(self.element).find('.buttons').append('<div class="button linkedin"><script type="IN/share" data-url="' + (sett.url !== '' ? sett.url : self.options.url) + '" data-counter="' + sett.counter + '"></script></div>');
-            var loading = 0;
-            if (typeof window.IN === 'undefined' && loading === 0) {
-                loading = 1;
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+
+        return {
+            settings: defaultSettings,
+            url: function (url) {
+                return "https://graph.facebook.com/fql?q=SELECT%20url,%20normalized_url,%20share_count,%20like_count,%20comment_count,%20total_count,commentsbox_count,%20comments_fbid,%20click_count%20FROM%20link_stat%20WHERE%20url=%27{url}%27&callback=?";
+            },
+            trackingAction: {site: 'facebook', action: 'like'},
+            load: function (self) {
+                var sett = this.settings;
+                $(self.element).find('.buttons').append('<div class="button facebook"><div id="fb-root"></div>' +
+                    '<div class="fb-like" data-href="' + (sett.url !== '' ? sett.url : self.options.url) +
+                    '" data-send="' + sett.send +
+                    '" data-layout="' + sett.layout +
+                    '" data-width="' + sett.width +
+                    '" data-show-faces="' + sett.faces +
+                    '" data-action="' + sett.action +
+                    '" data-colorscheme="' + sett.colorscheme +
+                    '" data-font="' + sett.font +
+                    '" data-via="' + sett.via +
+                    '" data-share="' + sett.share +
+                    '"></div></div>');
+                var loading = 0;
+                if (typeof FB === 'undefined' && loading === 0) {
+                    loading = 1;
+                    (function (d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0];
+                        if (d.getElementById(id)) {
+                            return;
+                        }
+                        js = d.createElement(s);
+                        js.id = id;
+                        js.src = 'https://connect.facebook.net/' + sett.lang + '/all.js#xfbml=1';
+                        if (sett.appId) {
+                            js.src += '&appId=' + sett.appId;
+                        }
+                        fjs.parentNode.insertBefore(js, fjs);
+                    }(document, 'script', 'facebook-jssdk'));
+                }
+                else {
+                    FB.XFBML.parse();
+                }
+            },
+            tracking: function () {
+                fb = window.setInterval(function () {
+                    if (typeof FB !== 'undefined' && 'undefined' !== typeof(_gaq) ) {
+                        FB.Event.subscribe('edge.create', function (targetUrl) {
+                            _gaq.push(['_trackSocial', 'facebook', 'like', targetUrl]);
+                        });
+                        FB.Event.subscribe('edge.remove', function (targetUrl) {
+                            _gaq.push(['_trackSocial', 'facebook', 'unlike', targetUrl]);
+                        });
+                        FB.Event.subscribe('message.send', function (targetUrl) {
+                            _gaq.push(['_trackSocial', 'facebook', 'send', targetUrl]);
+                        });
+                        //console.log('ok');
+                        clearInterval(fb);
+                    }
+                }, 1000);
+            },
+            popup: function (opt) {
+                window.open("https://www.facebook.com/sharer/sharer.php?u=" +
+                    encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
+                    "&t=" + opt.text + "", "", "toolbar=0, status=0, width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
+            }
+        };
+    });
+
+
+
+    SharrrePlatform.register("googlePlus", function (options) {
+        defaultSettings = {  //http://www.google.com/webmasters/+1/button/
+            url: '',  //if you need to personnalize button url
+            urlCount: false,  //if you want to use personnalize button url on global counter
+            size: 'medium',
+            lang: 'en-US',
+            annotation: '',
+            count: true,
+            popup: {
+                width: 900,
+                height: 500
+            }
+        };
+
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+        return {
+            settings: defaultSettings,
+            url: function (url) {
+                return url + '?url={url}&type=googlePlus';
+            },
+            trackingAction: {site: 'Google', action: '+1'},
+            load: function (self) {
+                var sett = this.settings;
+                //$(self.element).find('.buttons').append('<div class="button googleplus"><g:plusone size="'+self.options.buttons.googlePlus.size+'" href="'+self.options.url+'"></g:plusone></div>');
+                $(self.element).find('.buttons').append('<div class="button googleplus"><div class="g-plusone" data-size="' +
+                    sett.size + '" data-href="' + (sett.url !== '' ? sett.url : self.options.url) +
+                    '" data-annotation="' + sett.annotation + '"></div></div>');
+                window.___gcfg = {
+                    lang: sett.lang
+                };
+                var loading = 0;
+                if ((typeof gapi === 'undefined' || typeof gapi.plusone === 'undefined') && loading === 0) {
+                    loading = 1;
+                    (function () {
+                        var po = document.createElement('script');
+                        po.type = 'text/javascript';
+                        po.async = true;
+                        po.src = 'https://apis.google.com/js/plusone.js';
+                        var s = document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(po, s);
+                    })();
+                }
+                else {
+                    gapi.plusone.go();
+                }
+            },
+            tracking: function () {
+            },
+            popup: function (opt) {
+                window.open("https://plus.google.com/share?hl=" + this.settings.lang +
+                    "&url=" + encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)),
+                    "", "toolbar=0, status=0, width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
+            }
+        };
+    });
+
+
+    SharrrePlatform.register("pinterest", function (options) {
+        defaultSettings = { //http://pinterest.com/about/goodies/
+            url: '',  //if you need to personalize url button
+            media: '',
+            description: '',
+            layout: 'horizontal',
+            popup: {
+                width: 700,
+                height: 300
+            }
+        };
+
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+        return {
+            settings: defaultSettings,
+            url: function (test) {
+                return "https://api.pinterest.com/v1/urls/count.json?url={url}&callback=?";
+            },
+            trackingAction: {site: 'pinterest', action: 'pin'},
+            load: function (self) {
+                var sett = this.settings;
+                $(self.element).find('.buttons').append('<div class="button pinterest"><a href="https://www.pinterest.com/pin/create/button/?url=' + (sett.url !== '' ? sett.url : self.options.url) + '&media=' + sett.media + '&description=' + sett.description + '" data-pin-do="buttonBookmark" count-layout="' + sett.layout + '">Pin It</a></div>');
+
                 (function () {
                     var li = document.createElement('script');
                     li.type = 'text/javascript';
                     li.async = true;
-                    li.src = 'https://platform.linkedin.com/in.js';
+                    li.src = 'https://assets.pinterest.com/js/pinit.js';
+                    li.setAttribute('data-pin-build', 'parsePinBtns');
                     var s = document.getElementsByTagName('script')[0];
                     s.parentNode.insertBefore(li, s);
                 })();
-            }
-            else if (typeof window.IN !== 'undefined' && window.IN.parse) {
-                IN.parse(document);
-            }
-        },
-        tracking: function () {
-            function LinkedInShare() {
-                _gaq.push(['_trackSocial', 'linkedin', 'share']);
-            }
-        },
-        popup: function (opt) {
-            window.open('https://www.linkedin.com/cws/share?url=' +
-            encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
-            '&token=&isFramed=true', 'linkedin', 'toolbar=no, width=' + this.settings.popup.width + ", height=" + this.settings.popup.height);
-        }
-    };
-});
 
-
-SharrrePlatform.register("facebook", function (options) {
-    defaultSettings = { //http://developers.facebook.com/docs/reference/plugins/like/
-        url: '',  //if you need to personalize url button
-        urlCount: false,  //if you want to use personnalize button url on global counter
-        action: 'like',
-        layout: 'button_count',
-        count: true,
-        width: '',
-        send: 'false',
-        faces: 'false',
-        colorscheme: '',
-        font: '',
-        lang: 'en_US',
-        share: '',
-        appId: '',
-        popup: {
-            width: 900,
-            height: 500
-        }
-    };
-
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-
-    return {
-        settings: defaultSettings,
-        url: function (url) {
-            return "https://graph.facebook.com/fql?q=SELECT%20url,%20normalized_url,%20share_count,%20like_count,%20comment_count,%20total_count,commentsbox_count,%20comments_fbid,%20click_count%20FROM%20link_stat%20WHERE%20url=%27{url}%27&callback=?";
-        },
-        trackingAction: {site: 'facebook', action: 'like'},
-        load: function (self) {
-            var sett = this.settings;
-            $(self.element).find('.buttons').append('<div class="button facebook"><div id="fb-root"></div>' +
-            '<div class="fb-like" data-href="' + (sett.url !== '' ? sett.url : self.options.url) +
-            '" data-send="' + sett.send +
-            '" data-layout="' + sett.layout +
-            '" data-width="' + sett.width +
-            '" data-show-faces="' + sett.faces +
-            '" data-action="' + sett.action +
-            '" data-colorscheme="' + sett.colorscheme +
-            '" data-font="' + sett.font +
-            '" data-via="' + sett.via +
-            '" data-share="' + sett.share +
-            '"></div></div>');
-            var loading = 0;
-            if (typeof FB === 'undefined' && loading === 0) {
-                loading = 1;
-                (function (d, s, id) {
-                    var js, fjs = d.getElementsByTagName(s)[0];
-                    if (d.getElementById(id)) {
-                        return;
-                    }
-                    js = d.createElement(s);
-                    js.id = id;
-                    js.src = 'https://connect.facebook.net/' + sett.lang + '/all.js#xfbml=1';
-                    if (sett.appId) {
-                        js.src += '&appId=' + sett.appId;
-                    }
-                    fjs.parentNode.insertBefore(js, fjs);
-                }(document, 'script', 'facebook-jssdk'));
-            }
-            else {
-                FB.XFBML.parse();
-            }
-        },
-        tracking: function () {
-            fb = window.setInterval(function () {
-                if (typeof FB !== 'undefined' && 'undefined' !== typeof(_gaq) ) {
-                    FB.Event.subscribe('edge.create', function (targetUrl) {
-                        _gaq.push(['_trackSocial', 'facebook', 'like', targetUrl]);
-                    });
-                    FB.Event.subscribe('edge.remove', function (targetUrl) {
-                        _gaq.push(['_trackSocial', 'facebook', 'unlike', targetUrl]);
-                    });
-                    FB.Event.subscribe('message.send', function (targetUrl) {
-                        _gaq.push(['_trackSocial', 'facebook', 'send', targetUrl]);
-                    });
-                    //console.log('ok');
-                    clearInterval(fb);
+                if (window.parsePinBtns) {
+                    window.parsePinBtns();
                 }
-            }, 1000);
-        },
-        popup: function (opt) {
-            window.open("https://www.facebook.com/sharer/sharer.php?u=" +
-            encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
-            "&t=" + opt.text + "", "", "toolbar=0, status=0, width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
-        }
-    };
-});
-
-
-
-SharrrePlatform.register("googlePlus", function (options) {
-    defaultSettings = {  //http://www.google.com/webmasters/+1/button/
-        url: '',  //if you need to personnalize button url
-        urlCount: false,  //if you want to use personnalize button url on global counter
-        size: 'medium',
-        lang: 'en-US',
-        annotation: '',
-        count: true,
-        popup: {
-            width: 900,
-            height: 500
-        }
-    };
-
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-    return {
-        settings: defaultSettings,
-        url: function (url) {
-            return url + '?url={url}&type=googlePlus';
-        },
-        trackingAction: {site: 'Google', action: '+1'},
-        load: function (self) {
-            var sett = this.settings;
-            //$(self.element).find('.buttons').append('<div class="button googleplus"><g:plusone size="'+self.options.buttons.googlePlus.size+'" href="'+self.options.url+'"></g:plusone></div>');
-            $(self.element).find('.buttons').append('<div class="button googleplus"><div class="g-plusone" data-size="' +
-            sett.size + '" data-href="' + (sett.url !== '' ? sett.url : self.options.url) +
-            '" data-annotation="' + sett.annotation + '"></div></div>');
-            window.___gcfg = {
-                lang: sett.lang
-            };
-            var loading = 0;
-            if ((typeof gapi === 'undefined' || typeof gapi.plusone === 'undefined') && loading === 0) {
-                loading = 1;
-                (function () {
-                    var po = document.createElement('script');
-                    po.type = 'text/javascript';
-                    po.async = true;
-                    po.src = 'https://apis.google.com/js/plusone.js';
-                    var s = document.getElementsByTagName('script')[0];
-                    s.parentNode.insertBefore(po, s);
-                })();
+                $(self.element).find('.pinterest').on('click', function () {
+                    self.openPopup('pinterest');
+                });
+            },
+            tracking: function () {
+            },
+            popup: function (opt) {
+                window.open('https://pinterest.com/pin/create/button/?url=' +
+                    encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
+                    '&media=' + encodeURIComponent(this.settings.media) +
+                    '&description=' + this.settings.description, 'pinterest',
+                    'toolbar=no,width=' + this.settings.popup.width + ", height=" + this.settings.popup.height);
             }
-            else {
-                gapi.plusone.go();
+        };
+    });
+
+
+
+    SharrrePlatform.register("twitter", function (options) {
+        defaultSettings = {  //http://twitter.com/about/resources/tweetbutton
+            url: '',  //if you need to personalize url button
+            urlCount: false,  //if you want to use personnalize button url on global counter
+            count: false,
+            hashtags: '',
+            via: '',
+            related: '',
+            lang: 'en',
+            popup: {
+                width: 650,
+                height: 360
             }
-        },
-        tracking: function () {
-        },
-        popup: function (opt) {
-            window.open("https://plus.google.com/share?hl=" + this.settings.lang +
-                "&url=" + encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)),
-                "", "toolbar=0, status=0, width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
-        }
-    };
-});
+        };
 
-
-SharrrePlatform.register("pinterest", function (options) {
-    defaultSettings = { //http://pinterest.com/about/goodies/
-        url: '',  //if you need to personalize url button
-        media: '',
-        description: '',
-        layout: 'horizontal',
-        popup: {
-            width: 700,
-            height: 300
-        }
-    };
-
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-    return {
-        settings: defaultSettings,
-        url: function (test) {
-            return "https://api.pinterest.com/v1/urls/count.json?url={url}&callback=?";
-        },
-        trackingAction: {site: 'pinterest', action: 'pin'},
-        load: function (self) {
-            var sett = this.settings;
-            $(self.element).find('.buttons').append('<div class="button pinterest"><a href="https://www.pinterest.com/pin/create/button/?url=' + (sett.url !== '' ? sett.url : self.options.url) + '&media=' + sett.media + '&description=' + sett.description + '" data-pin-do="buttonBookmark" count-layout="' + sett.layout + '">Pin It</a></div>');
-
-            (function () {
-                var li = document.createElement('script');
-                li.type = 'text/javascript';
-                li.async = true;
-                li.src = 'https://assets.pinterest.com/js/pinit.js';
-                li.setAttribute('data-pin-build', 'parsePinBtns');
-                var s = document.getElementsByTagName('script')[0];
-                s.parentNode.insertBefore(li, s);
-            })();
-
-            if (window.parsePinBtns) {
-                window.parsePinBtns();
-            }
-            $(self.element).find('.pinterest').on('click', function () {
-                self.openPopup('pinterest');
-            });
-        },
-        tracking: function () {
-        },
-        popup: function (opt) {
-            window.open('https://pinterest.com/pin/create/button/?url=' +
-                encodeURIComponent((this.settings.url !== '' ? this.settings.url : opt.url)) +
-                '&media=' + encodeURIComponent(this.settings.media) +
-                '&description=' + this.settings.description, 'pinterest',
-                'toolbar=no,width=' + this.settings.popup.width + ", height=" + this.settings.popup.height);
-        }
-    };
-});
-
-
-
-SharrrePlatform.register("twitter", function (options) {
-    defaultSettings = {  //http://twitter.com/about/resources/tweetbutton
-        url: '',  //if you need to personalize url button
-        urlCount: false,  //if you want to use personnalize button url on global counter
-        count: false,
-        hashtags: '',
-        via: '',
-        related: '',
-        lang: 'en',
-        popup: {
-            width: 650,
-            height: 360
-        }
-    };
-
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-    return {
-        settings: defaultSettings,
-        trackingAction: {site: 'twitter', action: 'tweet'},
-        url: function (test) {
-            return "https://opensharecount.com/count.json?url={url}";
-        },
-        load: function (self) {
-            var sett = this.settings;
-            $(self.element).find('.buttons').append(
-                '<div class="button twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="' + (sett.url !== '' ? sett.url : self.options.url) + '" data-count="' + sett.count + '" data-text="' + self.options.text + '" data-via="' + sett.via + '" data-hashtags="' + sett.hashtags + '" data-related="' + sett.related + '" data-lang="' + sett.lang + '">Tweet</a></div>');
-            var loading = 0;
-            if (typeof twttr === 'undefined' && loading === 0) {
-                loading = 1;
-                (function () {
-                    var twitterScriptTag = document.createElement('script');
-                    twitterScriptTag.type = 'text/javascript';
-                    twitterScriptTag.async = true;
-                    twitterScriptTag.src = 'https://platform.twitter.com/widgets.js';
-                    var s = document.getElementsByTagName('script')[0];
-                    s.parentNode.insertBefore(twitterScriptTag, s);
-                })();
-            }
-            else {
-                $.ajax({url: 'https://platform.twitter.com/widgets.js', dataType: 'script', cache: true}); //http://stackoverflow.com/q/6536108
-            }
-        },
-        tracking: function () {
-            tw = window.setInterval(function () {
-                if (typeof twttr !== 'undefined') {
-                    twttr.events.bind('tweet', function (event) {
-                        if (event && 'undefined' !== typeof(_gaq) ) {
-                            _gaq.push(['_trackSocial', 'twitter', 'tweet']);
-                        }
-                    });
-                    clearInterval(tw);
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+        return {
+            settings: defaultSettings,
+            trackingAction: {site: 'twitter', action: 'tweet'},
+            url: function (test) {
+                return "https://opensharecount.com/count.json?url={url}";
+            },
+            load: function (self) {
+                var sett = this.settings;
+                $(self.element).find('.buttons').append(
+                    '<div class="button twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="' + (sett.url !== '' ? sett.url : self.options.url) + '" data-count="' + sett.count + '" data-text="' + self.options.text + '" data-via="' + sett.via + '" data-hashtags="' + sett.hashtags + '" data-related="' + sett.related + '" data-lang="' + sett.lang + '">Tweet</a></div>');
+                var loading = 0;
+                if (typeof twttr === 'undefined' && loading === 0) {
+                    loading = 1;
+                    (function () {
+                        var twitterScriptTag = document.createElement('script');
+                        twitterScriptTag.type = 'text/javascript';
+                        twitterScriptTag.async = true;
+                        twitterScriptTag.src = 'https://platform.twitter.com/widgets.js';
+                        var s = document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(twitterScriptTag, s);
+                    })();
                 }
-            }, 1000);
-        },
-        popup: function (opt) {
-            window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(opt.text) + "&url=" + encodeURIComponent((this.settings.url !== '' ? this.setting.url : opt.url)) + (this.settings.via !== '' ? '&via=' + this.settings.via : ''), "", "toolbar=0, status=0,width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
-        }
-    };
-});
+                else {
+                    $.ajax({url: 'https://platform.twitter.com/widgets.js', dataType: 'script', cache: true}); //http://stackoverflow.com/q/6536108
+                }
+            },
+            tracking: function () {
+                tw = window.setInterval(function () {
+                    if (typeof twttr !== 'undefined') {
+                        twttr.events.bind('tweet', function (event) {
+                            if (event && 'undefined' !== typeof(_gaq) ) {
+                                _gaq.push(['_trackSocial', 'twitter', 'tweet']);
+                            }
+                        });
+                        clearInterval(tw);
+                    }
+                }, 1000);
+            },
+            popup: function (opt) {
+                window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(opt.text) + "&url=" + encodeURIComponent((this.settings.url !== '' ? this.setting.url : opt.url)) + (this.settings.via !== '' ? '&via=' + this.settings.via : ''), "", "toolbar=0, status=0,width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
+            }
+        };
+    });
 
 
-SharrrePlatform.register("twitterFollow", function (options) {
-    defaultSettings = {  //http://twitter.com/about/resources/tweetbutton
-        url: '',  //if you need to personalize url button
-        urlCount: false,  //if you want to use personnalize button url on global counter
-        count: true,
-        display: 'horizontal',
-        lang: 'en',
-        popup: {
-            width: 650,
-            height: 360
-        },
-        user: "",
-        size: 'default',
-        showCount: 'false'
-    };
+    SharrrePlatform.register("twitterFollow", function (options) {
+        defaultSettings = {  //http://twitter.com/about/resources/tweetbutton
+            url: '',  //if you need to personalize url button
+            urlCount: false,  //if you want to use personnalize button url on global counter
+            count: true,
+            display: 'horizontal',
+            lang: 'en',
+            popup: {
+                width: 650,
+                height: 360
+            },
+            user: "",
+            size: 'default',
+            showCount: 'false'
+        };
 
-    defaultSettings = $.extend(true, {}, defaultSettings, options);
-    return {
-        settings: defaultSettings,
-        trackingAction: {site: 'twitter', action: 'follow'},
-        url: function (test) {
-            return '';
-            // Needs an API token
+        defaultSettings = $.extend(true, {}, defaultSettings, options);
+        return {
+            settings: defaultSettings,
+            trackingAction: {site: 'twitter', action: 'follow'},
+            url: function (test) {
+                return '';
+                // Needs an API token
 //            return "https://api.twitter.com/1.1/users/show.json?screen_name=" + this.settings.user + "&include_entities=true&callback=?";
-        },
-        load: function (self) {
-            var sett = this.settings;
-            $(self.element).find('.buttons').append(
-                '<div class="button twitterFollow"><a href="https://twitter.com/' + sett.user + '" class="twitter-follow-button"' +
-                '" data-size="' + sett.size +
-                '" data-show-count="' + sett.showCount +
-                '" data-lang="' + sett.lang +
-                '">Follow @' + sett.user + '</a></div>');
-            var loading = 0;
-            if (typeof twttr === 'undefined' && loading === 0) {
-                loading = 1;
-                (function () {
-                    var twitterScriptTag = document.createElement('script');
-                    twitterScriptTag.type = 'text/javascript';
-                    twitterScriptTag.async = true;
-                    twitterScriptTag.src = 'https://platform.twitter.com/widgets.js';
-                    var s = document.getElementsByTagName('script')[0];
-                    s.parentNode.insertBefore(twitterScriptTag, s);
-                })();
-            }
-            else {
-                $.ajax({url: 'https://platform.twitter.com/widgets.js', dataType: 'script', cache: true}); //http://stackoverflow.com/q/6536108
-            }
-        },
-        tracking: function () {
-        },
-        popup: function (opt) {
-            window.open("https://twitter.com/intent/follow?screen_name=" + encodeURIComponent(this.settings.user), "",
-                "toolbar=0, status=0, ,width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
+            },
+            load: function (self) {
+                var sett = this.settings;
+                $(self.element).find('.buttons').append(
+                    '<div class="button twitterFollow"><a href="https://twitter.com/' + sett.user + '" class="twitter-follow-button"' +
+                    '" data-size="' + sett.size +
+                    '" data-show-count="' + sett.showCount +
+                    '" data-lang="' + sett.lang +
+                    '">Follow @' + sett.user + '</a></div>');
+                var loading = 0;
+                if (typeof twttr === 'undefined' && loading === 0) {
+                    loading = 1;
+                    (function () {
+                        var twitterScriptTag = document.createElement('script');
+                        twitterScriptTag.type = 'text/javascript';
+                        twitterScriptTag.async = true;
+                        twitterScriptTag.src = 'https://platform.twitter.com/widgets.js';
+                        var s = document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(twitterScriptTag, s);
+                    })();
+                }
+                else {
+                    $.ajax({url: 'https://platform.twitter.com/widgets.js', dataType: 'script', cache: true}); //http://stackoverflow.com/q/6536108
+                }
+            },
+            tracking: function () {
+            },
+            popup: function (opt) {
+                window.open("https://twitter.com/intent/follow?screen_name=" + encodeURIComponent(this.settings.user), "",
+                    "toolbar=0, status=0, ,width=" + this.settings.popup.width + ", height=" + this.settings.popup.height);
 
-        }
-    };
-});
+            }
+        };
+    });
+})(window.jQuery, SharrrePlatform);
+
+
+
 
 
 
