@@ -1,7 +1,7 @@
 {
   "name": "hueman-addons",
-  "version": "1.0.4",
-  "description": "Addons for the Hueman WordPress theme.",
+  "version": "1.0.5",
+  "description": "Lightweight addons plugins for the Hueman WordPress theme.",
   "author": "nikeo",
   "license": "GNU GPL v3.0",
   "repository": {

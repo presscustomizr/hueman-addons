@@ -4,16 +4,17 @@ Author URI: http://presscustomizr.com
 Plugin URI: https://github.com/presscustomizr/hueman-addons
 Tags: hueman theme, hueman
 Requires at least: 3.4
-Tested up to: 4.5
+Tested up to: 4.7
 Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Addons for the Hueman WordPress theme
+Lightweight addons plugins for the Hueman WordPress theme.
 
 == Description ==
 **Addons for the Hueman WordPress theme.**
-The plugin includes the Share bar and shortcodes for the Hueman theme.
+The Hueman Addons is a WordPress plugin including some cool features like a social share bar and useful shortcodes.
+The plugin has been designed specifically for the Hueman WordPress theme. Lightweight and safe.
 
 
 == Installation ==
@@ -22,7 +23,24 @@ The plugin includes the Share bar and shortcodes for the Hueman theme.
 2. Activate the plugin
 
 
+== Screenshots ==
+1. Responsive columns shortcode
+2. Share Bar example
+
+
+==  How to use the Shortcodes ==
+[Documentation here](http://docs.presscustomizr.com/article/246-hueman-addons-how-to-use-the-shortcodes)
+
+
+==  How to use the Share Bar options ==
+[Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
+
+
 == Changelog ==
+= 1.0.5 : September 9th, 2016 =
+* Tested up to WP v4.6.1
+* Improved documentation
+
 = 1.0.4 : May 30th, 2016 =
 * Fix : disapppearing sharebar, added function scope to jQuerySharre.js to avoid 3rd party plugin conflicts
 
