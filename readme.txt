@@ -5,7 +5,7 @@ Plugin URI: https://github.com/presscustomizr/hueman-addons
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 1.0.6 : September 9th, 2016 =
+* fixed : added the text domain for internationalization
+
 = 1.0.5 : September 9th, 2016 =
 * Tested up to WP v4.6.1
 * Improved documentation

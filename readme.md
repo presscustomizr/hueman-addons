@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.7
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,13 +80,6 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 ```    
 
 
-## Credits ##
-
-
-
-## Translations ##
-
-
 
 ## Installation ##
 
@@ -94,14 +87,16 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 1-bis. Download the plugin, unzip the package and upload it to your /wp-content/plugins/ directory
 2. Activate the plugin
 
-## Frequently Asked Questions ##
 
 
-## Screenshots ##
+== Changelog ==
+= 1.0.6 : September 9th, 2016 =
+* fixed : added the text domain for internationalization
 
+= 1.0.5 : September 9th, 2016 =
+* Tested up to WP v4.6.1
+* Improved documentation
 
-
-## Changelog ##
 = 1.0.4 : May 30th, 2016 =
 * Fix : disapppearing sharebar, added function scope to jQuerySharre.js to avoid 3rd party plugin conflicts
 
