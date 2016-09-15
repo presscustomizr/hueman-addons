@@ -107,7 +107,7 @@ var SharrrePlatform = SharrrePlatform || (function () {
         return {
             settings: defaultSettings,
             url: function (url) {
-                return "https://graph.facebook.com/fql?q=SELECT%20url,%20normalized_url,%20share_count,%20like_count,%20comment_count,%20total_count,commentsbox_count,%20comments_fbid,%20click_count%20FROM%20link_stat%20WHERE%20url=%27{url}%27&callback=?";
+                return "https://graph.facebook.com/?id={url}&callback=?";
             },
             trackingAction: {site: 'facebook', action: 'like'},
             load: function (self) {
@@ -303,7 +303,7 @@ var SharrrePlatform = SharrrePlatform || (function () {
             settings: defaultSettings,
             trackingAction: {site: 'twitter', action: 'tweet'},
             url: function (test) {
-                return "https://opensharecount.com/count.json?url={url}";
+                return "http://opensharecount.com/count.json?url={url}";
             },
             load: function (self) {
                 var sett = this.settings;
@@ -534,7 +534,6 @@ var SharrrePlatform = SharrrePlatform || (function () {
         var self = this;
         $(this.element).append('<div class="buttons"></div>');
         $.each(self.options.share, function (name, val) {
-
             if (val === true) {
                 self.platforms[name].load(self);
                 if (self.options.enableTracking === true) { //add tracking
@@ -562,6 +561,9 @@ var SharrrePlatform = SharrrePlatform || (function () {
             buttonUrl = '';
         }
         url = buttonUrl.replace('{url}', replaceUrl);
+        if ( 'twitter' == name ) {
+          buttonUrl = self.platforms[name].url();
+        }
         if (url !== '') {  //urlCurl = '' if you don't want to used PHP script but used social button
             $.getJSON(url, function (json) {
                 if (typeof json.count !== "undefined") {  //GooglePlus, Stumbleupon, Twitter, Pinterest and Digg
@@ -570,8 +572,8 @@ var SharrrePlatform = SharrrePlatform || (function () {
                     count += parseInt(temp, 10);
                 }
                 //get the FB total count (shares, likes and more)
-                else if (json.data && json.data.length > 0 && typeof json.data[0].total_count !== "undefined") { //Facebook total count
-                    count += parseInt(json.data[0].total_count, 10);
+                else if ( ( typeof json.share !== "undefined" ) && ( typeof json.share.share_count !== "undefined" ) ) { //Facebook total count
+                    count += parseInt(json.share.share_count, 10);
                 }
                 else if (typeof json[0] !== "undefined") {  //Delicious
                     count += parseInt(json[0].total_posts, 10);

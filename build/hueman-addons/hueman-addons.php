@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 1.0.6
+* Version: 1.0.7
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
@@ -92,6 +92,7 @@ class HU_addons_plugin {
               'label'     => __('Enable Twitter Button', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',
+              'notice'    => __('Since Nov. 2015, Twitter disabled the share counts from its API. If you want to get the display count anyway, you can create an account for free (as of Feb. 2016) on [https://opensharecount.com/]. The Hueman Addons plugin is configured to use opensharecount.', 'hueman-addons'),
               'priority'  => 60
         ),
         'twitter-username' => array(

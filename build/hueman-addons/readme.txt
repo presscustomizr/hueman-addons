@@ -5,7 +5,7 @@ Plugin URI: https://github.com/presscustomizr/hueman-addons
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,10 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 1.0.7 : September 14th, 2016 =
+* fixed : Facebook counter not working due to API change
+* fixed : Twitter counter not working due to API change
+
 = 1.0.6 : September 9th, 2016 =
 * fixed : added the text domain for internationalization
 
