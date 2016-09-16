@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 1.0.7
+* Version: 1.0.8
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
@@ -71,7 +71,7 @@ class HU_addons_plugin {
               'default'   => 1,
               'control'   => 'HU_controls',
               'label'     => __('Display social sharing buttons in your single posts', 'hueman-addons'),
-              'title'     => __('Social Sharring Bar Setttings', 'hueman-addons'),
+              'title'     => __('Social Sharring Bar Settings', 'hueman-addons'),
               'notice'    => __('Display social sharing buttons in each single articles.', 'hueman-addons'),
               'section'   => 'social_links_sec',
               'type'      => 'checkbox',

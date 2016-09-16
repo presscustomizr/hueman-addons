@@ -1,15 +1,15 @@
 === Hueman Addons ===
 Contributors: nikeo
 Author URI: http://presscustomizr.com
-Plugin URI: https://github.com/presscustomizr/hueman-addons
+Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Lightweight addons plugins for the Hueman WordPress theme.
+Lightweight addons plugin for the Hueman WordPress theme.
 
 == Description ==
 **Addons for the Hueman WordPress theme.**
@@ -37,6 +37,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 1.0.8 : September 15th, 2016 =
+* fixed typos
+
 = 1.0.7 : September 14th, 2016 =
 * fixed : Facebook counter not working due to API change
 * fixed : Twitter counter not working due to API change
