@@ -6,7 +6,7 @@
 
 /*  Columns / Grid
 /* ------------------------------------ */
-	function hu_column_shortcode($atts,$content=NULL) {
+	function ha_column_shortcode($atts,$content=NULL) {
 		extract( shortcode_atts( array(
 			'size'	=> 'one-third',
 			'last'	=> false
@@ -18,44 +18,44 @@
 			$output.='<div class="clear"></div>';
 		return $output;
 	}
-	add_shortcode('column','hu_column_shortcode');
+	add_shortcode('column','ha_column_shortcode');
 
 /*  Hr
 /* ------------------------------------ */
-	function hu_hr_shortcode($atts,$content=NULL) {
+	function ha_hr_shortcode($atts,$content=NULL) {
 		$output = '<div class="hr"></div>';
 		return $output;
 	}
-	add_shortcode('hr','hu_hr_shortcode');
+	add_shortcode('hr','ha_hr_shortcode');
 
 /*  Highlight
 /* ------------------------------------ */
-	function hu_highlight_shortcode($atts,$content=NULL) {
+	function ha_highlight_shortcode($atts,$content=NULL) {
 		$output = '<span class="highlight">'.strip_tags($content).'</span>';
 		return $output;
 	}
-	add_shortcode('highlight','hu_highlight_shortcode');
+	add_shortcode('highlight','ha_highlight_shortcode');
 
 /*  Dropcap
 /* ------------------------------------ */
-	function hu_dropcap_shortcode($atts,$content=NULL) {
+	function ha_dropcap_shortcode($atts,$content=NULL) {
 		$output = '<span class="dropcap">'.strip_tags($content).'</span>';
 		return $output;
 	}
-	add_shortcode('dropcap','hu_dropcap_shortcode');
+	add_shortcode('dropcap','ha_dropcap_shortcode');
 
 /*  Pullquote Left
 /* ------------------------------------ */
-	function hu_pullquote_left_shortcode($atts,$content=NULL) {
+	function ha_pullquote_left_shortcode($atts,$content=NULL) {
 		$output = '<span class="pullquote-left">'.strip_tags($content).'</span>';
 		return $output;
 	}
-	add_shortcode('pullquote-left','hu_pullquote_left_shortcode');
+	add_shortcode('pullquote-left','ha_pullquote_left_shortcode');
 
 /*  Pullquote Right
 /* ------------------------------------ */
-	function hu_pullquote_right_shortcode($atts,$content=NULL) {
+	function ha_pullquote_right_shortcode($atts,$content=NULL) {
 		$output = '<span class="pullquote-right">'.strip_tags($content).'</span>';
 		return $output;
 	}
-	add_shortcode('pullquote-right','hu_pullquote_right_shortcode');
+	add_shortcode('pullquote-right','ha_pullquote_right_shortcode');
