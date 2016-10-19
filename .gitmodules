@@ -1,0 +1,7 @@
+[submodule "inc/skop"]
+	path = inc/skop
+	url = https://github.com/presscustomizr/skope.git
+
+[submodule "inc/sek"]
+  path = inc/sek
+  url = https://github.com/presscustomizr/sektions.git
