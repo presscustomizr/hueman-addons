@@ -11,7 +11,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         public static $_theme_setting_list;
         public $global_skope_optname;
 
-        public static function hu_skop_opt_instance() {
+        public static function ha_skop_opt_instance() {
             if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HA_Skop_Option ) )
               self::$instance = new HA_Skop_Option();
             return self::$instance;
@@ -20,33 +20,33 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         function __construct() {
             // if ( hu_is_customize_preview_frame() ) {
             //   //refresh the theme options right after the _preview_filter when previewing
-            //   add_action( 'customize_preview_init'  , array( $this , 'hu_cache_options' ) );
+            //   add_action( 'customize_preview_init'  , array( $this , 'ha_cache_options' ) );
             // } else {
-            //   add_action( 'wp' , array( $this, 'hu_cache_options' ) );
+            //   add_action( 'wp' , array( $this, 'ha_cache_options' ) );
             // }
-            add_action( 'wp' , array( $this, 'hu_cache_options' ), 99999 );
+            add_action( 'wp' , array( $this, 'ha_cache_options' ), 99999 );
 
 
             //SIDEBAR WIDGETS
-            add_filter('sidebars_widgets', array($this, 'hu_use_skope_widgets') );
+            add_filter('sidebars_widgets', array($this, 'ha_use_skope_widgets') );
 
             //SIDEBAR ON PREVIEW : fix the problem of a customized val being an empty array of wp_inactive_widgets;
-            //This filter is hu_customize_val_before_multidimensional_filter_{$opt_name}
-            //add_filter('hu_customize_val_before_multidimensional_filter_sidebars_widgets', array($this, 'hu_set_customized_sidebars_val'), 10, 2 );
+            //This filter is ha_customize_val_before_multidimensional_filter_{$opt_name}
+            //add_filter('ha_customize_val_before_multidimensional_filter_sidebars_widgets', array($this, 'ha_set_customized_sidebars_val'), 10, 2 );
 
 
             //CACHE SOME USEFUL LIST OF SETTINGS : THEME SETTINGS AND SKOPE EXCLUDED SETTINGS
-            $this -> hu_cache_skope_excluded_settings();
-            $this -> hu_cache_theme_setting_list();
-            // add_action( 'after_setup_theme', array( $this, 'hu_cache_skope_excluded_settings' ) );
-            // add_action( 'after_setup_theme', array( $this, 'hu_cache_theme_setting_list' ) );
+            $this -> ha_cache_skope_excluded_settings();
+            $this -> ha_cache_theme_setting_list();
+            // add_action( 'after_setup_theme', array( $this, 'ha_cache_skope_excluded_settings' ) );
+            // add_action( 'after_setup_theme', array( $this, 'ha_cache_theme_setting_list' ) );
 
             //FILTER THE LIST OF SKOPE EXCLUDED SETTINGS
             //=> merge the default ones with those defined in the setting map
-            add_filter( 'hu_get_skope_excluded_options', array( $this, 'hu_set_excluded_skope_settings') );
+            add_filter( 'hu_get_skope_excluded_options', array( $this, 'ha_set_excluded_skope_settings') );
 
             //SETUP FILTERS FOR WP OPTIONS AND THEME OPTIONS
-            add_action( 'wp',  array( $this, 'hu_setup_skope_option_filters' ), 1000 );
+            add_action( 'wp',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
 
             //SET THE NAME OF THE GLOBAL SKOPE OPTION
             //This option stores all global skope settings : theme and wp.
@@ -66,8 +66,8 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         //fired by constructor otherwise
         //@return void()
         //HOOK : WP
-        function hu_cache_options() {
-            $meta_type = hu_get_skope( 'meta_type', true );
+        function ha_cache_options() {
+            $meta_type = ha_get_skope( 'meta_type', true );
             $_skope_list = array( 'global', 'group', 'special_group', 'local' );
             foreach ($_skope_list as $_skp ) {
                 switch ( $_skp ) {
@@ -75,18 +75,18 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                       HA_Skop_Option::$_global_opt = false === get_option( HU_THEME_OPTIONS ) ? array() : (array)get_option( HU_THEME_OPTIONS );
                     break;
                     case 'group':
-                      $db_opt_name = $this -> hu_get_skope_opt_name( 'group' );
-                      HA_Skop_Option::$_group_opt = $this -> hu_get_skope_opt( 'group', $meta_type, $db_opt_name );
+                      $db_opt_name = $this -> ha_get_skope_opt_name( 'group' );
+                      HA_Skop_Option::$_group_opt = $this -> ha_get_skope_opt( 'group', $meta_type, $db_opt_name );
                       HA_Skop_Option::$_group_opt = ! HA_Skop_Option::$_group_opt ? array() : HA_Skop_Option::$_group_opt;
                     break;
                     case 'special_group':
-                      $db_opt_name = $this -> hu_get_skope_opt_name( 'special_group' );
-                      HA_Skop_Option::$_special_group_opt = $this -> hu_get_skope_opt( 'special_group', $meta_type, $db_opt_name );
+                      $db_opt_name = $this -> ha_get_skope_opt_name( 'special_group' );
+                      HA_Skop_Option::$_special_group_opt = $this -> ha_get_skope_opt( 'special_group', $meta_type, $db_opt_name );
                       HA_Skop_Option::$_special_group_opt = ! HA_Skop_Option::$_special_group_opt ? array() : HA_Skop_Option::$_special_group_opt;
                     break;
                     case 'local':
-                      $db_opt_name = $this -> hu_get_skope_opt_name( 'local' );
-                      HA_Skop_Option::$_local_opt = $this -> hu_get_skope_opt( 'local', $meta_type, $db_opt_name );
+                      $db_opt_name = $this -> ha_get_skope_opt_name( 'local' );
+                      HA_Skop_Option::$_local_opt = $this -> ha_get_skope_opt( 'local', $meta_type, $db_opt_name );
                       HA_Skop_Option::$_local_opt = ! HA_Skop_Option::$_local_opt ? array() : HA_Skop_Option::$_local_opt;
                     break;
                 }
@@ -100,14 +100,14 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         //
         //@param level : local, group, special_group
         //@param type : post
-        function hu_get_skope_opt( $level, $meta_type, $db_opt_name ) {
-            $skope = hu_get_skope();
+        function ha_get_skope_opt( $level, $meta_type, $db_opt_name ) {
+            $skope = ha_get_skope();
             $_dyn_type = ( hu_is_customize_preview_frame() && isset($_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
             $_opt = array();
 
             if( 'local' == $level ) {
-              if ( $this -> hu_can_have_meta_opt( $meta_type ) ) {
-                  $_id = hu_get_skope('id');
+              if ( $this -> ha_can_have_meta_opt( $meta_type ) ) {
+                  $_id = ha_get_skope('id');
                   switch ($meta_type) {
                       case 'post':
                         $_opt = get_post_meta( $_id , $db_opt_name, true );
@@ -121,7 +121,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                         $_opt = get_user_meta( $_id , $db_opt_name, true );
                         break;
                   }
-              } else if ( ( 'trans' == $_dyn_type || $this -> hu_can_have_trans_opt( $skope ) ) && false !== get_transient( $db_opt_name ) ) {
+              } else if ( ( 'trans' == $_dyn_type || $this -> ha_can_have_trans_opt( $skope ) ) && false !== get_transient( $db_opt_name ) ) {
                   $_opt = get_transient( $db_opt_name );
               }
             }
@@ -136,7 +136,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
 
 
         //@return the array of cached opt
-        function hu_get_cached_opt( $skope = null, $opt_name = null ) {
+        function ha_get_cached_opt( $skope = null, $opt_name = null ) {
             $skope = is_null( $skope ) ? 'local' : $skope;
             $_opt_array = array();
 
@@ -168,7 +168,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         *****************************************************/
         //hook : after_setup_theme
         //Note : the 'sidebar-areas' setting is not listed in that list because registered specifically
-        function hu_cache_theme_setting_list() {
+        function ha_cache_theme_setting_list() {
             if ( is_array(self::$_theme_setting_list) && ! empty( self::$_theme_setting_list ) )
               return;
             $_settings_map = HU_utils_settings_map::$instance -> hu_get_customizer_map( null, 'add_setting_control' );
@@ -189,7 +189,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         * CACHE AND SET SETTINGS EXCLUDED FROM SKOPE
         *****************************************************/
         //hook : after_setup_theme
-        function hu_cache_skope_excluded_settings() {
+        function ha_cache_skope_excluded_settings() {
             if ( is_array(self::$_skope_excluded_settings) && ! empty( self::$_skope_excluded_settings ) )
               return;
             $_settings_map = HU_utils_settings_map::$instance -> hu_get_customizer_map( null, 'add_setting_control' );
@@ -204,7 +204,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         //FILTER THE LIST OF SKOPE EXCLUDED SETTINGS
         //=> merge the default ones with those defined in the setting map
         //hook : hu_get_skope_excluded_options declared in HU_Utils::hu_get_skope_excluded_options
-        function hu_set_excluded_skope_settings( $_default_excluded ) {
+        function ha_set_excluded_skope_settings( $_default_excluded ) {
             return array_merge( $_default_excluded, self::$_skope_excluded_settings );
         }
 
@@ -218,10 +218,10 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         * SIDEBARS AND WIDGETS SPECIFICS
         *****************************************************/
         //hook filter: sidebar_widgets
-        function hu_use_skope_widgets( $original ) {
+        function ha_use_skope_widgets( $original ) {
           // if ( 0 == did_action('wp') )
           //   return $original;
-          if ( ! apply_filters( 'hu_skope_sidebars_widgets', false ) )
+          if ( ! apply_filters( 'ha_skope_sidebars_widgets', false ) )
             return $original;
 
           $db_skope_widgets = get_option('sidebars_widgets');
@@ -265,9 +265,9 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         }
 
 
-        //hook : 'hu_customize_val_before_multidimensional_filter_sidebars_widgets'
+        //hook : 'ha_customize_val_before_multidimensional_filter_sidebars_widgets'
         //DEPRECATED
-        function hu_set_customized_sidebars_val( $customized_val, $opt_name ) {
+        function ha_set_customized_sidebars_val( $customized_val, $opt_name ) {
           if ( is_array($customized_val) && isset($customized_val['sidebars_widgets[wp_inactive_widgets']) && 1 == count($customized_val) )
             return '_not_customized_';
           return $customized_val;
@@ -283,9 +283,9 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         * FILTER WP AND THEME OPTIONS
         *****************************************************/
         //hook : wp
-        function hu_setup_skope_option_filters() {
+        function ha_setup_skope_option_filters() {
             //FILTER THEME OPTIONS
-            add_filter( 'hu_opt', array( $this, 'hu_filter_hu_opt_for_skope' ), 10, 4 );
+            add_filter( 'hu_opt', array( $this, 'ha_filter_hu_opt_for_skope' ), 10, 4 );
 
             //FILTER WP OPTIONS
             $theme = get_option( 'stylesheet' );
@@ -295,13 +295,13 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
               "theme_mods_{$theme}"//header_image, custom_logo
             );
 
-            if ( apply_filters( 'hu_skope_sidebars_widgets', false ) ) {
+            if ( apply_filters( 'ha_skope_sidebars_widgets', false ) ) {
               $wp_options[] = 'sidebars_widgets';
               $wp_options  = array_merge( $wp_options, hu_get_registered_widgets_option_names() );
             }
 
             foreach ( $wp_options as $wp_opt ) {
-              add_filter( "option_{$wp_opt}", array( $this, 'hu_filter_wp_builtin_options'), 2000, 2 );
+              add_filter( "option_{$wp_opt}", array( $this, 'ha_filter_wp_builtin_options'), 2000, 2 );
             }
         }
 
@@ -309,7 +309,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         ///////FILTER WP OPTIONS
         //hook : option_{$wp_opt}
         //Example of filtered option : sidebars_widgets
-        function hu_filter_wp_builtin_options( $value, $option_name = null ) {
+        function ha_filter_wp_builtin_options( $value, $option_name = null ) {
           if ( is_null( $option_name ) )
             return $value;
           $theme = get_option( 'stylesheet' );
@@ -317,12 +317,12 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
             $skoped_theme_mods = array();
             if ( is_array($value) ) {
               foreach( $value as $_opt_name => $_val ) {
-                  $skoped_theme_mods[$_opt_name] = $this -> hu_filter_hu_opt_for_skope( $_val, $_opt_name, null );
+                  $skoped_theme_mods[$_opt_name] = $this -> ha_filter_hu_opt_for_skope( $_val, $_opt_name, null );
               }
               return $skoped_theme_mods;
             }
           } else {
-            return $this -> hu_filter_hu_opt_for_skope( $value, $option_name, null );//the option group is null
+            return $this -> ha_filter_hu_opt_for_skope( $value, $option_name, null );//the option group is null
           }
         }
 
@@ -346,23 +346,23 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         // C) the current context has no specific global option, then fall back on the default value
         //
         //HOOK : hu_opt
-        function hu_filter_hu_opt_for_skope( $_opt_val , $opt_name , $opt_group = HU_THEME_OPTIONS , $_default_val = null ) {
+        function ha_filter_hu_opt_for_skope( $_opt_val , $opt_name , $opt_group = HU_THEME_OPTIONS , $_default_val = null ) {
             //if the opt group not null, we are retrieving a theme option
             $_new_val = $_opt_val;
 
             //CUSTOMIZING
-            $_customized_val = $this -> hu_get_customized_value( $opt_name );
+            $_customized_val = $this -> ha_get_customized_value( $opt_name );
             if ( hu_is_customize_preview_frame() && '_not_customized_' != $_customized_val ) {
                 return $_customized_val;
             } else {
                 if ( hu_is_customize_preview_frame() ) {
-                    $cust_skope = $this -> hu_get_current_customized_skope();
-                    $_new_val = $this -> hu_get_preview_inherited_val( $opt_name, $_opt_val, $cust_skope );
+                    $cust_skope = $this -> ha_get_current_customized_skope();
+                    $_new_val = $this -> ha_get_preview_inherited_val( $opt_name, $_opt_val, $cust_skope );
                 } else {
                     $skop_opts = array(
-                        'local'         => $this -> hu_get_cached_opt( 'local', $opt_name ),
-                        'group'         => $this -> hu_get_cached_opt( 'group', $opt_name ),
-                        'special_group' => $this -> hu_get_cached_opt( 'special_group', $opt_name ),
+                        'local'         => $this -> ha_get_cached_opt( 'local', $opt_name ),
+                        'group'         => $this -> ha_get_cached_opt( 'group', $opt_name ),
+                        'special_group' => $this -> ha_get_cached_opt( 'special_group', $opt_name ),
                         'global'        => $_opt_val
                     );
 
@@ -400,8 +400,8 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         *****************************************************/
         //recursive method
         //apply the skope inheritance to return the relevant value
-        private function hu_get_preview_inherited_val( $opt_name, $original_opt_val, $skope ) {
-            $skop_opt_val = $this -> hu_get_cached_opt( $skope, $opt_name );
+        private function ha_get_preview_inherited_val( $opt_name, $original_opt_val, $skope ) {
+            $skop_opt_val = $this -> ha_get_cached_opt( $skope, $opt_name );
             //cast to array if the saved option is an object. For Ex : header_image_data can be an object
             $skop_opt_val = 'object' == gettype( $skop_opt_val ) ? (array)$skop_opt_val : $skop_opt_val;
             if ( is_array($skop_opt_val) ||  '_no_set_' != (string)$skop_opt_val )
@@ -410,13 +410,13 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
             if ( 'global' == $skope )
               return $original_opt_val;
 
-            $parent_skope = $this -> hu_get_parent_skope_name( $skope );
-            return $this -> hu_get_preview_inherited_val( $opt_name, $original_opt_val, $parent_skope );
+            $parent_skope = $this -> ha_get_parent_skope_name( $skope );
+            return $this -> ha_get_preview_inherited_val( $opt_name, $original_opt_val, $parent_skope );
 
         }
 
 
-        private function hu_get_parent_skope_name( $skope, $_index = null ) {
+        private function ha_get_parent_skope_name( $skope, $_index = null ) {
             $hierark = array( 'local', 'group', 'special_group', 'global' );
             $parent_ind = -1;
             //get the parent index
@@ -446,7 +446,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         // Consequently :
         // 1) we first check if each customized options contain a key == opt_name
         // 2) then we check if each customized option is multidimensional and starts with the provided opt_name
-        function hu_get_customized_value( $opt_name ) {
+        function ha_get_customized_value( $opt_name ) {
             //return '_not_customized_';
             if ( ! hu_is_customize_preview_frame() )
               return '_not_customized_';
@@ -503,7 +503,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                           //try to find a prefix match option. For ex : sidebars_widgets
                           if ( $opt_name != substr($_cust_opt_name, 0, strlen( $opt_name ) ) || $f_match )
                             continue;
-                          // $_customized_val = apply_filters( "hu_customize_val_before_multidimensional_filter_{$opt_name}", $_customized_val, $opt_name );
+                          // $_customized_val = apply_filters( "ha_customize_val_before_multidimensional_filter_{$opt_name}", $_customized_val, $opt_name );
                           // if ( '_not_customized_' == $_customized_val )
                           //   continue;
                           $_customized_val = $_setting -> _multidimensional_preview_filter( $val );
@@ -528,7 +528,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
             // }
 
             //APPLY A SPECIAL TREATMENT
-            return apply_filters( "hu_get_customize_val_{$opt_name}", $_customized_val, $opt_name );
+            return apply_filters( "ha_get_customize_val_{$opt_name}", $_customized_val, $opt_name );
         }
 
 
@@ -548,18 +548,18 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         * HELPERS
         *******************************************************/
         //@return the name of the option as a string for a given skope
-        function hu_get_skope_opt_name( $level = 'local', $special = '' ) {
+        function ha_get_skope_opt_name( $level = 'local', $special = '' ) {
             $name = '';
             switch ($level) {
               case 'local':
-                $name = strtolower( THEMENAME . '_czr_' . hu_get_skope() );
+                $name = strtolower( THEMENAME . '_czr_' . ha_get_skope() );
                 break;
               case 'group' :
-                if ( ! empty( hu_get_skope('type') ) )
-                  $name = strtolower( THEMENAME . '_czr_all_' . hu_get_skope('type') );
+                if ( ! empty( ha_get_skope('type') ) )
+                  $name = strtolower( THEMENAME . '_czr_all_' . ha_get_skope('type') );
                 break;
               case 'special_group' :
-                $name = strtolower( THEMENAME . '_czr_all_' . hu_get_skope('type') . $special );
+                $name = strtolower( THEMENAME . '_czr_all_' . ha_get_skope('type') . $special );
                 break;
               case 'global':
                 $name = HU_THEME_OPTIONS;
@@ -570,20 +570,20 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
 
         //@return the current posted skope string
         //falls back on 'global'
-        function hu_get_current_customized_skope() {
-            if ( '__no_posted__' ==  $this -> hu_get_sanitized_post_value( 'skope' ) )
+        function ha_get_current_customized_skope() {
+            if ( '__no_posted__' ==  $this -> ha_get_sanitized_post_value( 'skope' ) )
               return 'global';
-            return $this -> hu_get_sanitized_post_value( 'skope' );
+            return $this -> ha_get_sanitized_post_value( 'skope' );
         }
 
 
         //@return a sanitized esc_attr() value from the $_POST array
-        function hu_get_sanitized_post_value( $param ) {
+        function ha_get_sanitized_post_value( $param ) {
             return isset($_POST[$param]) ? esc_attr( $_POST[$param ] ) : '__no_posted__';
         }
 
 
-        function hu_can_have_meta_opt( $meta_type ) {
+        function ha_can_have_meta_opt( $meta_type ) {
             return in_array(
               $meta_type,
               array('post', 'tax', 'user')
@@ -591,7 +591,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
         }
 
 
-        function hu_can_have_trans_opt( $meta_type ) {
+        function ha_can_have_trans_opt( $meta_type ) {
             return in_array(
               $meta_type,
               array('home', 'search', '404', 'date')
@@ -601,7 +601,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
 
         //Write the new skope option in db
         //it can be a transient, post_meta, term_meta or user_meta
-        function hu_set_skope_option_val( $opt_name, $new_value, $db_option_name = null, $type = null, $obj_id = null ) {
+        function ha_set_skope_option_val( $opt_name, $new_value, $db_option_name = null, $type = null, $obj_id = null ) {
             if ( empty($opt_name) || is_null($db_option_name ) || is_null($type) )
               return;
 
@@ -609,7 +609,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
             switch ($type) {
               case 'trans':
                 $_val = get_transient( $opt_name );
-                $_val = $this -> hu_preprocess_skope_val( $new_value, $opt_name, $_val );
+                $_val = $this -> ha_preprocess_skope_val( $new_value, $opt_name, $_val );
                 set_transient( $opt_name, $_val, 60*24*365*100 );
               break;
 
@@ -617,7 +617,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                 if ( is_null( $obj_id ) )
                   return;
                 $_val = get_post_meta( $obj_id , $db_option_name, true );
-                $_val = $this -> hu_preprocess_skope_val( $new_value, $opt_name, $_val );
+                $_val = $this -> ha_preprocess_skope_val( $new_value, $opt_name, $_val );
                 update_post_meta( $obj_id , $db_option_name, $_val );
               break;
 
@@ -625,7 +625,7 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                 if ( is_null( $obj_id ) )
                   return;
                 $_val = get_term_meta( $obj_id , $db_option_name, true );
-                $_val = $this -> hu_preprocess_skope_val( $new_value, $opt_name, $_val );
+                $_val = $this -> ha_preprocess_skope_val( $new_value, $opt_name, $_val );
                 update_term_meta( $obj_id , $db_option_name, $_val );
               break;
 
@@ -633,14 +633,14 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
                 if ( is_null( $obj_id ) )
                   return;
                 $_val = get_user_meta( $obj_id , $db_option_name, true );
-                $_val = $this -> hu_preprocess_skope_val( $new_value, $opt_name, $_val );
+                $_val = $this -> ha_preprocess_skope_val( $new_value, $opt_name, $_val );
                 update_user_meta( $obj_id , $db_option_name, $_val );
               break;
             }
         }
 
         //@return updated option associative array( opt_name1 => value 1, opt_name2 => value2, ... )
-        function hu_preprocess_skope_val( $new_value, $opt_name, $current_value ) {
+        function ha_preprocess_skope_val( $new_value, $opt_name, $current_value ) {
               if ( ! $current_value || ! is_array($current_value) ) {
                 $to_return = array( $opt_name => $new_value );
               } else {

@@ -50,7 +50,7 @@ class HA_init {
       add_action( 'plugins_loaded', array( $this , 'ha_plugin_lang' ) );
 
       //fire
-      $this -> ha_load();
+      //$this -> ha_load();
     }//construct
 
 
@@ -191,7 +191,7 @@ endif;
   <?php
   ?>
     <pre>
-      <?php print_r(  HA_SKOP_OPT() -> hu_get_cached_opt('local', 'header_image') ); ?>
+      <?php print_r(  HA_SKOP_OPT() -> ha_get_cached_opt('local', 'header_image') ); ?>
     </pre>
   <?php
 });*/
@@ -211,7 +211,7 @@ endif;
 });*/
 
 
-//add_action('__before_content', 'hu_test_display_skope_options');
+//add_action('__before_content', 'ha_test_display_skope_options');
 //add_action('__before_content', 'print_options');
 //add_action('__before_content', 'print_labels');
 function print_labels() {
@@ -245,12 +245,12 @@ function print_options() {
   <?php
 }
 
-function hu_test_display_skope_options() {
+function ha_test_display_skope_options() {
   /* if ( is_array( get_option( 'theme_mods_hueman') ) )
     array_walk_recursive( get_option( 'theme_mods_hueman', ) function(&$v) { $v = htmlspecialchars($v); }); */
   ?>
     <pre>
-      <?php //print_r(__hu_get_saved_opt_names_for_skope( 'global', HU_THEME_OPTIONS )); ?>
+      <?php //print_r(__ha_get_saved_opt_names_for_skope( 'global', HU_THEME_OPTIONS )); ?>
     </pre>
   <?php
   ?>
@@ -258,8 +258,8 @@ function hu_test_display_skope_options() {
       <?php //print_r( hu_get_raw_option( null, HU_THEME_OPTIONS ) ); ?>
     </pre>
   <?php
-  /* if ( is_array(hu_get_saved_opt_names_for_skope) )
-    array_walk_recursive(hu_get_saved_opt_names_for_skope, function(&$v) { $v = htmlspecialchars($v); }); */
+  /* if ( is_array(ha_get_saved_opt_names_for_skope) )
+    array_walk_recursive(ha_get_saved_opt_names_for_skope, function(&$v) { $v = htmlspecialchars($v); }); */
 
     if ( hu_is_customize_preview_frame() ) {
         global $wp_customize;
@@ -288,19 +288,19 @@ function hu_test_display_skope_options() {
                 <?php print_r( $_POST ); ?>
               </pre>
             </p>
-            <p>HA_SKOP_OPT() -> hu_get_customized_value('widget_categories') : <pre><?php print_r( HA_SKOP_OPT() -> hu_get_customized_value('widget_categories') ) ?></p></pre>
-            <p>HA_SKOP_OPT() -> hu_get_customized_value('sidebars_widgets') : <pre><?php print_r( HA_SKOP_OPT() -> hu_get_customized_value('sidebars_widgets') ) ?></p></pre>
+            <p>HA_SKOP_OPT() -> ha_get_customized_value('widget_categories') : <pre><?php print_r( HA_SKOP_OPT() -> ha_get_customized_value('widget_categories') ) ?></p></pre>
+            <p>HA_SKOP_OPT() -> ha_get_customized_value('sidebars_widgets') : <pre><?php print_r( HA_SKOP_OPT() -> ha_get_customized_value('sidebars_widgets') ) ?></p></pre>
         </div>
          <hr>
         <div class="skope">
             <h2>get skope</h2>
-            <p>skope : <?php echo hu_get_skope() ?></p>
+            <p>skope : <?php echo ha_get_skope() ?></p>
             <?php
-              /* if ( is_array(hu_get_query_skope() ) )
-                array_walk_recursive(hu_get_query_skope() , function(&$v) { $v = htmlspecialchars($v); }); */
+              /* if ( is_array(ha_get_query_skope() ) )
+                array_walk_recursive(ha_get_query_skope() , function(&$v) { $v = htmlspecialchars($v); }); */
               ?>
                 <pre>
-                  <?php print_r(hu_get_query_skope() ); ?>
+                  <?php print_r(ha_get_query_skope() ); ?>
                 </pre>
               <?php
             ?>
@@ -309,21 +309,21 @@ function hu_test_display_skope_options() {
         <div class="meta-type">
             <h2>DYN TYPE AND META TYPE</h2>
             <?php
-              $skope = hu_get_skope();
-              $meta_type = hu_get_skope( 'meta_type', true );
+              $skope = ha_get_skope();
+              $meta_type = ha_get_skope( 'meta_type', true );
               $_dyn_type = ( hu_is_customize_preview_frame() && isset($_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
             ?>
             <p>DYN TYPE : <?php echo $_dyn_type ?></p>
-            <p>hu_get_skope() : <?php echo hu_get_skope(); ?></p>
-            <p>META TYPE : <?php echo $meta_type ?> Can have trans opt? <?php echo HA_SKOP_OPT() -> hu_can_have_trans_opt($skope) ? 'OUI' : 'NON' ?></p>
+            <p>ha_get_skope() : <?php echo ha_get_skope(); ?></p>
+            <p>META TYPE : <?php echo $meta_type ?> Can have trans opt? <?php echo HA_SKOP_OPT() -> ha_can_have_trans_opt($skope) ? 'OUI' : 'NON' ?></p>
         </div>
         <hr>
         <div class="current-scope-opt-name">
             <h2>Current Scopes Opt Names</h2>
-            <p> <strong>Local</strong> : <?php echo HA_SKOP_OPT() -> hu_get_skope_opt_name('local'); ?></p>
-            <p> <strong>group</strong> : <?php echo HA_SKOP_OPT() -> hu_get_skope_opt_name( 'group' ); ?></p>
-            <p> <strong>special_group</strong> : <?php echo HA_SKOP_OPT() -> hu_get_skope_opt_name( 'special_group' ); ?></p>
-            <p> <strong>global</strong> : <?php echo HA_SKOP_OPT() -> hu_get_skope_opt_name( 'global' ); ?></p>
+            <p> <strong>Local</strong> : <?php echo HA_SKOP_OPT() -> ha_get_skope_opt_name('local'); ?></p>
+            <p> <strong>group</strong> : <?php echo HA_SKOP_OPT() -> ha_get_skope_opt_name( 'group' ); ?></p>
+            <p> <strong>special_group</strong> : <?php echo HA_SKOP_OPT() -> ha_get_skope_opt_name( 'special_group' ); ?></p>
+            <p> <strong>global</strong> : <?php echo HA_SKOP_OPT() -> ha_get_skope_opt_name( 'global' ); ?></p>
         </div>
         <hr>
         <div class="get-option">
@@ -333,7 +333,7 @@ function hu_test_display_skope_options() {
         <hr>
         <div class="customized">
             <h2>Customized</h2>
-            <p><?php print_r( HA_SKOP_OPT() -> hu_get_customized_value( 'widget_archives' ) ); ?></p>
+            <p><?php print_r( HA_SKOP_OPT() -> ha_get_customized_value( 'widget_archives' ) ); ?></p>
         </div>
         <hr>
         <div class="raw-db-option">
@@ -344,15 +344,15 @@ function hu_test_display_skope_options() {
         <div class="local-skope">
             <h2>DB Value for Local Skope</h2>
             <p><?php echo isset($_POST['opt_name']) ? '$_POST Option name : ' . $_POST['opt_name'] : '' ?></p>
-            <p><?php echo 'Our Option name : ' . HA_SKOP_OPT() -> hu_get_skope_opt_name('local') ?></p>
-            <p><?php echo isset($_POST['opt_name']) ? strlen($_POST['opt_name']) . ' | ' . strlen(HA_SKOP_OPT() -> hu_get_skope_opt_name('local')) : '' ?></p>
+            <p><?php echo 'Our Option name : ' . HA_SKOP_OPT() -> ha_get_skope_opt_name('local') ?></p>
+            <p><?php echo isset($_POST['opt_name']) ? strlen($_POST['opt_name']) . ' | ' . strlen(HA_SKOP_OPT() -> ha_get_skope_opt_name('local')) : '' ?></p>
             <?php
-              $_meta_type = hu_get_skope( 'meta_type', true );
-              $db_opt_name = HA_SKOP_OPT() -> hu_get_skope_opt_name('local');
-              $_option_array = HA_SKOP_OPT() -> hu_get_skope_opt('local' , $_meta_type, $db_opt_name );
+              $_meta_type = ha_get_skope( 'meta_type', true );
+              $db_opt_name = HA_SKOP_OPT() -> ha_get_skope_opt_name('local');
+              $_option_array = HA_SKOP_OPT() -> ha_get_skope_opt('local' , $_meta_type, $db_opt_name );
             ?>
             <p>Meta type : <?php echo $_meta_type; ?></p>
-            <p>Option dyn type to fetch : <?php echo hu_get_skope_dyn_type( $_meta_type ); ?></p>
+            <p>Option dyn type to fetch : <?php echo ha_get_skope_dyn_type( $_meta_type ); ?></p>
             <p>Option value : <?php //echo isset($_option_array['widget_archives']) ? $_option_array['widget_archives'] : 'NOT SET'; ?></p>
         </div>
         <hr>
@@ -361,25 +361,25 @@ function hu_test_display_skope_options() {
             <h3>local</h3>
             <p>
               <pre>
-                <?php print_r( HA_SKOP_OPT() -> hu_get_cached_opt('local') ); ?>
+                <?php print_r( HA_SKOP_OPT() -> ha_get_cached_opt('local') ); ?>
               </pre>
             </p>
             <h3>group</h3>
             <p>
               <pre>
-                <?php print_r( HA_SKOP_OPT() -> hu_get_cached_opt('group') ); ?>
+                <?php print_r( HA_SKOP_OPT() -> ha_get_cached_opt('group') ); ?>
               </pre>
             </p>
             <h3>special group</h3>
             <p>
               <pre>
-                <?php print_r( HA_SKOP_OPT() -> hu_get_cached_opt('special_group') ); ?>
+                <?php print_r( HA_SKOP_OPT() -> ha_get_cached_opt('special_group') ); ?>
               </pre>
             </p>
             <h3>global</h3>
             <p>
               <pre>
-                <?php print_r( count( HA_SKOP_OPT() -> hu_get_cached_opt('global') ) ); ?>
+                <?php print_r( count( HA_SKOP_OPT() -> ha_get_cached_opt('global') ) ); ?>
               </pre>
             </p>
         </div>
@@ -392,7 +392,7 @@ function hu_test_display_skope_options() {
 //@return the name of the currently saved option for a given skope
 //only used for the 'global' skope for now
 //@todo other skope cases
-function __hu_get_saved_opt_names_for_skope( $skope = null, $opt_name = null, $opt_group = null ) {
+function __ha_get_saved_opt_names_for_skope( $skope = null, $opt_name = null, $opt_group = null ) {
     $skope = is_null( $skope ) ? 'global' : $skope;
     $_opts = hu_get_raw_option( $opt_name, $opt_group );
     $defaults = HU_utils::$inst -> hu_get_default_options();
@@ -404,7 +404,7 @@ function __hu_get_saved_opt_names_for_skope( $skope = null, $opt_name = null, $o
           continue;
         if ( ! HU_utils::$inst -> hu_is_option_skoped($key) )
           continue;
-        if ( __hu_is_option_set_to_default( $key, $value, $defaults ) )
+        if ( __ha_is_option_set_to_default( $key, $value, $defaults ) )
           continue;
         $_saved_opts[] = $key;
     }
@@ -413,7 +413,7 @@ function __hu_get_saved_opt_names_for_skope( $skope = null, $opt_name = null, $o
 
 
 
-function __hu_is_option_set_to_default( $opt_name, $value, $defaults ) {
+function __ha_is_option_set_to_default( $opt_name, $value, $defaults ) {
     if ( ! is_array( $defaults ) || ! array_key_exists($opt_name, $defaults) )
       return;
     /* if ( is_array() )
