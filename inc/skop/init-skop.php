@@ -1,19 +1,32 @@
 <?php
-load_template( dirname( __FILE__ ) . '/skop-options.php' );
-/**
- * @since 3.5.0
- * @return object CZR Instance
- */
-function HA_SKOP_OPT() {
-  return HA_Skop_Option::ha_skop_opt_instance();
-}
-HA_SKOP_OPT();
+add_action('hu_hueman_loaded', 'ha_load_skop_options');
+function ha_load_skop_options() {
+  require_once( HA_BASE_PATH . 'inc/skop/skop-options.php' );
 
-if ( hu_is_customizing() ) {
-  load_template( dirname( __FILE__ ) . '/skop-customizer.php' );
-  load_template( dirname( __FILE__ ) . '/tmpl/skope-tmpls.php' );
-  load_template( dirname( __FILE__ ) . '/skop-ajax.php' );
+  function HA_SKOP_OPT() {
+    return HA_Skop_Option::ha_skop_opt_instance();
+  }
+  HA_SKOP_OPT();
 }
+
+if ( HU_AD() -> ha_is_customizing() ) {
+  add_action('customize_register', 'ha_augment_customizer');//extend WP_Customize_Setting
+  require_once( HA_BASE_PATH . 'inc/skop/skop-customize-register.php' );
+  require_once( HA_BASE_PATH . 'inc/skop/tmpl/skope-tmpls.php' );
+
+  //Customizer Ajax : we must for Hueman to be loaded (some Hueman constants are used)
+  add_action('hu_hueman_loaded', 'ha_load_skop_ajax');
+}
+
+//hook : customize_register
+function ha_augment_customizer() {
+    require_once( HA_BASE_PATH . 'inc/skop/skop-customizer-augment.php' );
+}
+//hook : 'hu_hueman_loaded'
+function ha_load_skop_ajax() {
+  require_once( HA_BASE_PATH . 'inc/skop/skop-ajax.php' );
+}
+
 
 //DISABLE PARTIAL REFRESH FOR NOW
 //filter declared in init-core
