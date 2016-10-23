@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 	var path  = require('path');
   var _     = require('lodash');
 	var global_config = {
-		  //path to task.js files, defaults to grunt dir
+      //path to task.js files, defaults to grunt dir
       configPath: path.join(process.cwd(), 'grunt-tasks-config/'),
       // auto grunt.initConfig
       init: true,
