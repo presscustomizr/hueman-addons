@@ -161,7 +161,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
       * @since  3.3+
       */
       function ha_is_customize_preview_frame() {
-        return is_customize_preview();
+        return is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) );
       }
 
 
