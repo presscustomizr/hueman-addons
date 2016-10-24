@@ -161,7 +161,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
       * @since  3.3+
       */
       function ha_is_customize_preview_frame() {
-        return ! is_admin() && isset($_REQUEST['wp_customize']);
+        return is_customize_preview();
       }
 
 
@@ -193,6 +193,16 @@ if ( ! class_exists( 'HU_AD' ) ) :
           $this -> ha_is_customize_preview_frame(),
           $this -> ha_doing_customizer_ajax()
         ) );
+      }
+
+      //Check the existence of the 'changeset_uuid' method in the WP_Customize_Manager to state if the changeset feature is
+      function ha_is_changeset_enabled( $wp_customize = null ) {
+        if ( ! $this -> ha_is_customizing() )
+          return;
+        if ( is_null( $wp_customize ) || ! is_object( $wp_customize ) ) {
+          global $wp_customize;
+        }
+        return method_exists( $wp_customize, 'changeset_uuid');
       }
 
   } //end of class
