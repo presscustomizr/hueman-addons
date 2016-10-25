@@ -44,7 +44,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , plugin_dir_path( __FILE__ ) );
         if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( __DIR__ ) ) ) );
 
-        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
+        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , apply_filters( 'ha_is_skop_on', true ) );
         if( ! defined( 'HA_SEK_ON' ) ) define( 'HA_SEK_ON' , false );
 
         //stop execution if not Hueman
@@ -81,7 +81,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         /* ------------------------------------------------------------------------- *
          *  Loads BETAS
         /* ------------------------------------------------------------------------- */
-        if ( HA_SKOP_ON ) {
+        if ( $this -> ha_is_skop_on() ) {
           require_once( HA_BASE_PATH . 'inc/skop/init-skop.php' );
         }
         if ( HA_SEK_ON ) {
@@ -194,6 +194,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
           $this -> ha_doing_customizer_ajax()
         ) );
       }
+
+      //@return bool
+      function ha_is_skop_on() {
+        return defined( 'HA_SKOP_ON' ) ? HA_SKOP_ON : false;
+      }
+
 
       //Check the existence of the 'changeset_uuid' method in the WP_Customize_Manager to state if the changeset feature is
       function ha_is_changeset_enabled( $wp_customize = null ) {
