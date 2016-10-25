@@ -197,12 +197,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //Check the existence of the 'changeset_uuid' method in the WP_Customize_Manager to state if the changeset feature is
       function ha_is_changeset_enabled( $wp_customize = null ) {
-        if ( ! $this -> ha_is_customizing() )
-          return;
-        if ( is_null( $wp_customize ) || ! is_object( $wp_customize ) ) {
+        if ( $this -> ha_is_customizing() && ( is_null( $wp_customize ) || ! is_object( $wp_customize ) ) ) {
           global $wp_customize;
         }
-        return method_exists( $wp_customize, 'changeset_uuid');
+        return apply_filters( 'ha_is_changeset_enabled',
+          $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid')
+        );
       }
 
   } //end of class
