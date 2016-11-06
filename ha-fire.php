@@ -214,11 +214,33 @@ if ( ! class_exists( 'HU_AD' ) ) :
   } //end of class
 endif;
 
+
+function ha_error_log( $data ) {
+  if ( ! defined('TC_DEV') || true !== TC_DEV )
+    return;
+  error_log( $data );
+}
+
+
 //Creates a new instance
 function HU_AD() {
   return HU_AD::ha_get_instance();
 }
 HU_AD();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
