@@ -5,7 +5,7 @@ class HA_Czr {
     self::$instance =& $this;
 
     //CUSTOMIZER PANEL JS
-    add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_extend_visibilities' ), 100 );
+    add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_extend_ctrl_dependencies' ), 100 );
     //Various DOM ready actions + print rate link + template
     add_action( 'customize_controls_print_footer_scripts'   , array( $this, 'hu_various_dom_ready' ) );
     //control style
@@ -79,12 +79,15 @@ class HA_Czr {
 
 
   //hook : 'customize_controls_enqueue_scripts'
-  function hu_extend_visibilities() {
+  function hu_extend_ctrl_dependencies() {
     ?>
     <script type="text/javascript">
       (function (api, $, _) {
-        var _oldDeps = api.CZR_visibilities.prototype.controlDeps;
-        api.CZR_visibilities.prototype.controlDeps = _.extend( _oldDeps, {
+        //retro compat
+        if ( ! _.has( api , 'CZR_ctrlDependencies' ) )
+          return;
+        var _oldDeps = api.CZR_ctrlDependencies.prototype.controlDeps;
+        api.CZR_ctrlDependencies.prototype.controlDeps = _.extend( _oldDeps, {
             'sharrre' : {
                 controls: [
                   'sharrre-scrollable',
