@@ -164,6 +164,9 @@ if ( ! class_exists( 'HU_AD' ) ) :
         return is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) );
       }
 
+      function ha_is_previewing_live_changeset() {
+        return ! isset( $_POST['customize_messenger_channel']) && is_customize_preview();
+      }
 
       /**
       * Always include wp_customize or customized in the custom ajax action triggered from the customizer
