@@ -191,11 +191,9 @@ if ( ! class_exists( 'HU_AD' ) ) :
       */
       function ha_is_customizing() {
         //checks if is customizing : two contexts, admin and front (preview frame)
-        return in_array( 1, array(
-          $this -> ha_is_customize_left_panel(),
-          $this -> ha_is_customize_preview_frame(),
-          $this -> ha_doing_customizer_ajax()
-        ) );
+        return $this -> ha_is_customize_left_panel() ||
+          $this -> ha_is_customize_preview_frame() ||
+          $this -> ha_doing_customizer_ajax();
       }
 
       //@return bool
