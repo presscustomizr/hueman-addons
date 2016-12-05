@@ -59,7 +59,7 @@
     			enableHover: false,
     			enableTracking: true,
           buttons:{size: 'tall'},
-    			urlCurl: '<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) ) . "/assets/front/js/sharrre.php"; ?>',
+    			urlCurl: '<?php echo HA_BASE_URL . "assets/front/js/sharrre.php"; ?>',
     			click: function(api, options){
     				api.simulateClick();
     				api.openPopup('googlePlus');
