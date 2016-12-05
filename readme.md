@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.7
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 1.0.9 : December 6th, 2016 =
+* updated : customizer compatibility with Hueman version 3.2.11
+
 = 1.0.8 : September 15th, 2016 =
 * fixed typos
 
