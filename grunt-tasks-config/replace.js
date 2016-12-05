@@ -1,7 +1,7 @@
 module.exports = {
 	main: {
 		src: [
-			'hueman-addons.php'
+			'ha-fire.php'
 		],
 		overwrite: true,
 		replacements: [ {

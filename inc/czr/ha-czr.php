@@ -79,38 +79,46 @@ class HA_Czr {
 
 
   //hook : 'customize_controls_enqueue_scripts'
-  function hu_extend_visibilities() {
-    ?>
-    <script type="text/javascript">
-      (function (api, $, _) {
-        var _oldDeps = api.CZR_visibilities.prototype.controlDeps;
-        api.CZR_visibilities.prototype.controlDeps = _.extend( _oldDeps, {
-            'sharrre' : {
-                controls: [
-                  'sharrre-scrollable',
-                  'sharrre-twitter-on',
-                  'twitter-username',
-                  'sharrre-facebook-on',
-                  'sharrre-google-on',
-                  'sharrre-pinterest-on',
-                  'sharrre-linkedin-on'
-                ],
-                callback : function (to) {
-                  return '0' !== to && false !== to && 'off' !== to;
-                }
-            },
-            'sharrre-twitter-on' : {
-                controls: [
-                  'twitter-username'
-                ],
-                callback : function (to) {
-                  return '0' !== to && false !== to && 'off' !== to;
-                }
-            }
-        });
-      }) ( wp.customize, jQuery, _);
-    </script>
-    <?php
-  }
+    function hu_extend_visibilities() {
+      ?>
+      <script type="text/javascript">
+        (function (api, $, _) {
+            if ( ! _.has( api, 'CZR_ctrlDependencies') )
+              return;
+            //@return boolean
+            var _is_checked = function( to ) {
+                return 0 !== to && '0' !== to && false !== to && 'off' !== to;
+            };
+            api.CZR_ctrlDependencies.prototype.dominiDeps = _.extend(
+                  api.CZR_ctrlDependencies.prototype.dominiDeps,
+                  [
+                      {
+                          dominus : 'sharrre',
+                          servi : [
+                            'sharrre-scrollable',
+                            'sharrre-twitter-on',
+                            'twitter-username',
+                            'sharrre-facebook-on',
+                            'sharrre-google-on',
+                            'sharrre-pinterest-on',
+                            'sharrre-linkedin-on'
+                          ],
+                          visibility : function (to) {
+                              return _is_checked(to);
+                          }
+                      },
+                       {
+                          dominus : 'sharrre-twitter-on',
+                          servi : ['twitter-username'],
+                          visibility : function (to) {
+                              return _is_checked(to);
+                          }
+                      },
+                  ]
+            );
+        }) ( wp.customize, jQuery, _);
+      </script>
+      <?php
+    }
 
 }//end of class
