@@ -230,3 +230,20 @@ function HU_AD() {
   return HU_AD::ha_get_instance();
 }
 HU_AD();
+
+
+/* ------------------------------------------------------------------------- *
+ *  FOR DEV
+/* ------------------------------------------------------------------------- */
+add_action('hu_hueman_loaded', function() {
+    if ( class_exists( 'HA_skop_dev_logs') ) {
+      new HA_skop_dev_logs(
+        array(
+            'hook' => '__header_after_container_inner',
+            'display_header' => true,
+            'tested_option' => 'use-header-image'
+          )
+
+      );
+    }
+}, 100 );
