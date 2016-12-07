@@ -44,7 +44,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , plugin_dir_path( __FILE__ ) );
         if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( __DIR__ ) ) ) );
 
-        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
+        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , apply_filters( 'ha_is_skop_on', true ) );
         if( ! defined( 'HA_SEK_ON' ) ) define( 'HA_SEK_ON' , false );
 
         //stop execution if not Hueman
@@ -81,7 +81,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         /* ------------------------------------------------------------------------- *
          *  Loads BETAS
         /* ------------------------------------------------------------------------- */
-        if ( HA_SKOP_ON ) {
+        if ( $this -> ha_is_skop_on() ) {
           require_once( HA_BASE_PATH . 'inc/skop/init-skop.php' );
         }
         if ( HA_SEK_ON ) {
@@ -161,9 +161,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
       * @since  3.3+
       */
       function ha_is_customize_preview_frame() {
-        return ! is_admin() && isset($_REQUEST['wp_customize']);
+        return is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) );
       }
 
+      function ha_is_previewing_live_changeset() {
+        return ! isset( $_POST['customize_messenger_channel']) && is_customize_preview();
+      }
 
       /**
       * Always include wp_customize or customized in the custom ajax action triggered from the customizer
@@ -195,8 +198,32 @@ if ( ! class_exists( 'HU_AD' ) ) :
         ) );
       }
 
+      //@return bool
+      function ha_is_skop_on() {
+        return defined( 'HA_SKOP_ON' ) ? HA_SKOP_ON : false;
+      }
+
+
+      //Check the existence of the 'changeset_uuid' method in the WP_Customize_Manager to state if the changeset feature is
+      function ha_is_changeset_enabled( $wp_customize = null ) {
+        if ( $this -> ha_is_customizing() && ( is_null( $wp_customize ) || ! is_object( $wp_customize ) ) ) {
+          global $wp_customize;
+        }
+        return apply_filters( 'ha_is_changeset_enabled',
+          $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid')
+        );
+      }
+
   } //end of class
 endif;
+
+
+function ha_error_log( $data ) {
+  if ( ! defined('TC_DEV') || true !== TC_DEV )
+    return;
+  error_log( $data );
+}
+
 
 //Creates a new instance
 function HU_AD() {
