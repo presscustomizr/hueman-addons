@@ -44,7 +44,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , plugin_dir_path( __FILE__ ) );
         if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( __DIR__ ) ) ) );
 
-        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , false );
+        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
         if( ! defined( 'HA_SEK_ON' ) ) define( 'HA_SEK_ON' , false );
 
         //stop execution if not Hueman
