@@ -89,7 +89,7 @@ class HA_Czr {
             var _is_checked = function( to ) {
                 return 0 !== to && '0' !== to && false !== to && 'off' !== to;
             };
-            api.CZR_ctrlDependencies.prototype.dominiDeps = _.extend(
+            api.CZR_ctrlDependencies.prototype.dominiDeps = _.union(
                   api.CZR_ctrlDependencies.prototype.dominiDeps,
                   [
                       {
