@@ -209,9 +209,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if ( $this -> ha_is_customizing() && ( is_null( $wp_customize ) || ! is_object( $wp_customize ) ) ) {
           global $wp_customize;
         }
-        return apply_filters( 'ha_is_changeset_enabled',
-          $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid')
-        );
+        return $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid');
       }
 
   } //end of class

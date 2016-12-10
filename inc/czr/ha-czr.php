@@ -114,7 +114,29 @@ class HA_Czr {
                               return _is_checked(to);
                           }
                       },
+                  ],
+                  [
+                      {
+                          dominus : 'layout-global',
+                          servi : [
+                            'layout-home',
+                            'layout-single',
+                            'layout-archive',
+                            'layout-archive-category',
+                            'layout-search',
+                            'layout-404',
+                            'layout-page'
+                          ],
+                          visibility : function() {
+                            if ( ! serverControlParams.isSkopOn )
+                              return;
+                            if ( 'global' == api.czr_skope( api.czr_activeSkopeId() )().skope )
+                              return true;
+                            return false;
+                          }
+                      }
                   ]
+
             );
         }) ( wp.customize, jQuery, _);
       </script>
