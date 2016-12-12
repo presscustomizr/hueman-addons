@@ -21,7 +21,9 @@ module.exports = {
       '!patches/**',
       '!inc/init-pro.php',
       '!assets/back/js/parts/**',
-      '!npm-debug.log'
+      '!npm-debug.log',
+      '!inc/skop/_dev/**',
+      '!inc/sek/**',
 		],
 		dest: 'build/<%= pkg.name %>/'
 	}

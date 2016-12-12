@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 	var path  = require('path');
   var _     = require('lodash');
 	var global_config = {
-		  //path to task.js files, defaults to grunt dir
+      //path to task.js files, defaults to grunt dir
       configPath: path.join(process.cwd(), 'grunt-tasks-config/'),
       // auto grunt.initConfig
       init: true,
@@ -11,14 +11,16 @@ module.exports = function(grunt) {
       data: {
         pkg: grunt.file.readJSON( 'package.json' ),
         paths : {
+          skop_dev_php : 'inc/skop/_dev/',
+          inc_php : 'inc/',
           front_js : 'assets/front/js/',
           lang : 'lang/'
       },
 			tasks : {
 				'dev': [ 'watch'],
-
+        'skop_php' : [ 'concat:skop_php', 'comments:php'],
 				//PROD
-				'build':  [ 'jshint:front_js','uglify:front_js', 'replace', 'clean', 'copy', 'compress'],
+				'build':  [ 'skop_php', 'jshint:front_js','uglify:front_js', 'replace', 'clean', 'copy', 'compress'],
 			},
 			uglify_requested_paths : {
 				src : '' || grunt.option('src'),

@@ -3,14 +3,23 @@ class HA_Czr {
   static $instance;
   function __construct() {
     self::$instance =& $this;
-
+    add_action( 'customize_register'                      ,  array( $this, 'ha_augment_customizer_setting') );//extend WP_Customize_Setting
     //CUSTOMIZER PANEL JS
-    add_action( 'customize_controls_print_footer_scripts', array( $this, 'hu_extend_visibilities' ), 100 );
+    add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_extend_visibilities' ), 100 );
     //Various DOM ready actions + print rate link + template
-    add_action( 'customize_controls_print_footer_scripts'   , array( $this, 'hu_various_dom_ready' ) );
+    add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_various_dom_ready' ) );
     //control style
-    add_action( 'customize_controls_enqueue_scripts'         , array( $this,  'hu_customize_controls_js_css' ) );
+    add_action( 'customize_controls_enqueue_scripts'      , array( $this, 'hu_customize_controls_js_css' ), 20 );
   }
+
+
+  //hook : customize_register
+  function ha_augment_customizer_setting() {
+      if ( ! HU_AD() -> ha_is_skop_on() )
+        return;
+      require_once( HA_BASE_PATH . 'inc/czr/skop-customizer-augment-setting.php' );
+  }
+
 
   /**************************************************************
   ** CUSTOMIZER
@@ -23,15 +32,45 @@ class HA_Czr {
    * @since Hueman 3.3.0
    */
   function hu_customize_controls_js_css() {
-
+    //Hueman Addons Specifics
     wp_enqueue_style(
-      'hu-czr-addons-controls-style',
-      sprintf( '%1$sassets/czr/css/czr-control-footer.css', HA_BASE_URL ),
-      array( 'customize-controls' ),
-      time(),
-      $media = 'all'
+        'ha-czr-addons-controls-style',
+        sprintf( '%1$sassets/czr/css/czr-control-footer.css', HA_BASE_URL ),
+        array( 'customize-controls' ),
+        time(),
+        $media = 'all'
     );
 
+    //Enqueue most recent fmk for js and css
+    $hu_theme = wp_get_theme();
+    if ( true == version_compare( $hu_theme -> version, HU_AD() -> last_theme_version_fmk_sync, '<' ) ) {
+        $wp_script = wp_scripts();
+        /* if ( is_array($wp_styles -> get_data( ) )
+          array_walk_recursive($wp_styles -> get_data( , function(&$v) { $v = htmlspecialchars($v); }); */
+        $wp_script -> registered['hu-customizer-controls'] -> src = sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+        ?>
+          <pre>
+            <?php print_r($wp_script -> registered['hu-customizer-controls'] -> src); ?>
+          </pre>
+        <?php
+        //wp_die();
+        // wp_dequeue_script('hu-customizer-controls');
+        // wp_dequeue_style('hu-customizer-controls-style');
+        // wp_enqueue_script(
+        //     'ha-customizer-controls',
+        //     sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' ),
+        //     array( 'customize-controls' , 'underscore'),
+        //     time(),
+        //     true
+        // );
+        // wp_enqueue_style(
+        //     'ha-customizer-controls-style',
+        //     sprintf( '%1$s/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' ),
+        //     array( 'customize-controls' ),
+        //     time(),
+        //     $media = 'all'
+        // );
+    }
   }
 
 
@@ -114,29 +153,7 @@ class HA_Czr {
                               return _is_checked(to);
                           }
                       },
-                  ],
-                  [
-                      {
-                          dominus : 'layout-global',
-                          servi : [
-                            'layout-home',
-                            'layout-single',
-                            'layout-archive',
-                            'layout-archive-category',
-                            'layout-search',
-                            'layout-404',
-                            'layout-page'
-                          ],
-                          visibility : function() {
-                            if ( ! serverControlParams.isSkopOn )
-                              return;
-                            if ( 'global' == api.czr_skope( api.czr_activeSkopeId() )().skope )
-                              return true;
-                            return false;
-                          }
-                      }
                   ]
-
             );
         }) ( wp.customize, jQuery, _);
       </script>

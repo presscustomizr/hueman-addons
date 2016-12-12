@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 1.0.9
+* Version: 2.0-beta
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
@@ -24,6 +24,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
       public static $theme;
       public static $theme_name;
       public $is_customizing;
+      public $last_theme_version_sync;
+      public $minimal_authorized_theme_version;
 
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )
@@ -35,6 +37,10 @@ if ( ! class_exists( 'HU_AD' ) ) :
       function __construct() {
         self::$instance =& $this;
 
+        //last version sync
+        $this -> last_theme_version_fmk_sync = '3.2.13';
+        $this -> minimal_authorized_theme_version = '3.2.12';
+
         //checks if is customizing : two context, admin and front (preview frame)
         $this -> is_customizing = $this -> ha_is_customizing();
 
@@ -44,11 +50,11 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , plugin_dir_path( __FILE__ ) );
         if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( __DIR__ ) ) ) );
 
-        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , apply_filters( 'ha_is_skop_on', true ) );
+        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
         if( ! defined( 'HA_SEK_ON' ) ) define( 'HA_SEK_ON' , false );
 
-        //stop execution if not Hueman
-        if ( false === strpos( self::$theme_name, 'hueman' ) ) {
+        //stop execution if not Hueman or if minimal version of Hueman is not installed
+        if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version ) ) {
           add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
           return;
         }
@@ -58,9 +64,9 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
         //fire
         $this -> ha_load();
+
+        add_action('wp_head', array( $this, 'hu_admin_style') );
       }//construct
-
-
 
 
       function ha_load() {
@@ -82,7 +88,13 @@ if ( ! class_exists( 'HU_AD' ) ) :
          *  Loads BETAS
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_skop_on() ) {
-          require_once( HA_BASE_PATH . 'inc/skop/init-skop.php' );
+          if ( defined('TC_DEV') && true === TC_DEV ) {
+              if ( file_exists( HA_BASE_PATH . 'inc/skop/_dev/skop-x-fire.php' ) ) {
+                  require_once( HA_BASE_PATH . 'inc/skop/_dev/skop-x-fire.php' );
+              }
+          } else {
+              require_once( HA_BASE_PATH . 'inc/skop/czr-skop.php' );
+          }
         }
         if ( HA_SEK_ON ) {
           require_once( HA_BASE_PATH . 'inc/sek/init-sektions.php' );
@@ -125,22 +137,25 @@ if ( ! class_exists( 'HU_AD' ) ) :
       }
 
 
-
+      //hook : admin_notices
       function ha_admin_notice() {
-          $what = __( 'works only with the Hueman theme', 'hueman-addons' );
+          if ( version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version ) ) {
+            $message = sprintf( __( 'This version of the <strong>%1$s</strong> plugin requires at least the version %2$s of the Hueman theme.', 'hueman-addons' ),
+              'Hueman Addons',
+              $this -> minimal_authorized_theme_version
+            );
+          } else if ( false === strpos( self::$theme_name, 'hueman' ) ) {
+            $message = sprintf( __( 'The <strong>%1$s</strong> plugin %2$s.', 'hueman-addons' ),
+              'Hueman Addons',
+              __( 'works only with the Hueman theme', 'hueman-addons' )
+            );
+          } else {
+            $message = __( "The <strong>%1$s</strong> plugin can't be activated.", 'hueman-addons' );
+          }
 
-         ?>
-          <div class="error">
-              <p>
-                <?php
-                printf( __( 'The <strong>%1$s</strong> plugin %2$s.' ,'hueman-addons' ),
-                  'Hueman Addons',
-                  $what
-                );
-                ?>
-              </p>
-          </div>
-          <?php
+        ?>
+          <div class="error"><p><?php echo $message; ?></p></div>
+        <?php
       }
 
 
@@ -200,7 +215,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //@return bool
       function ha_is_skop_on() {
-        return defined( 'HA_SKOP_ON' ) ? HA_SKOP_ON : false;
+        global $wp_version;
+        return apply_filters( 'ha_is_skop_on', version_compare( $wp_version, '4.7', '>=' ) );
       }
 
 
@@ -212,6 +228,41 @@ if ( ! class_exists( 'HU_AD' ) ) :
         return $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid');
       }
 
+      //hook : wp_head
+      //only on front end and if user is logged-in
+      function hu_admin_style() {
+        ?>
+            <script type="text/javascript" id="ha-customize-btn">
+              jQuery( function($) {
+                  $( "#wp-admin-bar-customize").find('a').attr('title', '<?php _e( "Customize this page !", "hueman-addons"); ?>' );
+              });
+            </script>
+            <style type="text/css" id="ha-fun-ab">
+              @-webkit-keyframes super-rainbow {
+                0%   { text-shadow : 0px 0px 2px;}
+                20%  { text-shadow : 0px 0px 5px; }
+                40%  { text-shadow : 0px 0px 10px; }
+                60%  { text-shadow : 0px 0px 13px }
+                80%  { text-shadow : 0px 0px 10px; }
+                100% { text-shadow : 0px 0px 5px; }
+              }
+              @-moz-keyframes super-rainbow {
+                0%   { text-shadow : 0px 0px 2px;}
+                20%  { text-shadow : 0px 0px 5px; }
+                40%  { text-shadow : 0px 0px 10px; }
+                60%  { text-shadow : 0px 0px 13px }
+                80%  { text-shadow : 0px 0px 10px; }
+                100% { text-shadow : 0px 0px 5px; }
+              }
+
+              #wp-admin-bar-customize .ab-item:before {
+                  color:#7ECEFD;
+                  -webkit-animation: super-rainbow 4s infinite linear;
+                   -moz-animation: super-rainbow 4s infinite linear;
+              }
+            </style>
+        <?php
+      }
   } //end of class
 endif;
 
@@ -228,20 +279,3 @@ function HU_AD() {
   return HU_AD::ha_get_instance();
 }
 HU_AD();
-
-
-/* ------------------------------------------------------------------------- *
- *  FOR DEV
-/* ------------------------------------------------------------------------- */
-add_action('hu_hueman_loaded', function() {
-    if ( class_exists( 'HA_skop_dev_logs') ) {
-      new HA_skop_dev_logs(
-        array(
-            'hook' => '__header_after_container_inner',
-            'display_header' => true,
-            'tested_option' => 'use-header-image'
-          )
-
-      );
-    }
-}, 100 );
