@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 2.0-beta
+* Version: 2.0-beta-2
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
@@ -38,8 +38,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
         self::$instance =& $this;
 
         //last version sync
-        $this -> last_theme_version_fmk_sync = '3.2.13';
-        $this -> minimal_authorized_theme_version = '3.2.13-beta';
+        $this -> last_theme_version_fmk_sync = '3.2.12';
+        $this -> minimal_authorized_theme_version = '3.2.12';
 
         //checks if is customizing : two context, admin and front (preview frame)
         $this -> is_customizing = $this -> ha_is_customizing();
