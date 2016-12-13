@@ -44,32 +44,14 @@ class HA_Czr {
     //Enqueue most recent fmk for js and css
     $hu_theme = wp_get_theme();
     if ( true == version_compare( $hu_theme -> version, HU_AD() -> last_theme_version_fmk_sync, '<' ) ) {
-        $wp_script = wp_scripts();
-        /* if ( is_array($wp_styles -> get_data( ) )
-          array_walk_recursive($wp_styles -> get_data( , function(&$v) { $v = htmlspecialchars($v); }); */
-        $wp_script -> registered['hu-customizer-controls'] -> src = sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
-        ?>
-          <pre>
-            <?php print_r($wp_script -> registered['hu-customizer-controls'] -> src); ?>
-          </pre>
-        <?php
-        //wp_die();
-        // wp_dequeue_script('hu-customizer-controls');
-        // wp_dequeue_style('hu-customizer-controls-style');
-        // wp_enqueue_script(
-        //     'ha-customizer-controls',
-        //     sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' ),
-        //     array( 'customize-controls' , 'underscore'),
-        //     time(),
-        //     true
-        // );
-        // wp_enqueue_style(
-        //     'ha-customizer-controls-style',
-        //     sprintf( '%1$s/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' ),
-        //     array( 'customize-controls' ),
-        //     time(),
-        //     $media = 'all'
-        // );
+        $wp_styles = wp_styles();
+        $wp_scripts = wp_scripts();
+        if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+        }
+        if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
+            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+        }
     }
   }
 

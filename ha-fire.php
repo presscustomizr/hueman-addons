@@ -39,7 +39,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
         //last version sync
         $this -> last_theme_version_fmk_sync = '3.2.13';
-        $this -> minimal_authorized_theme_version = '3.2.12';
+        $this -> minimal_authorized_theme_version = '3.2.13-beta';
 
         //checks if is customizing : two context, admin and front (preview frame)
         $this -> is_customizing = $this -> ha_is_customizing();
@@ -54,7 +54,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_SEK_ON' ) ) define( 'HA_SEK_ON' , false );
 
         //stop execution if not Hueman or if minimal version of Hueman is not installed
-        if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version ) ) {
+        if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version, '<' ) ) {
           add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
           return;
         }
@@ -139,7 +139,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //hook : admin_notices
       function ha_admin_notice() {
-          if ( version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version ) ) {
+          if ( version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version, '<' ) ) {
             $message = sprintf( __( 'This version of the <strong>%1$s</strong> plugin requires at least the version %2$s of the Hueman theme.', 'hueman-addons' ),
               'Hueman Addons',
               $this -> minimal_authorized_theme_version
@@ -150,7 +150,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
               __( 'works only with the Hueman theme', 'hueman-addons' )
             );
           } else {
-            $message = __( "The <strong>%1$s</strong> plugin can't be activated.", 'hueman-addons' );
+            return;
           }
 
         ?>
@@ -214,8 +214,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
       }
 
       //@return bool
+      //skop shall not be activated when previewing the theme from the customizer
+
       function ha_is_skop_on() {
         global $wp_version;
+        if ( $this -> ha_isprevdem() )
+          return;
         return apply_filters( 'ha_is_skop_on', version_compare( $wp_version, '4.7', '>=' ) );
       }
 
@@ -226,6 +230,24 @@ if ( ! class_exists( 'HU_AD' ) ) :
           global $wp_customize;
         }
         return $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid');
+      }
+
+      //@return an array of unfiltered options
+      //=> all options or a single option val
+      function ha_get_raw_option( $opt_name = null, $opt_group = null ) {
+          $alloptions = wp_cache_get( 'alloptions', 'options' );
+          $alloptions = maybe_unserialize($alloptions);
+          if ( ! is_null( $opt_group ) && isset($alloptions[$opt_group]) ) {
+            $alloptions = maybe_unserialize($alloptions[$opt_group]);
+          }
+          if ( is_null( $opt_name ) )
+            return $alloptions;
+          return isset( $alloptions[$opt_name] ) ? maybe_unserialize($alloptions[$opt_name]) : false;
+      }
+
+      function ha_isprevdem() {
+        $_active_theme = $this -> ha_get_raw_option( 'template' );
+        return ( $_active_theme != strtolower('Hueman') );
       }
 
       //hook : wp_head
