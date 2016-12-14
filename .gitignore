@@ -14,7 +14,7 @@ Thumbs.db
 
 # GRUNT
 node_modules/
-# grunt-tasks-config/
+grunt-tasks-config/
 # gruntfile.js
 
 
