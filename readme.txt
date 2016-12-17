@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 2.0-beta4
+Stable tag: 2.0-beta5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.0 : December 16th, 2016 =
+* added : new customizer interface. Requires WP 4.7+
+
 = 1.0.9 : December 6th, 2016 =
 * updated : customizer compatibility with Hueman version 3.2.11
 
