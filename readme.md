@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.7
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.0.3 : December 19th, 2016 =
+* fixed : retro-compatibility with php version 5.3, removed anonymous callback in action hook.
+
 = 2.0.2 : December 19th, 2016 =
 * improved : featured-posts-include is displayed in the customizer only when is_home() context
 * fixed : customizer frozen in an infinite load in some specific cases
