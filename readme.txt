@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,11 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.2 : December 19th, 2016 =
+* improved : featured-posts-include is displayed in the customizer only when is_home() context
+* fixed : customizer frozen in an infinite load in some specific cases
+* fixed : replace hu_is_customize_preview_frame() by HU_AD() -> ha_is_customize_preview_frame()
+
 = 2.0.1 : December 18th, 2016 =
 * fixed : php compatibility issue
 
