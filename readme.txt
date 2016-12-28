@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.7
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,10 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.5 : December 28th, 2016 =
+* fixed : customizer panel doesn't scroll down fully
+* fixed : customizer freezing on Safari 10.0.2
+
 = 2.0.4 : December 21st, 2016 =
 * fixed : it was not possible to set static front page and post page layout independently
 * fixed : removed anonymous callback assigned to "hu_hueman_loaded" used to print dev logs

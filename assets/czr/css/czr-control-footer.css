@@ -25,14 +25,13 @@
   color: #E6B800;
   text-shadow: 0px 1px 0px rgba(0, 0, 0, 0.6);
 }
-/* Add space at the bottom of each section => otherwise the last controls might be hidden */
-.accordion-section-content {
-    margin-bottom: 40px!important;
-}
 
 @media screen and (min-width: 1025px) {
   .wp-customizer .expanded #customize-footer-actions {
       height: 85px;
       background: inherit;
+  }
+  .wp-customizer #customize-controls .wp-full-overlay-sidebar-content {
+    bottom: 85px;
   }
 }
