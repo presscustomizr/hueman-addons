@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.7
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.0.6 January 4th 2017 =
+* fixed : customizer not loading when deprecated link widget is enabled
+
 = 2.0.5 : December 28th, 2016 =
 * fixed : customizer panel doesn't scroll down fully
 * fixed : customizer freezing on Safari 10.0.2
