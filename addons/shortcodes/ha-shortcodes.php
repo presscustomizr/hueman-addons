@@ -7,6 +7,6 @@ class HA_Shortcodes {
   }
 
   function ha_shortcodes_actions() {
-    require_once( HA_BASE_PATH . 'inc/shortcodes/shortcodes.php' );
+    require_once( HA_BASE_PATH . 'addons/shortcodes/shortcodes.php' );
   }
 }//end of class

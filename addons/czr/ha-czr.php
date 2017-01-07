@@ -17,7 +17,7 @@ class HA_Czr {
   function ha_augment_customizer_setting() {
       if ( ! HU_AD() -> ha_is_skop_on() )
         return;
-      require_once( HA_BASE_PATH . 'inc/czr/skop-customizer-augment-setting.php' );
+      require_once( HA_BASE_PATH . 'addons/czr/skop-customizer-augment-setting.php' );
   }
 
 
@@ -35,7 +35,7 @@ class HA_Czr {
     //Hueman Addons Specifics
     wp_enqueue_style(
         'ha-czr-addons-controls-style',
-        sprintf( '%1$sassets/czr/css/czr-control-footer.css', HA_BASE_URL ),
+        sprintf( '%1$saddons/assets/czr/css/czr-control-footer.css', HA_BASE_URL ),
         array( 'customize-controls' ),
         time(),
         $media = 'all'
@@ -47,10 +47,10 @@ class HA_Czr {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/addons/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
-            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf('%1$s/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf('%1$s/addons/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
         }
     }
   }

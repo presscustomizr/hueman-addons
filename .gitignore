@@ -9,8 +9,8 @@ ehthumbs.db
 Thumbs.db
 
 # SKOP SEK
-#inc/skop/
-#inc/sek/
+#addons/skop/
+#addons/sek/
 
 # GRUNT
 node_modules/

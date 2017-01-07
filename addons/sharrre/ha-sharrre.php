@@ -60,7 +60,7 @@ class HA_Sharrre {
     if ( ! ha_are_share_buttons_enabled() )
       return;
 
-    require_once( HA_BASE_PATH . 'inc/sharrre/sharrre-template.php' );
+    require_once( HA_BASE_PATH . 'addons/sharrre/sharrre-template.php' );
   }
 
 
@@ -72,7 +72,7 @@ class HA_Sharrre {
     if ( is_singular() ) {
       wp_enqueue_script(
         'sharrre',
-        sprintf( '%1$sassets/front/js/jQuerySharrre%2$s', HA_BASE_URL, (defined('TC_DEV') && true === TC_DEV) ? '.js' : '.min.js' ),
+        sprintf( '%1$saddons/assets/front/js/jQuerySharrre%2$s', HA_BASE_URL, (defined('TC_DEV') && true === TC_DEV) ? '.js' : '.min.js' ),
         array( 'jquery' ),
         '',
         true
