@@ -5,7 +5,9 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
 
         function __construct() {
             parent::__construct();
-            add_action( 'wp_ajax_' . HU_OPT_AJAX_ACTION , array( $this, 'ha_ajax_get_opt' ) );
+            //DEPRECATED
+            //add_action( 'wp_ajax_' . HU_OPT_AJAX_ACTION , array( $this, 'ha_ajax_get_opt' ) );
+
             //add_action( 'wp_ajax_czr_skope_reset', array( $this, 'ha_ajax_reset_skope' ) );
             //Changeset
             add_action( 'wp_ajax_czr_changeset_setting_reset',  array( $this, 'ha_ajax_reset_changeset_setting' ) );

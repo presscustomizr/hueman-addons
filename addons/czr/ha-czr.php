@@ -48,13 +48,13 @@ class HA_Czr {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/addons/assets/czr/css/czr-control-base%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$saddons/assets/czr/css/czr-control-base%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
             $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
-                '%1$s/addons/assets/czr/js/%2$s%3$s.js',
+                '%1$saddons/assets/czr/js/%2$s%3$s.js',
                 HA_BASE_URL,
-                $is_pro ? 'czr-control-full' : 'czr-control-base',
+                $is_pro ? 'czr-control-full' : 'czr-control',
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
         }
@@ -113,7 +113,8 @@ class HA_Czr {
             if ( ! _.has( api, 'CZR_ctrlDependencies') )
               return;
             //@return boolean
-            var _is_checked = function( to ) {
+            var pro_header_short_opt_name = '<?php echo HU_AD() -> pro_header -> pro_header_short_opt_name ?>',//'pro_header_bg'
+                _is_checked = function( to ) {
                 return 0 !== to && '0' !== to && false !== to && 'off' !== to;
             };
             api.CZR_ctrlDependencies.prototype.dominiDeps = _.union(
@@ -146,10 +147,10 @@ class HA_Czr {
                           servi : [
                             'use-header-image',
                             'header_image',
-                            'pro_header_bg'
+                            pro_header_short_opt_name//pro_header_bg
                           ],
                           visibility : function ( to, servusShortId ) {
-                              if ( 'pro_header_bg' == servusShortId ) {
+                              if ( pro_header_short_opt_name == servusShortId ) {
                                   return 'classical' != to;
                               } else if ( 'header_image' == servusShortId ) {
                                   var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );

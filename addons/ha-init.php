@@ -20,6 +20,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       public $models;
 
+      public $pro_header;//Will store the pro header instance
+
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )
             self::$instance = new HU_AD();
@@ -73,13 +75,16 @@ if ( ! class_exists( 'HU_AD' ) ) :
       /* ------------------------------------------------------------------------- */
       function ha_get_model( $model_name ) {
         $_models = $this -> models;
+        if ( ! is_array($_models) ) {
+          ha_error_log( 'Problem in HU_AD::ha_get_model : attempting to get a model (' . $model_name . ') but the HU_AD::models property is not populated yet.');
+        }
         return array_key_exists( $model_name, $_models ) ? $_models[ $model_name ] : false;
       }
 
       //@return void()
       function ha_set_model( $model_name, $model_data = array() ) {
         $_models = $this -> models;
-        if ( ! is_string($model_name) || empty($model_name) || ! is_array( $model_data ) || empty( $model_data ) ) {
+        if ( ! is_string( $model_name ) || empty( $model_name ) || ! is_array( $model_data ) || empty( $model_data ) ) {
           wp_die('Hueman Addons : model not properly defined.');
         }
         $_models[$model_name] = $model_data;

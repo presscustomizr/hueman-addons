@@ -734,70 +734,95 @@ function ha_get_query_skope() {
 /**
 * Used when localizing the customizer js params
 * Can be a post ( post, pages, CPT) , tax(tag, cats, custom taxs), author, date, search page, 404.
+* @param $args : array(
+*    'level'       => string,
+*    'meta_type'   => string
+*    'long'        => bool
+*    'is_prefixed' => bool //<= indicated if we should add the "Options for" prefix
+* )
 * @return string title of the current ctx if exists. If not => false.
 */
-function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
-  $_dyn_type = ( HU_AD() -> ha_is_customize_preview_frame() && isset($_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
-  $type = ha_get_skope('type');
-  $skope = ha_get_skope();
-  $title = '';
+function ha_get_skope_title( $args = array() ) {
+    $defaults = array(
+        'level'       =>  '',
+        'meta_type'   => null,
+        'long'        => false,
+        'is_prefixed' => true
+    );
 
-  if( 'local' == $level ) {
-      $type = ha_get_skope( 'type' );
-      $title =  __('Options for', 'hueman-addons') . ' ';
-      if ( ha_skope_has_a_group( $meta_type ) ) {
-          $_id = ha_get_skope('id');
-          switch ($meta_type) {
-              case 'post':
+    $args = wp_parse_args( $args, $defaults );
+
+    $level        = $args['level'];
+    $meta_type    = $args['meta_type'];
+    $long         = $args['long'];
+    $is_prefixed  = $args['is_prefixed'];
+
+    $_dyn_type = ( HU_AD() -> ha_is_customize_preview_frame() && isset( $_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
+    $type = ha_get_skope('type');
+    $skope = ha_get_skope();
+    $title = '';
+
+    if( 'local' == $level ) {
+        $type = ha_get_skope( 'type' );
+        $title = $is_prefixed ? __( 'Options for', 'hueman-addons' ) . ' ' : $title;
+        if ( ha_skope_has_a_group( $meta_type ) ) {
+            $_id = ha_get_skope('id');
+            switch ($meta_type) {
+                case 'post':
+                  $type_obj = get_post_type_object( $type );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
+                  break;
+
+                case 'tax':
+                  $type_obj = get_taxonomy( $type );
+                  $term = get_term( $_id, $type );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
+                  break;
+
+                case 'user':
+                  $author = get_userdata( $_id );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
+                  break;
+            }
+        } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
+            if ( is_post_type_archive() ) {
+                global $wp_the_query;
+                $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
+            } else {
+                $title .= strtolower( $skope );
+            }
+        } else {
+            $title .= __( 'Undefined', 'hueman-addons' );
+        }
+    }
+    if ( 'group' == $level || 'special_group' == $level ) {
+        $title = $is_prefixed ? __( 'Options for all', 'hueman-addons' ) . ' ' : __( 'All' , 'hueman-adons' ) . ' ';
+        switch( $meta_type ) {
+            case 'post' :
                 $type_obj = get_post_type_object( $type );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
-                break;
+                $title .= strtolower( $type_obj -> labels -> name );
+            break;
 
-              case 'tax':
+            case 'tax' :
                 $type_obj = get_taxonomy( $type );
-                $term = get_term( $_id, $type );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
-                break;
+                $title .= strtolower( $type_obj -> labels -> name );
+            break;
 
-              case 'user':
-                $author = get_userdata( $_id );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
-                break;
-          }
-      } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
-          if ( is_post_type_archive() ) {
-              global $wp_the_query;
-              $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
-          } else {
-              $title .= strtolower( $skope );
-          }
-      } else {
-          $title .= __( 'Undefined', 'hueman-addons' );
-      }
-  }
-  if ( 'group' == $level || 'special_group' == $level ) {
-      $title =  __('Options for all', 'hueman-addons');
-      switch( $meta_type ) {
-          case 'post' :
-              $type_obj = get_post_type_object( $type );
-              $title .= strtolower( ' ' . $type_obj -> labels -> name );
-          break;
-
-          case 'tax' :
-              $type_obj = get_taxonomy( $type );
-              $title .= strtolower( ' ' . $type_obj -> labels -> name );
-          break;
-
-          case 'user' :
-              $title .= ' ' . __('users', 'hueman-addons');
-          break;
-      }
-  }
-  if ( 'global' == $level ) {
-    $title = __('Site wide options', 'hueman-addons');
-  }
-  return ha_trim_text( $title, $long ? 45 : 28, '...');
+            case 'user' :
+                $title .= __('users', 'hueman-addons');
+            break;
+        }
+    }
+    if ( 'global' == $level ) {
+        $title = __( 'Sitewide options', 'hueman-addons' );
+    }
+    $title = ucfirst( $title );
+    return ha_trim_text( $title, $long ? 45 : 28, '...');
 }
+
+
+
+
 
 //@return bool
 //=> tells if the current skope is part of the ones without group
@@ -823,6 +848,7 @@ function _ha_get_default_scope_model() {
     return array(
         'title'       => '',
         'long_title'  => '',
+        'ctx_title'   => '',
         'id'          => '',
         'skope'       => '',
         'level'       => '',

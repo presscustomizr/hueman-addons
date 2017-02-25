@@ -21,7 +21,7 @@ function ha_print_skope_templates() {
         <div class="czr-scope-content"><h4 class="czr-skp-switch-link">{{data.title}}</h4></div>
         <div class="czr-scope-footer">
           <# if ( data.is_winner ) { #>
-            <span class="czr-scope-winner fa fa-check czr-pull-left info" title="Your front end page will be displayed like this customization scope."></span>
+            <span class="czr-scope-winner fa fa-check czr-pull-left info" title="This scope of options will override any other scopes set site wide or in a parent scope."></span>
           <# } #>
           <span class="czr-scope-force fa fa-exclamation-circle czr-pull-right" title="Force priority"></span>
         </div>

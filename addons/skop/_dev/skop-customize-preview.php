@@ -98,6 +98,14 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
         //posts tagged #tag2
         //posts categorized #cat1
         //@return array()
+        //
+        //ha_get_skope_title() takes the following default args
+        //array(
+        //  'level'       =>  '',
+        //  'meta_type'   => null,
+        //  'long'        => false,
+        //  'is_prefixed' => true
+        //)
         function _ha_get_json_export_ready_skopes() {
             $skopes = array();
             $_meta_type = ha_get_skope( 'meta_type', true );
@@ -109,20 +117,21 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
 
             //global and local and always sent
             $skopes[] = wp_parse_args(
-              array(
-                'title'       => ha_get_skope_title( 'global' ),
-                'long_title'  =>  ha_get_skope_title( 'global', null, true ),
-                'skope'       => 'global',
-                'level'       => '_all_',
-                'dyn_type'    => 'option',
-                'opt_name'    => HU_THEME_OPTIONS,
-                'is_winner'   => false,
-                'is_primary'  => true,
-                'has_db_val'  => ! empty( $saved_glob_opt ),
-                'db'          => $saved_glob_opt,
-                'changeset'   => $this -> _ha_get_api_ready_skope_changeset( array( 'level' => 'global', 'skope_meta_key' => '' ) )
-              ),
-              $defaults
+                array(
+                    'title'       => ha_get_skope_title( array( 'level' => 'global' ) ),
+                    'long_title'  => ha_get_skope_title( array( 'level' => 'global', 'meta_type' => null, 'long' => true ) ),
+                    'ctx_title'   => ha_get_skope_title( array( 'level' => 'global', 'meta_type' => null, 'long' => true, 'is_prefixed' => false ) ),
+                    'skope'       => 'global',
+                    'level'       => '_all_',
+                    'dyn_type'    => 'option',
+                    'opt_name'    => HU_THEME_OPTIONS,
+                    'is_winner'   => false,
+                    'is_primary'  => true,
+                    'has_db_val'  => ! empty( $saved_glob_opt ),
+                    'db'          => $saved_glob_opt,
+                    'changeset'   => $this -> _ha_get_api_ready_skope_changeset( array( 'level' => 'global', 'skope_meta_key' => '' ) )
+                ),
+                $defaults
             );
 
 
@@ -137,8 +146,9 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
               $group_opts = HA_SKOP_OPT() -> ha_get_skope_opt( 'group', $group_opt_name );
               $skopes[] = wp_parse_args(
                 array(
-                  'title'       => ha_get_skope_title( 'group', $_meta_type ),
-                  'long_title'  => ha_get_skope_title( 'group', $_meta_type, true),
+                  'title'       => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type  ) ),
+                  'long_title'  => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type, 'long' => true ) ),
+                  'ctx_title'   => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type, 'long' => true, 'is_prefixed' => false ) ),
                   'skope'       => 'group',
                   'level'       => 'all_' . ha_get_skope('type'),
                   'dyn_type'    => 'skope_meta',
@@ -157,8 +167,9 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
           $local_opts = HA_SKOP_OPT() -> ha_get_skope_opt( 'local', $loc_opt_name );
           $skopes[] = wp_parse_args(
             array(
-                'title'       => ha_get_skope_title( 'local', $_meta_type ),
-                'long_title'  => ha_get_skope_title( 'local', $_meta_type, true),
+                'title'       => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type ) ),
+                'long_title'  => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type, 'long' => true ) ),
+                'ctx_title'   => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type, 'long' => true, 'is_prefixed' => false ) ),
                 'skope'       => 'local',
                 'level'       => ha_get_skope(),
                 'dyn_type'    => 'skope_meta',

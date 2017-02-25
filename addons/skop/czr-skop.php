@@ -458,67 +458,82 @@ function ha_get_query_skope() {
 
   return apply_filters( 'ha_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $current_obj );
 }
-function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
-  $_dyn_type = ( HU_AD() -> ha_is_customize_preview_frame() && isset($_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
-  $type = ha_get_skope('type');
-  $skope = ha_get_skope();
-  $title = '';
+function ha_get_skope_title( $args = array() ) {
+    $defaults = array(
+        'level'       =>  '',
+        'meta_type'   => null,
+        'long'        => false,
+        'is_prefixed' => true
+    );
 
-  if( 'local' == $level ) {
-      $type = ha_get_skope( 'type' );
-      $title =  __('Options for', 'hueman-addons') . ' ';
-      if ( ha_skope_has_a_group( $meta_type ) ) {
-          $_id = ha_get_skope('id');
-          switch ($meta_type) {
-              case 'post':
+    $args = wp_parse_args( $args, $defaults );
+
+    $level        = $args['level'];
+    $meta_type    = $args['meta_type'];
+    $long         = $args['long'];
+    $is_prefixed  = $args['is_prefixed'];
+
+    $_dyn_type = ( HU_AD() -> ha_is_customize_preview_frame() && isset( $_POST['dyn_type']) ) ? $_POST['dyn_type'] : '';
+    $type = ha_get_skope('type');
+    $skope = ha_get_skope();
+    $title = '';
+
+    if( 'local' == $level ) {
+        $type = ha_get_skope( 'type' );
+        $title = $is_prefixed ? __( 'Options for', 'hueman-addons' ) . ' ' : $title;
+        if ( ha_skope_has_a_group( $meta_type ) ) {
+            $_id = ha_get_skope('id');
+            switch ($meta_type) {
+                case 'post':
+                  $type_obj = get_post_type_object( $type );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
+                  break;
+
+                case 'tax':
+                  $type_obj = get_taxonomy( $type );
+                  $term = get_term( $_id, $type );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
+                  break;
+
+                case 'user':
+                  $author = get_userdata( $_id );
+                  $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
+                  break;
+            }
+        } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
+            if ( is_post_type_archive() ) {
+                global $wp_the_query;
+                $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
+            } else {
+                $title .= strtolower( $skope );
+            }
+        } else {
+            $title .= __( 'Undefined', 'hueman-addons' );
+        }
+    }
+    if ( 'group' == $level || 'special_group' == $level ) {
+        $title = $is_prefixed ? __( 'Options for all', 'hueman-addons' ) . ' ' : __( 'All' , 'hueman-adons' ) . ' ';
+        switch( $meta_type ) {
+            case 'post' :
                 $type_obj = get_post_type_object( $type );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
-                break;
+                $title .= strtolower( $type_obj -> labels -> name );
+            break;
 
-              case 'tax':
+            case 'tax' :
                 $type_obj = get_taxonomy( $type );
-                $term = get_term( $_id, $type );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
-                break;
+                $title .= strtolower( $type_obj -> labels -> name );
+            break;
 
-              case 'user':
-                $author = get_userdata( $_id );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
-                break;
-          }
-      } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
-          if ( is_post_type_archive() ) {
-              global $wp_the_query;
-              $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
-          } else {
-              $title .= strtolower( $skope );
-          }
-      } else {
-          $title .= __( 'Undefined', 'hueman-addons' );
-      }
-  }
-  if ( 'group' == $level || 'special_group' == $level ) {
-      $title =  __('Options for all', 'hueman-addons');
-      switch( $meta_type ) {
-          case 'post' :
-              $type_obj = get_post_type_object( $type );
-              $title .= strtolower( ' ' . $type_obj -> labels -> name );
-          break;
-
-          case 'tax' :
-              $type_obj = get_taxonomy( $type );
-              $title .= strtolower( ' ' . $type_obj -> labels -> name );
-          break;
-
-          case 'user' :
-              $title .= ' ' . __('users', 'hueman-addons');
-          break;
-      }
-  }
-  if ( 'global' == $level ) {
-    $title = __('Site wide options', 'hueman-addons');
-  }
-  return ha_trim_text( $title, $long ? 45 : 28, '...');
+            case 'user' :
+                $title .= __('users', 'hueman-addons');
+            break;
+        }
+    }
+    if ( 'global' == $level ) {
+        $title = __( 'Sitewide options', 'hueman-addons' );
+    }
+    $title = ucfirst( $title );
+    return ha_trim_text( $title, $long ? 45 : 28, '...');
 }
 function ha_skope_has_no_group( $meta_type ) {
     return in_array(
@@ -536,6 +551,7 @@ function _ha_get_default_scope_model() {
     return array(
         'title'       => '',
         'long_title'  => '',
+        'ctx_title'   => '',
         'id'          => '',
         'skope'       => '',
         'level'       => '',
@@ -1249,7 +1265,6 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
 
         function __construct() {
             parent::__construct();
-            add_action( 'wp_ajax_' . HU_OPT_AJAX_ACTION , array( $this, 'ha_ajax_get_opt' ) );
             add_action( 'wp_ajax_czr_changeset_setting_reset',  array( $this, 'ha_ajax_reset_changeset_setting' ) );
             add_action( 'wp_ajax_czr_changeset_skope_reset',    array( $this, 'ha_ajax_reset_changeset_skope' ) );
             add_action( 'wp_ajax_czr_published_setting_reset',  array( $this, 'ha_ajax_reset_published_setting' ) );
@@ -1655,28 +1670,30 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
 
             $saved_glob_opt = $this -> _ha_get_sanitized_skoped_saved_global_options();
             $skopes[] = wp_parse_args(
-              array(
-                'title'       => ha_get_skope_title( 'global' ),
-                'long_title'  =>  ha_get_skope_title( 'global', null, true ),
-                'skope'       => 'global',
-                'level'       => '_all_',
-                'dyn_type'    => 'option',
-                'opt_name'    => HU_THEME_OPTIONS,
-                'is_winner'   => false,
-                'is_primary'  => true,
-                'has_db_val'  => ! empty( $saved_glob_opt ),
-                'db'          => $saved_glob_opt,
-                'changeset'   => $this -> _ha_get_api_ready_skope_changeset( array( 'level' => 'global', 'skope_meta_key' => '' ) )
-              ),
-              $defaults
+                array(
+                    'title'       => ha_get_skope_title( array( 'level' => 'global' ) ),
+                    'long_title'  => ha_get_skope_title( array( 'level' => 'global', 'meta_type' => null, 'long' => true ) ),
+                    'ctx_title'   => ha_get_skope_title( array( 'level' => 'global', 'meta_type' => null, 'long' => true, 'is_prefixed' => false ) ),
+                    'skope'       => 'global',
+                    'level'       => '_all_',
+                    'dyn_type'    => 'option',
+                    'opt_name'    => HU_THEME_OPTIONS,
+                    'is_winner'   => false,
+                    'is_primary'  => true,
+                    'has_db_val'  => ! empty( $saved_glob_opt ),
+                    'db'          => $saved_glob_opt,
+                    'changeset'   => $this -> _ha_get_api_ready_skope_changeset( array( 'level' => 'global', 'skope_meta_key' => '' ) )
+                ),
+                $defaults
             );
             if ( ha_get_skope('meta_type') ) {
               $group_opt_name = HA_SKOP_OPT() -> ha_get_skope_opt_name( 'group' );
               $group_opts = HA_SKOP_OPT() -> ha_get_skope_opt( 'group', $group_opt_name );
               $skopes[] = wp_parse_args(
                 array(
-                  'title'       => ha_get_skope_title( 'group', $_meta_type ),
-                  'long_title'  => ha_get_skope_title( 'group', $_meta_type, true),
+                  'title'       => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type  ) ),
+                  'long_title'  => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type, 'long' => true ) ),
+                  'ctx_title'   => ha_get_skope_title( array( 'level' => 'group', 'meta_type' => $_meta_type, 'long' => true, 'is_prefixed' => false ) ),
                   'skope'       => 'group',
                   'level'       => 'all_' . ha_get_skope('type'),
                   'dyn_type'    => 'skope_meta',
@@ -1692,8 +1709,9 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
           $local_opts = HA_SKOP_OPT() -> ha_get_skope_opt( 'local', $loc_opt_name );
           $skopes[] = wp_parse_args(
             array(
-                'title'       => ha_get_skope_title( 'local', $_meta_type ),
-                'long_title'  => ha_get_skope_title( 'local', $_meta_type, true),
+                'title'       => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type ) ),
+                'long_title'  => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type, 'long' => true ) ),
+                'ctx_title'   => ha_get_skope_title( array( 'level' => 'local', 'meta_type' => $_meta_type, 'long' => true, 'is_prefixed' => false ) ),
                 'skope'       => 'local',
                 'level'       => ha_get_skope(),
                 'dyn_type'    => 'skope_meta',
@@ -1951,6 +1969,11 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
                 )
               );
         }
+        function hu_add_skp_translated_strings( $strings ) {
+              return array_merge( $strings, array(
+
+              ));
+        }//hu_add_skp_translated_strings
     }//class
 endif;
 

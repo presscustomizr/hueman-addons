@@ -14,6 +14,8 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
              *  CUSTOMIZE PANE : Add skope server params to the Hueman theme control server params
             /* ------------------------------------------------------------------------- */
             add_filter( 'hu_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
+            //'controls_translated_strings' is declared in hueman theme, czr-resources
+            //add_filter( 'controls_translated_strings', array( $this, 'hu_add_skp_translated_strings') );
             /* ------------------------------------------------------------------------- *
              *  Skopify the save DEPRECATED
              *  1) Dynamically set the type in WP_Customize_Setting::save()
@@ -82,6 +84,15 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
               );
         }
 
+
+        /* ------------------------------------------------------------------------- *
+         *  CUSTOMIZE PANEL : ADD TRANSLATED STRINGS
+        /* ------------------------------------------------------------------------- */
+        function hu_add_skp_translated_strings( $strings ) {
+              return array_merge( $strings, array(
+
+              ));
+        }//hu_add_skp_translated_strings
 
 
         //hook : customize_register

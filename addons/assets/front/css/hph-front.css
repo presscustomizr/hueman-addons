@@ -6,8 +6,17 @@
   z-index: 10000;
   width: 100%;
 }
+/* TOP MENU */
 .pro-header-on #nav-topbar.nav-container {
     background: rgba(0, 0, 0, 0.7);
+}
+
+.pro-header-on .search-expand {
+    background: none;
+}
+/* HEADER MENU */
+.pro-header-on #nav-header.nav-container {
+    background: none;
 }
 .pro-header-on #page {
   margin-top: 0px;
@@ -29,6 +38,9 @@
     padding: 0px;
 }
 
+.pro-header-on #nav-header .nav ul {
+  background: rgba(0,0,0,.25);
+}
 
 
 /* LARGE HEADER WRAPPER */
@@ -60,7 +72,7 @@
 }
 
 .pc-section-slider:not(.full-height) {
-    height: 500px !important;
+    height: 500px;
 }
 /*
 .pc-section-slider .filter {
@@ -91,9 +103,11 @@
 
 
 /* FILTER AND SKIN */
-.filter::before {
-  position: absolute;
+.pc-section-slider .filter::before {
+    position: absolute;
     left: 0;
+    right: 0;
+    bottom: 0;
     top: 0;
     width: 100%;.
     height: 100%;
@@ -102,13 +116,7 @@
     content: "";
 
 }
-.header-skin-dark .filter::before {
-    content: '';
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    position: absolute;
+.header-skin-dark .pc-section-slider .filter::before {
     background: rgba(34, 34, 34, 0.65);
 }
 
@@ -116,8 +124,18 @@
     color: #fff
 }
 
+.header-skin-light .pc-section-slider .filter::before {
+    background: rgba(255, 255, 255, 0.75);
+}
+.header-skin-light .site-title a,
+.header-skin-light .site-description,
+.header-skin-light #nav-header .nav li a,
+.header-skin-light .carousel-caption h2,
+.header-skin-light .carousel-caption h3 {
+    color: #000
+}
 
-
+.header-skin-light
 
 
 /* PARALLAX */
@@ -388,10 +406,14 @@ img.v-centered {
 }
 
 @media only screen and (max-width: 719px) {
+    .pro-header-on #nav-topbar.nav-container {
+        background:none;
+    }
     .pro-header-on #header {
         padding-bottom: 0px;
-        background: #33363b;
-        /*position: relative;*/
+        background: rgba(0, 0, 0, 0.7);
+        /*background: #33363b;
+        position: relative;*/
     }
    /* .pc-section-slider h2.very-big {
       font-size: 70px;
@@ -402,9 +424,9 @@ img.v-centered {
         margin-bottom: 1.25em;
         font-size: 1.728em;
     }*/
-     .pro-header-on #header {
+     /*.pro-header-on #header {
       position: relative;
-    }
+    }*/
 }
 @media only screen and (max-width: 480px) {
     /*.pc-section-slider h2.very-big {
@@ -554,5 +576,20 @@ http://flickity.metafizzy.co
 }
 
 .flickity-page-dots .dot.is-selected {
+  opacity: 1;
+}
+
+/* FLICKITY CUSTOM */
+
+.lazy-load-on .carousel-cell img {
+  -webkit-transition: opacity 0.4s;
+  -moz-transition: opacity 0.4s;
+  -ms-transition: opacity 0.4s;
+  -o-transition: opacity 0.4s;
+  transition: opacity 0.4s;
+  opacity: 0;
+}
+.lazy-load-on .carousel-cell img.flickity-lazyloaded,
+.lazy-load-on .carousel-cell img.flickity-lazyerror {
   opacity: 1;
 }
