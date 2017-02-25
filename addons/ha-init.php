@@ -50,7 +50,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
 
         //PRO THEME / PRO ADDON ?
-        $this->is_pro_theme   = did_action('plugins_loaded');
+        $this->is_pro_theme   = did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' );
         $this->is_pro_addons  = ! did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' );
 
         //stop execution if not Hueman or if minimal version of Hueman is not installed

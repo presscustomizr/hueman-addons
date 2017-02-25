@@ -113,7 +113,7 @@ class HA_Czr {
             if ( ! _.has( api, 'CZR_ctrlDependencies') )
               return;
             //@return boolean
-            var pro_header_short_opt_name = '<?php echo HU_AD() -> pro_header -> pro_header_short_opt_name ?>',//'pro_header_bg'
+            var pro_header_short_opt_name = '<?php echo HU_AD() -> ha_is_pro_addons() ? HU_AD() -> pro_header -> pro_header_short_opt_name : ''; ?>',//'pro_header_bg'
                 _is_checked = function( to ) {
                 return 0 !== to && '0' !== to && false !== to && 'off' !== to;
             };
