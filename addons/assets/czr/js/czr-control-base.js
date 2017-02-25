@@ -35,7 +35,7 @@ if(this.$element.prop("multiple"))this.current(function(d){var e=[];a=[a],a.push
                 _truncate = function( string ){
                       if ( ! _.isString( string ) )
                         return '';
-                      return string.length > 80 ? string.substr( 0, 79 ) : string;
+                      return string.length > 150 ? string.substr( 0, 149 ) : string;
                 };
             if ( ! _.isEmpty( _.filter( _toArr, function( it ) { return ! _.isString( it ); } ) ) ) {
                   _toArr =  JSON.stringify( _toArr );

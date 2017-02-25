@@ -33,7 +33,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         self::$instance =& $this;
 
         //last version sync
-        $this -> last_theme_version_fmk_sync = '3.3.4';
+        $this -> last_theme_version_fmk_sync = '3.3.5';
         $this -> minimal_authorized_theme_version = '3.3.0';
 
         //checks if is customizing : two context, admin and front (preview frame)

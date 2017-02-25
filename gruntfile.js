@@ -13,12 +13,21 @@ module.exports = function(grunt) {
         paths : {
           addons_php : 'addons/',
           front_js : 'assets/front/js/',
+          czr_assets : 'addons/assets/czr/',
           lang : 'lang/'
       },
 			tasks : {
 				'dev': [ 'watch'],
 				//PROD
-				'build':  [ 'jshint:front_js','uglify:front_js', 'replace', 'clean', 'copy', 'compress'],
+				'build':  [
+          'jshint:front_js',
+          'uglify:front_js',
+          'comments:czr_base_control_js',
+          'replace',
+          'clean',
+          'copy',
+          'compress'
+        ],
 			},
 			uglify_requested_paths : {
 				src : '' || grunt.option('src'),
