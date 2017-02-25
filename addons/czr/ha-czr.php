@@ -5,7 +5,7 @@ class HA_Czr {
     self::$instance =& $this;
     add_action( 'customize_register'                      ,  array( $this, 'ha_augment_customizer_setting') );//extend WP_Customize_Setting
     //CUSTOMIZER PANEL JS
-    add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_extend_visibilities' ), 100 );
+    add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_extend_dependencies' ), 100 );
     //Various DOM ready actions + print rate link + template
     add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_various_dom_ready' ) );
     //control style
@@ -43,14 +43,20 @@ class HA_Czr {
 
     //Enqueue most recent fmk for js and css
     $hu_theme = wp_get_theme();
-    if ( true == version_compare( $hu_theme -> version, HU_AD() -> last_theme_version_fmk_sync, '<' ) ) {
+    $is_pro = HU_AD() -> ha_is_pro_addons() || HU_AD() -> ha_is_pro_theme();
+    if ( true == version_compare( $hu_theme -> version, HU_AD() -> last_theme_version_fmk_sync, '<' ) || $is_pro ) {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/addons/assets/czr/css/czr-control%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$s/addons/assets/czr/css/czr-control-base%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
-            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf('%1$s/addons/assets/czr/js/czr-control%2$s.js' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
+                '%1$s/addons/assets/czr/js/%2$s%3$s.js',
+                HA_BASE_URL,
+                $is_pro ? 'czr-control-full' : 'czr-control-base',
+                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
+            );
         }
     }
   }
@@ -100,7 +106,7 @@ class HA_Czr {
 
 
   //hook : 'customize_controls_enqueue_scripts'
-    function hu_extend_visibilities() {
+    function hu_extend_dependencies() {
       ?>
       <script type="text/javascript">
         (function (api, $, _) {
@@ -133,6 +139,25 @@ class HA_Czr {
                           servi : ['twitter-username'],
                           visibility : function (to) {
                               return _is_checked(to);
+                          }
+                      },
+                      {
+                          dominus : 'pro_header_type',
+                          servi : [
+                            'use-header-image',
+                            'header_image',
+                            'pro_header_bg'
+                          ],
+                          visibility : function ( to, servusShortId ) {
+                              if ( 'pro_header_bg' == servusShortId ) {
+                                  return 'classical' != to;
+                              } else if ( 'header_image' == servusShortId ) {
+                                  var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );
+                                  return 'classical' == to && _is_checked( api( wpServusId )() );
+                              }
+                              else {
+                                  return 'classical' == to;
+                              }
                           }
                       },
                   ]

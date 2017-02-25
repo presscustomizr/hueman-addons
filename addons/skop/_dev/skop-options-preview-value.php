@@ -687,23 +687,6 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
             return isset($_POST[$param]) ? esc_attr( $_POST[$param ] ) : '__not_posted__';
         }
 
-
-        function ha_can_have_meta_opt( $meta_type ) {
-            return in_array(
-              $meta_type,
-              array('post', 'tax', 'user')
-            );
-        }
-
-
-        function ha_can_have_trans_opt( $meta_type ) {
-            return in_array(
-              $meta_type,
-              array('home', 'search', '404', 'date')
-            );
-        }
-
-
         //@return updated option associative array( opt_name1 => value 1, opt_name2 => value2, ... )
         public function ha_preprocess_skope_val( $new_value, $opt_name, $current_value ) {
               if ( ! $current_value || ! is_array($current_value) ) {

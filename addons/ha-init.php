@@ -18,6 +18,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
       private $is_pro_theme;
       private $is_pro_addons;
 
+      public $models;
+
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )
             self::$instance = new HU_AD();
@@ -65,6 +67,25 @@ if ( ! class_exists( 'HU_AD' ) ) :
       }//construct
 
 
+
+      /* ------------------------------------------------------------------------- *
+      *  MODELS UTILITIES
+      /* ------------------------------------------------------------------------- */
+      function ha_get_model( $model_name ) {
+        $_models = $this -> models;
+        return array_key_exists( $model_name, $_models ) ? $_models[ $model_name ] : false;
+      }
+
+      //@return void()
+      function ha_set_model( $model_name, $model_data = array() ) {
+        $_models = $this -> models;
+        if ( ! is_string($model_name) || empty($model_name) || ! is_array( $model_data ) || empty( $model_data ) ) {
+          wp_die('Hueman Addons : model not properly defined.');
+        }
+        $_models[$model_name] = $model_data;
+        $this -> models = $_models;
+      }
+
       /* ------------------------------------------------------------------------- *
       *  I am a man in constant sorrow
       /* ------------------------------------------------------------------------- */
@@ -96,7 +117,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
         new HA_Czr();
 
         /* ------------------------------------------------------------------------- *
-         *  Loads BETAS
+         *  Loads SKOP
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_skop_on() ) {
           if ( defined('TC_DEV') && true === TC_DEV ) {
@@ -106,6 +127,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
           } else {
               require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
           }
+        }
+        /* ------------------------------------------------------------------------- *
+         *  Loads PRO
+        /* ------------------------------------------------------------------------- */
+        if ( $this -> ha_is_pro_addons() || $this -> ha_is_pro_theme() ) {
+          require_once( HA_BASE_PATH . 'addons/ha-init-pro.php' );
         }
       }
 

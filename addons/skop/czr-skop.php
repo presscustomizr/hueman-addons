@@ -388,12 +388,15 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
     break;
 
     default:
-      if  ( false != $meta_type && false != $obj_id && false != $obj_id )
+      if  ( false != $meta_type && false != $obj_id ) {
         $_return = array( "meta_type" => "{$meta_type}" , "type" => "{$type}", "id" => "{$obj_id}" );
-      else if ( false != $meta_type && ! $obj_id )
+      }
+      else if ( false != $meta_type && ! $obj_id ) {
         $_return = array( "meta_type" => "{$meta_type}", "type" => "{$type}" );
-      else if ( false != $obj_id )
+      }
+      else if ( false != $obj_id ) {
         $_return = array( "id" => "{$obj_id}" );
+      }
     break;
   }
   if ( ! $_return_string ) {
@@ -405,16 +408,17 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
     return isset($_return[$_requesting_wot]) ? $_return[$_requesting_wot] : '';
   $_concat = "";
   foreach ( $_return as $_key => $_part ) {
-    if ( empty( $_concat) )
-      $_concat .= $_part;
-    else
-      $_concat .= '_'. $_part;
+    if ( empty( $_concat) ) {
+        $_concat .= $_part;
+    } else {
+        $_concat .= '_'. $_part;
+    }
   }
   return $_concat;
 }
 function ha_get_query_skope() {
-  global $wp_query;
-  if ( ! isset($wp_query) || empty($wp_query) )
+  global $wp_the_query;
+  if ( ! isset( $wp_the_query ) || empty( $wp_the_query ) )
     return array();
 
   $current_obj  = get_queried_object();
@@ -423,7 +427,7 @@ function ha_get_query_skope() {
   $obj_id       = false;
 
 
-  if ( is_object($current_obj) ) {
+  if ( is_object( $current_obj ) ) {
       if ( isset($current_obj -> post_type) ) {
           $meta_type  = 'post';
           $type       = $current_obj -> post_type;
@@ -438,17 +442,18 @@ function ha_get_query_skope() {
   if ( is_author() ) {
       $meta_type  = 'user';
       $type       = 'author';
-      $obj_id     = get_query_var('author');
+      $obj_id     = $wp_the_query ->get( 'author' );
   }
-
+  if ( is_post_type_archive() ) {
+      $obj_id     = 'post_type_archive' . '_'. $wp_the_query ->get( 'post_type' );
+  }
   if ( is_404() )
     $obj_id  = '404';
   if ( is_search() )
     $obj_id  = 'search';
   if ( is_date() )
     $obj_id  = 'date';
-  $skope_is_home = ( is_home() && ( 'posts' == get_option( 'show_on_front' ) || '__nothing__' == get_option( 'show_on_front' ) ) ) || is_front_page();
-  if ( $skope_is_home )
+  if ( hu_is_real_home() )
     $obj_id  = 'home';
 
   return apply_filters( 'ha_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $current_obj );
@@ -460,9 +465,9 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
   $title = '';
 
   if( 'local' == $level ) {
-      $type = ha_get_skope('type');
+      $type = ha_get_skope( 'type' );
       $title =  __('Options for', 'hueman-addons') . ' ';
-      if ( HA_SKOP_OPT() -> ha_can_have_meta_opt( $meta_type ) ) {
+      if ( ha_skope_has_a_group( $meta_type ) ) {
           $_id = ha_get_skope('id');
           switch ($meta_type) {
               case 'post':
@@ -478,12 +483,18 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
 
               case 'user':
                 $author = get_userdata( $_id );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman'), $_id, $author -> user_login );
+                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
                 break;
           }
-
-      } else if ( ( 'trans' == $_dyn_type || HA_SKOP_OPT() -> ha_can_have_trans_opt( $skope ) ) ) {
-          $title .= strtolower( ha_get_skope() );
+      } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
+          if ( is_post_type_archive() ) {
+              global $wp_the_query;
+              $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
+          } else {
+              $title .= strtolower( $skope );
+          }
+      } else {
+          $title .= __( 'Undefined', 'hueman-addons' );
       }
   }
   if ( 'group' == $level || 'special_group' == $level ) {
@@ -508,6 +519,18 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
     $title = __('Site wide options', 'hueman-addons');
   }
   return ha_trim_text( $title, $long ? 45 : 28, '...');
+}
+function ha_skope_has_no_group( $meta_type ) {
+    return in_array(
+      $meta_type,
+      array( 'home', 'search', '404', 'date' )
+    ) || is_post_type_archive();
+}
+function ha_skope_has_a_group( $meta_type ) {
+    return in_array(
+      $meta_type,
+      array('post', 'tax', 'user')
+    );
 }
 function _ha_get_default_scope_model() {
     return array(
@@ -2608,22 +2631,6 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
         }
         function ha_get_sanitized_post_value( $param ) {
             return isset($_POST[$param]) ? esc_attr( $_POST[$param ] ) : '__not_posted__';
-        }
-
-
-        function ha_can_have_meta_opt( $meta_type ) {
-            return in_array(
-              $meta_type,
-              array('post', 'tax', 'user')
-            );
-        }
-
-
-        function ha_can_have_trans_opt( $meta_type ) {
-            return in_array(
-              $meta_type,
-              array('home', 'search', '404', 'date')
-            );
         }
         public function ha_preprocess_skope_val( $new_value, $opt_name, $current_value ) {
               if ( ! $current_value || ! is_array($current_value) ) {

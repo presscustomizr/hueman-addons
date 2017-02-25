@@ -624,12 +624,20 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
     break;
 
     default:
-      if  ( false != $meta_type && false != $obj_id && false != $obj_id )
+      //LOCAL
+      //here we don't check if there's a type this is the case where there must be one when a meta type (post, tax, user) is defined.
+      //typically the skope will look like post_page_25
+      if  ( false != $meta_type && false != $obj_id ) {
         $_return = array( "meta_type" => "{$meta_type}" , "type" => "{$type}", "id" => "{$obj_id}" );
-      else if ( false != $meta_type && ! $obj_id )
+      }
+      //GROUP
+      else if ( false != $meta_type && ! $obj_id ) {
         $_return = array( "meta_type" => "{$meta_type}", "type" => "{$type}" );
-      else if ( false != $obj_id )
+      }
+      //LOCAL WITH NO GROUP : home, 404, search, date, post type archive
+      else if ( false != $obj_id ) {
         $_return = array( "id" => "{$obj_id}" );
+      }
     break;
   }
 
@@ -650,10 +658,11 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
   //generate the ctx string from the array of ctx_parts
   $_concat = "";
   foreach ( $_return as $_key => $_part ) {
-    if ( empty( $_concat) )
-      $_concat .= $_part;
-    else
-      $_concat .= '_'. $_part;
+    if ( empty( $_concat) ) {
+        $_concat .= $_part;
+    } else {
+        $_concat .= '_'. $_part;
+    }
   }
   return $_concat;
 }
@@ -669,8 +678,8 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
 */
 function ha_get_query_skope() {
   //don't call get_queried_object if the $query is not defined yet
-  global $wp_query;
-  if ( ! isset($wp_query) || empty($wp_query) )
+  global $wp_the_query;
+  if ( ! isset( $wp_the_query ) || empty( $wp_the_query ) )
     return array();
 
   $current_obj  = get_queried_object();
@@ -679,7 +688,7 @@ function ha_get_query_skope() {
   $obj_id       = false;
 
 
-  if ( is_object($current_obj) ) {
+  if ( is_object( $current_obj ) ) {
       //post, custom post types, page
       if ( isset($current_obj -> post_type) ) {
           $meta_type  = 'post';
@@ -699,18 +708,21 @@ function ha_get_query_skope() {
   if ( is_author() ) {
       $meta_type  = 'user';
       $type       = 'author';
-      $obj_id     = get_query_var('author');
+      $obj_id     = $wp_the_query ->get( 'author' );
   }
 
+  //SKOPES WITH NO GROUPS
+  //post type archive object
+  if ( is_post_type_archive() ) {
+      $obj_id     = 'post_type_archive' . '_'. $wp_the_query ->get( 'post_type' );
+  }
   if ( is_404() )
     $obj_id  = '404';
   if ( is_search() )
     $obj_id  = 'search';
   if ( is_date() )
     $obj_id  = 'date';
-  //the home context in skope can not be simply is_home()
-  $skope_is_home = ( is_home() && ( 'posts' == get_option( 'show_on_front' ) || '__nothing__' == get_option( 'show_on_front' ) ) ) || is_front_page();
-  if ( $skope_is_home )
+  if ( hu_is_real_home() )
     $obj_id  = 'home';
 
   return apply_filters( 'ha_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $current_obj );
@@ -731,9 +743,9 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
   $title = '';
 
   if( 'local' == $level ) {
-      $type = ha_get_skope('type');
+      $type = ha_get_skope( 'type' );
       $title =  __('Options for', 'hueman-addons') . ' ';
-      if ( HA_SKOP_OPT() -> ha_can_have_meta_opt( $meta_type ) ) {
+      if ( ha_skope_has_a_group( $meta_type ) ) {
           $_id = ha_get_skope('id');
           switch ($meta_type) {
               case 'post':
@@ -749,12 +761,18 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
 
               case 'user':
                 $author = get_userdata( $_id );
-                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman'), $_id, $author -> user_login );
+                $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
                 break;
           }
-
-      } else if ( ( 'trans' == $_dyn_type || HA_SKOP_OPT() -> ha_can_have_trans_opt( $skope ) ) ) {
-          $title .= strtolower( ha_get_skope() );
+      } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
+          if ( is_post_type_archive() ) {
+              global $wp_the_query;
+              $title .= sprintf( __( '%1$s archive page', 'hueman-addons' ), $wp_the_query ->get( 'post_type' ) );
+          } else {
+              $title .= strtolower( $skope );
+          }
+      } else {
+          $title .= __( 'Undefined', 'hueman-addons' );
       }
   }
   if ( 'group' == $level || 'special_group' == $level ) {
@@ -779,6 +797,24 @@ function ha_get_skope_title( $level, $meta_type = null, $long = false ) {
     $title = __('Site wide options', 'hueman-addons');
   }
   return ha_trim_text( $title, $long ? 45 : 28, '...');
+}
+
+//@return bool
+//=> tells if the current skope is part of the ones without group
+function ha_skope_has_no_group( $meta_type ) {
+    return in_array(
+      $meta_type,
+      array( 'home', 'search', '404', 'date' )
+    ) || is_post_type_archive();
+}
+
+//@return bool
+//Tells if the current skope has a group level
+function ha_skope_has_a_group( $meta_type ) {
+    return in_array(
+      $meta_type,
+      array('post', 'tax', 'user')
+    );
 }
 
 
