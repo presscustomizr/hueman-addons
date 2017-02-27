@@ -55,7 +55,7 @@ class HA_Czr {
             $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
                 '%1$saddons/assets/czr/js/%2$s%3$s.js',
                 HA_BASE_URL,
-                $is_pro ? 'czr-control-full' : 'czr-control',
+                $is_pro ? 'czr-control-full' : 'czr-control-base',
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
         }
