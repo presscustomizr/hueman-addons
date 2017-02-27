@@ -37,6 +37,10 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.8 February 26th 2017 =
+* improved : better customizer user interface
+* improved : javascript error handling in the customizer
+
 = 2.0.7 January 5th 2017 =
 * fixed : new customizer interface not loaded for multisites
 
