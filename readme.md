@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.7
-Stable tag: 2.0.8
+Stable tag: 2.0.9
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.0.9 March 2nd 2017 =
+* fixed : Google Plus button disappeared in v2.0.8
+
 = 2.0.8 February 26th 2017 =
 * improved : better customizer user interface
 * improved : javascript error handling in the customizer
