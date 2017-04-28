@@ -51,6 +51,7 @@
     		});
     <?php endif; ?>
     <?php if ( hu_is_checked('sharrre-google-on') ) : ?>
+        <?php $path = HU_AD() -> ha_get_base_url(); ?>
     		$('#googleplus').sharrre({
     			share: {
     				googlePlus: true
@@ -59,7 +60,7 @@
     			enableHover: false,
     			enableTracking: true,
           buttons:{size: 'tall'},
-    			urlCurl: '<?php echo HA_BASE_URL . "addons/assets/front/js/sharrre.php"; ?>',
+    			urlCurl: '<?php echo $path . "addons/assets/front/js/sharrre.php"; ?>',
     			click: function(api, options){
     				api.simulateClick();
     				api.openPopup('googlePlus');

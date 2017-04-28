@@ -13,7 +13,7 @@ final class HA_skop_dev_logs {
 
 
     function __construct( $args = array() ) {
-        if ( ! defined('TC_DEV') || true !== TC_DEV || ! apply_filters('ha_print_skope_logs' , true ) )
+        if ( ! defined('CZR_DEV') || true !== CZR_DEV || ! apply_filters('ha_print_skope_logs' , true ) )
           return;
         $defaults = array(
           'hook' => '__before_content',

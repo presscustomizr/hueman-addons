@@ -37,21 +37,34 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
             // } else {
             //   add_action( 'wp' , array( $this, 'ha_cache_options' ) );
             // }
-            add_action( 'wp' , array( $this, 'ha_cache_options' ), 99999 );
+            if ( hu_is_ajax() && ! ha_is_partial_ajax_request() ) {
 
-            //SETUP FILTERS FOR WP OPTIONS AND THEME OPTIONS
-            // => exclude partial requests, WP does the job
-            if ( ! ha_is_partial_ajax_request() ) {
-              add_action( 'wp',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+              add_action( 'ajax_query_ready',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+
+              add_action( 'ajax_query_ready' , array( $this, 'ha_cache_options' ), 99999 );
+
             }
+            else {
+
+              //SETUP FILTERS FOR WP OPTIONS AND THEME OPTIONS
+              // => exclude partial requests, WP does the job
+              if ( ! ha_is_partial_ajax_request() ) {
+                add_action( 'wp',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+              }
+
+              add_action( 'wp' , array( $this, 'ha_cache_options' ), 99999 );
+
+            }
+
 
             //---------------------- DEPRECATED -------------------------------- //
             //SET THE NAME OF THE GLOBAL SKOPE OPTION
             //This option stores all global skope settings : theme and wp.
             //It is updated each time the global skope get saved or reset in the customizer
             //It is used to send the list of currently modified global settings in db
-            $theme_name = strtolower(THEMENAME);
+            $theme_name = ha_get_skope_theme_name();
             $this -> global_skope_optname = "{$theme_name}_global_skope";
+
         }//construct
 
 
@@ -149,15 +162,18 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
                   $_opt_array = self::$_local_opt;
                 break;
             }
+
+            //make sure we still have an array at this stage
+            $_opt_array = ! is_array( $_opt_array ) ? array() : $_opt_array;
+
             if ( is_null( $opt_name ) )
               return $_opt_array;
             else {
-              if ( in_array( $opt_name, HU_utils::$_theme_setting_list ) ) {
-                  $_theme_option_prefix = strtolower(HU_THEME_OPTIONS);
-                  $opt_name = "{$_theme_option_prefix}[{$opt_name}]";
-              }
-
-              return array_key_exists($opt_name, $_opt_array) ? $_opt_array[$opt_name] : '_no_set_';
+                if ( in_array( $opt_name, HU_utils::$_theme_setting_list ) ) {
+                    $_theme_option_prefix = strtolower(HU_THEME_OPTIONS);
+                    $opt_name = "{$_theme_option_prefix}[{$opt_name}]";
+                }
+                return array_key_exists( $opt_name, $_opt_array ) ? $_opt_array[$opt_name] : '_no_set_';
             }
         }
 
@@ -175,7 +191,17 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
                if ( isset($data['skoped']) && false === $data['skoped'] )
                  $_excluded[] = $_id;
              }
-             self::$_skope_excluded_settings = $_excluded;
+
+            //WFC COMPAT
+            if ( class_exists( 'TC_utils_wfc' ) ) {
+                $wfc_setting_map = TC_utils_wfc::$instance -> tc_customizer_map();
+                if ( array_key_exists( 'add_setting_control', $wfc_setting_map ) ) {
+                    foreach ( $wfc_setting_map['add_setting_control'] as $_id => $data ) {
+                          $_excluded[] = $_id;
+                    }
+                }
+            }
+            self::$_skope_excluded_settings = $_excluded;
         }
 
 

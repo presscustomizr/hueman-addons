@@ -25,11 +25,11 @@ if ( ! class_exists( 'HA_customize_ajax_content_picker_actions' ) ) :
             add_action( 'wp_ajax_search-available-content-items-customizer' , array( $this, 'ajax_search_available_items' ) );
       }
 
+
       //hook : 'pre_post_link'
       function dont_use_fancy_permalinks() {
         return '';
       }
-
 
 
       /* ------------------------------------------------------------------------- *
@@ -73,13 +73,9 @@ if ( ! class_exists( 'HA_customize_ajax_content_picker_actions' ) ) :
             }
             $page = empty( $_POST['page'] ) ? 0 : absint( $_POST['page'] );
             //do we need that ?
-            if ( $page < 1 ) {
-              $page = 1;
-            }
-            // ha_error_log('/////////////// OBJECT TYPES ?');
-            // ha_error_log( print_R( $wp_object_types, true ) );
-            // $type = sanitize_key( $_POST['type'] );
-            // $object = /*sanitize_key(*/ $_POST['object'] /*)*/;
+            // if ( $page < 1 ) {
+            //   $page = 1;
+            // }
 
             $items = array();
 
@@ -103,13 +99,12 @@ if ( ! class_exists( 'HA_customize_ajax_content_picker_actions' ) ) :
             }
             remove_filter( 'pre_post_link', array( $this, 'dont_use_fancy_permalinks' ), 999 );
 
-            // ha_error_log('/////////////// ITEMS ?');
-            // ha_error_log( print_R( $items, true ) );
-
             if ( is_wp_error( $items ) ) {
-              wp_send_json_error( $items->get_error_code() );
+                wp_send_json_error( $items->get_error_code() );
             } else {
-              wp_send_json_success( array( 'items' => $items ) );
+                wp_send_json_success( array(
+                    'items' => apply_filters( 'content_picker_ajax_items', $items, $page, 'ajax_load_available_items' )
+                ) );
             }
       }
 
@@ -298,9 +293,11 @@ if ( ! class_exists( 'HA_customize_ajax_content_picker_actions' ) ) :
             remove_filter( 'pre_post_link', array( $this, 'dont_use_fancy_permalinks' ), 999 );
 
             if ( empty( $items ) ) {
-              wp_send_json_error( array( 'message' => __( 'No results found.', 'hueman') ) );
+                wp_send_json_error( array( 'message' => __( 'No results found.', 'hueman') ) );
             } else {
-              wp_send_json_success( array( 'items' => $items ) );
+                wp_send_json_success( array(
+                    'items' => apply_filters( 'content_picker_ajax_items', $items, $p, 'ajax_search_available_items' )
+                ) );
             }
       }
 
@@ -365,12 +362,12 @@ if ( ! class_exists( 'HA_customize_ajax_content_picker_actions' ) ) :
                               $post_title = sprintf( __( '#%d (no title)', 'hueman' ), $post->ID );
                             }
                             $items[] = array(
-                              'title'      => html_entity_decode( $post_title, ENT_QUOTES, get_bloginfo( 'charset' ) ),
-                              'type'       => 'post',
-                              'type_label' => get_post_type_object( $post->post_type )->labels->singular_name,
-                              'object'     => $post->post_type,
-                              'id'         => intval( $post->ID ),
-                              'url'        => get_permalink( intval( $post->ID ) ),
+                                'title'      => html_entity_decode( $post_title, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+                                'type'       => 'post',
+                                'type_label' => get_post_type_object( $post->post_type )->labels->singular_name,
+                                'object'     => $post->post_type,
+                                'id'         => intval( $post->ID ),
+                                'url'        => get_permalink( intval( $post->ID ) ),
                             );
                       }
                   }

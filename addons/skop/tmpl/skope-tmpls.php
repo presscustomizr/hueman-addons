@@ -87,13 +87,33 @@ function ha_print_skope_templates() {
 
     <?php /* PREVIEW TOP NOTE @to_translate */ ?>
     <script type="text/html" id="tmpl-czr-top-note">
-      <div id="czr-top-note">
+      <div id="czr-top-note" class="czr-preview-notification">
             <div class="czr-note-content">
                 <span class="fa fa-arrow-left"></span>
                 <h2>{{data.title}}</h2>
                 <p class="czr-note-message"></p>
-                <span class="fa fa-times czr-top-note-close" title="close"></span>
+                <span class="fa fa-times czr-preview-note-close" title="close"></span>
             </div>
+      </div>
+    </script>
+
+    <?php /* PREVIEW BOTTOM INFORMATIONS */ ?>
+    <script type="text/html" id="tmpl-czr-bottom-infos">
+      <div id="czr-bottom-infos" class="czr-preview-notification">
+            <div class="czr-note-content">
+                <h2>{{data.title}}</h2>
+                <p class="czr-note-message"></p>
+                <span class="fa fa-times czr-preview-note-close" title="<?php _e( 'Close', 'hueman'); ?>"></span>
+            </div>
+
+            <p class="action-links-wrap">
+                <span class="action-link">
+                  <span class="fa fa-info-circle"></span><a class="czr-doc-link" href="http://docs.presscustomizr.com/article/256-using-the-customizer-in-the-hueman-wordpress-theme" title="<?php _e( 'Using the customizer in the Hueman theme', 'hueman'); ?>" target="_blank"> <?php _e( 'Using the customizer in the Hueman theme', 'hueman'); ?></a>
+                </span>
+                <span class="action-link">
+                  <span class="fa fa-cog"></span><span class="czr-disable-bottom-infos" title="<?php _e( 'Permanently disable this notification', 'hueman'); ?>"> <?php _e( 'Permanently disable this notification.', 'hueman'); ?></span>
+                </span>
+            </p>
       </div>
     </script>
   <?php

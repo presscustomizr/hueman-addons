@@ -1,5 +1,23 @@
 <?php
 
+//@return a normalized theme name string
+//@important => used to get the skoped options. Don't messes up with this !
+//work with a child theme, will always get the parent theme name which is what we want.
+function ha_get_skope_theme_name() {
+    $_theme                     = wp_get_theme();
+    //Get infos from parent theme if using a child theme
+    $_theme = $_theme -> parent() ? $_theme -> parent() : $_theme;
+    $theme_name = strtolower( $_theme -> name );// wp_get_theme() -> name is uppercase and has spaces. Example : Hueman Pro
+
+    if ( false !== strpos( $theme_name, 'hueman' ) ) {
+      $theme_name = 'hueman';
+    } else if ( false !== strpos( $theme_name, 'customizr' ) ) {
+        $theme_name = 'customizr';
+    } else {
+        $theme_name = str_replace(' ', '_', $theme_name );
+    }
+    return $theme_name;
+}
 
 //delete_option( 'hu_theme_options' );
 
@@ -82,7 +100,7 @@ function ha_create_skope_post( $reset = false ) {
   }
   $post_array = array();
   $post_array['post_type'] = 'czr_skope_opt';
-  $post_array['post_name'] =  strtolower( THEMENAME ) . '_skope_post';
+  $post_array['post_name'] =  ha_get_skope_theme_name() . '_skope_post';
   $post_array['post_status'] = 'publish';
   $r = wp_insert_post( wp_slash( $post_array ), true );
   if ( ! is_wp_error( $r ) ) {
@@ -134,6 +152,7 @@ function ha_get_skope_excluded_options() {
         'sidebar-areas',
         'about-page',
         'help-button',
+        'show-skope-infos',
 
         //wp built-ins
         'show_on_front',
@@ -770,18 +789,18 @@ function ha_get_skope_title( $args = array() ) {
             switch ($meta_type) {
                 case 'post':
                   $type_obj = get_post_type_object( $type );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
                   break;
 
                 case 'tax':
                   $type_obj = get_taxonomy( $type );
                   $term = get_term( $_id, $type );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
                   break;
 
                 case 'user':
                   $author = get_userdata( $_id );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'hueman-addons'), $_id, $author -> user_login );
                   break;
             }
         } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {

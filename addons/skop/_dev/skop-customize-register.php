@@ -10,6 +10,9 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
             //Assign an extended class to Header_Image Settings
             add_action( 'customize_register' , array( $this, 'ha_alter_wp_customizer_settings' ) , 100, 1 );
 
+            // REGISTER A NEW SETTING IN ADMIN SETTINGS SEC
+            add_filter( 'hu_admin_sec'   , array( $this, 'ha_register_skop_infos_settings'));
+
             /* ------------------------------------------------------------------------- *
              *  CUSTOMIZE PANE : Add skope server params to the Hueman theme control server params
             /* ------------------------------------------------------------------------- */
@@ -24,6 +27,22 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
             //add_action( 'customize_register' , 'ha_prepare_skopify_customizer_save');
         }
 
+        //hook : hu_admin_sec
+        function ha_register_skop_infos_settings( $settings ) {
+            $settings = is_array( $settings ) ? $settings : array();
+            return array_merge( $settings, array(
+                'show-skope-infos' => array(
+                    'default'   => 1,
+                    'control'   => 'HU_controls',
+                    'label'     => __('Display an informations block at the bottom of the preview', 'hueman-addons'),
+                    'section'   => 'admin_sec',
+                    'type'      => 'checkbox',
+                    'notice'    => __('When this option is checked, a block of informations about the current customization scope is displayed at the bottom of the preview.', 'hueman-addons'),
+                    'priority'  => 30,
+                    'transport' => 'postMessage'
+                )
+            ));
+        }
 
 
         /* ------------------------------------------------------------------------- *
@@ -68,8 +87,11 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
                   'isWPCustomCssSkoped'    => (bool)apply_filters( 'ha_skope_wp_custom_css', false ),
                   'isNavMenuLocationsSkoped'  => (bool)apply_filters( 'ha_skope_navmenu', true ),
                   'isChangeSetOn'         => HU_AD() -> ha_is_changeset_enabled(),
-                  'isLocalSkope'          => isset( $_GET['url'] ),
-                  'isTopNoteOn'           => apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('TC_DEV') && true === TC_DEV ) ),
+                  //If server send isLocalSkope = true, then try to activate the local skope
+                  //serverControlParams.isLocalSkope is used in api.czr_skopeBase.getActiveSkopeId()
+                  //Old check was based on isset( $_GET['url'] ), but setting the local skope on init makes the preview too long to load
+                  'isLocalSkope'          => apply_filters( 'skope_is_local', isset( $_GET['url'] ) ),
+                  'isTopNoteOn'           => apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('CZR_DEV') && true === CZR_DEV ) ),
                   'topNoteParams'         => array(
                       'title'   => __( 'Welcome in the new customizer interface !', 'hueman-addons' ),
                       'message' => sprintf ( __( 'Discover a new way to customize your pages on %1$s.', 'hueman-addons' ),
@@ -126,7 +148,7 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
         //   //add_filter( 'wp_insert_post_data', 'ha_customizer_set_changet_post_data', 100, 2 );
 
         //   //EXPERIMENT
-        //   $theme_name = strtolower(THEMENAME);//is always the parent theme name
+        //   $theme_name = ha_get_skope_theme_name();//is always the parent theme name
         //   //add_action( "customize_save_{$theme_name}_global_skope"  , 'ha_set_setting_type' );
         //   //add_action( 'customize_update_global_option' , 'ha_customizer_set_global_option', 10, 2 );
         // }

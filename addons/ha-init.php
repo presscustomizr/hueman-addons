@@ -1,6 +1,6 @@
 <?php
 /**
-* Fires the plugin
+* Fires the plugin or the theme addon
 * @author Nicolas GUILLAUME
 * @since 1.0
 */
@@ -12,15 +12,15 @@ if ( ! class_exists( 'HU_AD' ) ) :
       public static $theme;
       public static $theme_name;
       public $is_customizing;
-      public $last_theme_version_sync;
-      public $minimal_authorized_theme_version;
-
       private $is_pro_theme;
       private $is_pro_addons;
 
       public $models;
 
       public $pro_header;//Will store the pro header instance
+      public $pro_grids;//Will store the pro grids instance
+      public $pro_infinite;//Will store the pro infinite scroll instance
+      public $pro_skins;
 
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )
@@ -32,10 +32,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
       function __construct() {
         self::$instance =& $this;
 
-        //last version sync
-        $this -> last_theme_version_fmk_sync = '3.3.5';
-        $this -> minimal_authorized_theme_version = '3.3.0';
-
         //checks if is customizing : two context, admin and front (preview frame)
         $this -> is_customizing = $this -> ha_is_customizing();
 
@@ -44,20 +40,38 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
         //did_action('plugins_loaded') ?
 
+
         if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
-        if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
+
+        //are we in pro theme?
+        if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
+
+            if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , HU_BASE_URL );
+
+        }
+        else {
+
+            if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
+
+        }
+
 
         if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
 
         //PRO THEME / PRO ADDON ?
-        $this->is_pro_theme   = did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' );
+        $this->is_pro_theme   = did_action('plugins_loaded');
         $this->is_pro_addons  = ! did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' );
 
         //stop execution if not Hueman or if minimal version of Hueman is not installed
-        if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version, '<' ) ) {
-          add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
-          return;
+        if ( ! defined( 'HU_IS_PRO' ) || ! HU_IS_PRO ) {
+            if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, MINIMAL_AUTHORIZED_THEME_VERSION, '<' ) ) {
+              add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
+              $this->is_pro_theme = $this->is_pro_addons = false;
+              return;
+            }
         }
+
+
         //TEXT DOMAIN
         //adds plugin text domain
         add_action( 'plugins_loaded', array( $this , 'ha_plugin_lang' ) );
@@ -73,22 +87,34 @@ if ( ! class_exists( 'HU_AD' ) ) :
       /* ------------------------------------------------------------------------- *
       *  MODELS UTILITIES
       /* ------------------------------------------------------------------------- */
-      function ha_get_model( $model_name ) {
-        $_models = $this -> models;
-        if ( ! is_array($_models) ) {
-          ha_error_log( 'Problem in HU_AD::ha_get_model : attempting to get a model (' . $model_name . ') but the HU_AD::models property is not populated yet.');
-        }
-        return array_key_exists( $model_name, $_models ) ? $_models[ $model_name ] : false;
+      //When doing partial ajax, get the model directly from the setter
+      //in other cases, use the cached one
+      function ha_get_model( $model_name , $setter = null , $args = array() ) {
+          $model_data = array();
+          if ( ha_is_partial_ajax_request() ) {
+              $model_data = call_user_func_array( $setter, $args );
+          } else {
+              $_models = $this -> models;
+              if ( ! is_array($_models) ) {
+                  ha_error_log( 'Problem in HU_AD::ha_get_model : attempting to get a model (' . $model_name . ') but the HU_AD::models property is not populated yet.');
+              }
+              $model_data = ( array_key_exists( $model_name, $_models ) && array_key_exists( 'data', $_models[$model_name] ) ) ? $_models[ $model_name ]['data'] : false;
+          }
+
+          return $model_data;
       }
 
       //@return void()
-      function ha_set_model( $model_name, $model_data = array() ) {
-        $_models = $this -> models;
-        if ( ! is_string( $model_name ) || empty( $model_name ) || ! is_array( $model_data ) || empty( $model_data ) ) {
-          wp_die('Hueman Addons : model not properly defined.');
-        }
-        $_models[$model_name] = $model_data;
-        $this -> models = $_models;
+      //@param $setter can be a function or an array with a class and a method array( $this, '_get_pro_header_model' )
+      function ha_set_model( $model_name, $setter = null , $args = array() ) {
+          $_models = $this -> models;
+          $model_data = call_user_func_array( $setter, $args );
+
+          if ( ! is_string( $model_name ) || empty( $model_name ) || ! is_array( $model_data ) || empty( $model_data ) ) {
+            wp_die('Hueman Addons : model not properly defined.');
+          }
+          $_models[$model_name] = array( 'data' => $model_data, 'setter' => $setter, 'args' => $args );
+          $this -> models = $_models;
       }
 
       /* ------------------------------------------------------------------------- *
@@ -100,6 +126,11 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       function ha_is_pro_theme() {
         return $this->is_pro_theme;
+      }
+
+      //@return the right url path whether we are in plugin or pro theme
+      function ha_get_base_url() {
+        return defined( 'HU_BASE' ) && HU_IS_PRO ? HU_BASE_URL : HA_BASE_URL;
       }
 
 
@@ -125,7 +156,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
          *  Loads SKOP
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_skop_on() ) {
-          if ( defined('TC_DEV') && true === TC_DEV ) {
+          if ( defined('CZR_DEV') && true === CZR_DEV ) {
               if ( file_exists( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' ) ) {
                   require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' );
               }
@@ -179,10 +210,10 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //hook : admin_notices
       function ha_admin_notice() {
-          if ( version_compare( self::$theme -> version, $this -> minimal_authorized_theme_version, '<' ) ) {
+          if ( version_compare( self::$theme -> version, MINIMAL_AUTHORIZED_THEME_VERSION, '<' ) ) {
             $message = sprintf( __( 'This version of the <strong>%1$s</strong> plugin requires at least the version %2$s of the Hueman theme.', 'hueman-addons' ),
               'Hueman Addons',
-              $this -> minimal_authorized_theme_version
+              MINIMAL_AUTHORIZED_THEME_VERSION
             );
           } else if ( false === strpos( self::$theme_name, 'hueman' ) ) {
             $message = sprintf( __( 'The <strong>%1$s</strong> plugin %2$s.', 'hueman-addons' ),
@@ -274,20 +305,39 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //@return an array of unfiltered options
       //=> all options or a single option val
-      function ha_get_raw_option( $opt_name = null, $opt_group = null ) {
+      function ha_get_raw_option( $opt_name = null, $opt_group = null, $from_cache = true ) {
           $alloptions = wp_cache_get( 'alloptions', 'options' );
-          $alloptions = maybe_unserialize($alloptions);
-          if ( ! is_null( $opt_group ) && isset($alloptions[$opt_group]) ) {
-            $alloptions = maybe_unserialize($alloptions[$opt_group]);
+          $alloptions = maybe_unserialize( $alloptions );
+          //is there any option group requested ?
+          if ( ! is_null( $opt_group ) && array_key_exists( $opt_group, $alloptions ) ) {
+            $alloptions = maybe_unserialize( $alloptions[ $opt_group ] );
           }
-          if ( is_null( $opt_name ) )
-            return $alloptions;
-          return isset( $alloptions[$opt_name] ) ? maybe_unserialize($alloptions[$opt_name]) : false;
+          //shall we return a specific option ?
+          if ( is_null( $opt_name ) ) {
+              return $alloptions;
+          } else {
+              $opt_value = array_key_exists( $opt_name, $alloptions ) ? maybe_unserialize( $alloptions[ $opt_name ] ) : false;//fallback on cache option val
+              //do we need to get the db value instead of the cached one ? <= might be safer with some user installs not properly handling the wp cache
+              //=> typically used to checked the template name for czr_fn_isprevdem()
+              if ( ! $from_cache ) {
+                  global $wpdb;
+                  //@see wp-includes/option.php : get_option()
+                  $row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $opt_name ) );
+                  if ( is_object( $row ) ) {
+                      $opt_value = $row->option_value;
+                  }
+              }
+              return $opt_value;
+          }
       }
 
       function ha_isprevdem() {
-        $_active_theme = $this -> ha_get_raw_option( 'template' );
-        return ( $_active_theme != strtolower('Hueman') );
+          $_active_theme  = $this -> ha_get_raw_option( 'template' );
+          $hu_theme       = wp_get_theme();
+          $hu_theme       = $hu_theme -> parent() ? $hu_theme -> parent() : $hu_theme;
+          $hu_theme       = strtolower( $hu_theme -> name );
+          $hu_theme       = str_replace(' ', '-', $hu_theme );
+          return apply_filters( 'hu_isprevdem', ( $_active_theme != $hu_theme && ! is_child_theme() ) );
       }
 
       //hook : wp_head
@@ -330,7 +380,7 @@ endif;
 
 
 function ha_error_log( $data ) {
-  if ( ! defined('TC_DEV') || true !== TC_DEV )
+  if ( ! defined('CZR_DEV') || true !== CZR_DEV )
     return;
   error_log( $data );
 }

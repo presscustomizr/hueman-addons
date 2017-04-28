@@ -10,8 +10,9 @@ class HA_Czr {
     add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_various_dom_ready' ) );
     //control style
     add_action( 'customize_controls_enqueue_scripts'      , array( $this, 'hu_customize_controls_js_css' ), 20 );
+    //add the _custom_ item to the content picker retrieved in ajax
+    add_filter( 'content_picker_ajax_items'               , array( $this, 'ha_add_custom_item_to_ajax_results' ), 10, 3 );
   }
-
 
   //hook : customize_register
   function ha_augment_customizer_setting() {
@@ -35,7 +36,7 @@ class HA_Czr {
     //Hueman Addons Specifics
     wp_enqueue_style(
         'ha-czr-addons-controls-style',
-        sprintf( '%1$saddons/assets/czr/css/czr-control-footer.css', HA_BASE_URL ),
+        sprintf( '%1$saddons/assets/czr/css/czr-control-footer.css', HU_AD() -> ha_get_base_url() ),
         array( 'customize-controls' ),
         time(),
         $media = 'all'
@@ -44,17 +45,16 @@ class HA_Czr {
     //Enqueue most recent fmk for js and css
     $hu_theme = wp_get_theme();
     $is_pro = HU_AD() -> ha_is_pro_addons() || HU_AD() -> ha_is_pro_theme();
-
-    if ( true == version_compare( $hu_theme -> version, HU_AD() -> last_theme_version_fmk_sync, '<' ) || $is_pro ) {
+    if ( true == version_compare( $hu_theme -> version, LAST_THEME_VERSION_FMK_SYNC , '<' ) || $is_pro ) {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$saddons/assets/czr/css/czr-control-base%2$s.css' , HA_BASE_URL, ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$saddons/assets/czr/css/czr-control-base%2$s.css' , HU_AD() -> ha_get_base_url(), ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
             $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
                 '%1$saddons/assets/czr/js/%2$s%3$s.js',
-                HA_BASE_URL,
+                HU_AD() -> ha_get_base_url(),
                 $is_pro ? 'czr-control-full' : 'czr-control-base',
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
@@ -108,13 +108,15 @@ class HA_Czr {
 
   //hook : 'customize_controls_enqueue_scripts'
     function hu_extend_dependencies() {
+      //pro_header is not set in the free addon
+      $pro_header_slider_short_opt_name = isset( HU_AD() -> pro_header ) ? HU_AD() -> pro_header -> pro_header_slider_short_opt_name : 'pro_slider_header_bg';
       ?>
       <script type="text/javascript">
         (function (api, $, _) {
             if ( ! _.has( api, 'CZR_ctrlDependencies') )
               return;
             //@return boolean
-            var pro_header_short_opt_name = '<?php echo HU_AD() -> ha_is_pro_addons() ? HU_AD() -> pro_header -> pro_header_short_opt_name : ''; ?>',//'pro_header_bg'
+            var pro_header_slider_short_opt_name = '<?php echo $pro_header_slider_short_opt_name; ?>',//'pro_slider_header_bg'
                 _is_checked = function( to ) {
                 return 0 !== to && '0' !== to && false !== to && 'off' !== to;
             };
@@ -148,10 +150,10 @@ class HA_Czr {
                           servi : [
                             'use-header-image',
                             'header_image',
-                            pro_header_short_opt_name//pro_header_bg
+                            pro_header_slider_short_opt_name//pro_header_bg
                           ],
                           visibility : function ( to, servusShortId ) {
-                              if ( pro_header_short_opt_name == servusShortId ) {
+                              if ( pro_header_slider_short_opt_name == servusShortId ) {
                                   return 'classical' != to;
                               } else if ( 'header_image' == servusShortId ) {
                                   var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );
@@ -167,6 +169,43 @@ class HA_Czr {
         }) ( wp.customize, jQuery, _);
       </script>
       <?php
+    }
+
+
+
+    //declared this way:
+    //wp_send_json_success( array(
+    //     'items' => apply_filters( 'content_picker_ajax_items', $items, $p, 'ajax_search_available_items' );
+    // ) );
+    //
+    // An item looks like :
+    // array(
+    //    'title'      => html_entity_decode( $post_title, ENT_QUOTES, get_bloginfo( 'charset' ) ),
+    //    'type'       => 'post',
+    //    'type_label' => get_post_type_object( $post->post_type )->labels->singular_name,
+    //    'object'     => $post->post_type,
+    //    'id'         => intval( $post->ID ),
+    //    'url'        => get_permalink( intval( $post->ID ) )
+    // )
+    // hook : content_picker_ajax_items
+    function ha_add_custom_item_to_ajax_results( $items, $page, $context ) {
+        if ( is_numeric( $page ) && $page < 1 ) {
+            return array_merge(
+                array(
+                    array(
+                       'title'      => sprintf( '<span style="font-weight:bold">%1$s</span>', __('Set a custom url', 'hueman') ),
+                       'type'       => '',
+                       'type_label' => '',
+                       'object'     => '',
+                       'id'         => '_custom_',
+                       'url'        => ''
+                    )
+                ),
+                $items
+            );
+        } else {
+            return $items;
+        }
     }
 
 }//end of class

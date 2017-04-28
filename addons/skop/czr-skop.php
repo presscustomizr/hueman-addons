@@ -1,4 +1,23 @@
 <?php
+function ha_get_skope_theme_name() {
+    $_theme                     = wp_get_theme();
+    $_theme = $_theme -> parent() ? $_theme -> parent() : $_theme;
+    $theme_name = strtolower( $_theme -> name );// wp_get_theme() -> name is uppercase and has spaces. Example : Hueman Pro
+
+    if ( false !== strpos( $theme_name, 'hueman' ) ) {
+      $theme_name = 'hueman';
+    } else if ( false !== strpos( $theme_name, 'customizr' ) ) {
+        $theme_name = 'customizr';
+    } else {
+        $theme_name = str_replace(' ', '_', $theme_name );
+    }
+    return $theme_name;
+}
+
+
+/* ------------------------------------------------------------------------- *
+ *  MAYBE REGISTER CHANGESET POST TYPE IF WP < 4.7
+/* ------------------------------------------------------------------------- */
 if ( ! post_type_exists( 'czr_skope_opt') ) {
     register_post_type( 'czr_skope_opt', array(
       'labels' => array(
@@ -45,6 +64,13 @@ if ( ! post_type_exists( 'czr_skope_opt') ) {
       ),
     ) );
 }
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  CREATE SKOPE POST AND SAVE IT AS OPTION IF NEEDED
+/* ------------------------------------------------------------------------- */
 add_action( 'init', 'ha_create_skope_post');
 function ha_create_skope_post( $reset = false ) {
   $post_id = $reset ? false : get_option('skope-post-id');
@@ -56,7 +82,7 @@ function ha_create_skope_post( $reset = false ) {
   }
   $post_array = array();
   $post_array['post_type'] = 'czr_skope_opt';
-  $post_array['post_name'] =  strtolower( THEMENAME ) . '_skope_post';
+  $post_array['post_name'] =  ha_get_skope_theme_name() . '_skope_post';
   $post_array['post_status'] = 'publish';
   $r = wp_insert_post( wp_slash( $post_array ), true );
   if ( ! is_wp_error( $r ) ) {
@@ -67,9 +93,27 @@ function ha_create_skope_post( $reset = false ) {
   }
 
 }
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  SKOPE HELPERS
+/* ------------------------------------------------------------------------- */
+/**
+* Boolean helper
+* @return bool
+*/
 function ha_is_option_skoped( $opt_name ) {
   return ! in_array( $opt_name, ha_get_skope_excluded_options() );
 }
+
+
+
+/**
+* Helper : returns a set of options not skoped
+* is filtered with the exclusions defined in the customizer setting map
+* @return array()
+*/
 function ha_get_skope_excluded_options() {
   return apply_filters(
     'ha_get_skope_excluded_options',
@@ -87,6 +131,7 @@ function ha_get_skope_excluded_options() {
         'sidebar-areas',
         'about-page',
         'help-button',
+        'show-skope-infos',
         'show_on_front',
         'page_on_front',
         'page_for_posts',
@@ -99,12 +144,24 @@ function ha_get_skope_excluded_options() {
     )
   );
 }
+
+
+/**
+* Helper : define a set protected options. Never reset typically.
+* @return array() of opt name
+*/
 function ha_get_protected_options() {
   return apply_filters(
       'ha_protected_options',
       array( 'defaults', 'ver', 'has_been_copied', 'last_update_notice', 'last_update_notice_pro' )
   );
 }
+
+/**
+* Boolean helper
+* @uses  the short option name
+* @return bool
+*/
 function ha_is_option_protected( $opt_name ) {
   return in_array( $opt_name, ha_get_protected_options() );
 }
@@ -139,6 +196,16 @@ function ha_get_wp_builtins_skoped_theme_mods() {
 function ha_is_wp_builtin_skoped_theme_mod( $opt_name ) {
   return in_array( $opt_name , ha_get_wp_builtins_skoped_theme_mods() );
 }
+
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  SKOPE MAKE CHANGESET DATA READY FOR FRONT END : used when publishing and previewing
+/* ------------------------------------------------------------------------- */
 function ha_prepare_skope_changeset_for_front_end( $data ) {
   global $wp_customize;
   $new_data = array();
@@ -182,6 +249,21 @@ function ha_prepare_skope_changeset_for_front_end( $data ) {
   }
   return array_merge( $new_data, $multidimensionals );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  SKOPE MULTIDIM HELPERS : used in option class, ajax and preview
+/* ------------------------------------------------------------------------- */
 function _ha_is_wp_setting_multidimensional( $base_name ) {
     $wp_multidimensional_prefix = array( 'sidebars_widgets', 'widget_', 'nav_menu_locations' );
     $found_match = false;
@@ -204,6 +286,18 @@ function _ha_build_multidimensional_db_option( $actual_setting_id, $setting_valu
     }
     return $api_ready;
 }
+
+
+/**
+ * Will attempt to replace a specific value in a multidimensional array.
+ *
+ * @since 3.4.0
+ *
+ * @param $root
+ * @param $keys
+ * @param mixed $value The value to update.
+ * @return mixed
+ */
 function _ha_multidimensional_replace( $root, $keys, $value ) {
   if ( ! isset( $value ) )
     return $root;
@@ -217,6 +311,18 @@ function _ha_multidimensional_replace( $root, $keys, $value ) {
 
   return $root;
 }
+
+
+/**
+ * Multidimensional helper function.
+ *
+ * @since 3.4.0
+ *
+ * @param $root
+ * @param $keys
+ * @param bool $create Default is false.
+ * @return array|void Keys are 'root', 'node', and 'key'.
+ */
 function ha_multidimensional( &$root, $keys, $create = false ) {
   if ( $create && empty( $root ) )
     $root = array();
@@ -293,6 +399,15 @@ function ha_get_skope_post_id() {
   }
   return $skope_post_id;
 }
+
+
+
+/**
+* Get the meta skope data stored in a changeset post.
+* This function is used both when updating the WP changeset post metas and the theme skope post meta
+* @param $args = array()
+* @return array|WP_Error Changeset data or WP_Error on error.
+*/
 function ha_get_skope_db_data( $args ) {
   $db_data = array();
   $defaults = array(
@@ -360,6 +475,14 @@ function ha_get_dyn_types() {
     array('option','skope_meta')
   );
 }
+
+
+/**
+* Return the current ctx. Front / Back agnostic.
+* @param $_requesting_wot is a string with the follwing possible values : 'meta_type' (like post) , 'type' (like page), 'id' (like page id)
+* @param $_return_string string param stating if the return value should be a string or an array
+* @return a string of all concatenated ctx parts (default) 0R an array of the ctx parts
+*/
 function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
   $parts    = ha_get_query_skope();
   $_return  = array();
@@ -416,6 +539,16 @@ function ha_get_skope( $_requesting_wot = null, $_return_string = true ) {
   }
   return $_concat;
 }
+
+
+
+
+/**
+* Contx builder from the wp $query
+* !! has to be fired after 'template_redirect'
+* Used on front ( not customizing preview ? => @todo make sure of this )
+* @return  array of ctx parts
+*/
 function ha_get_query_skope() {
   global $wp_the_query;
   if ( ! isset( $wp_the_query ) || empty( $wp_the_query ) )
@@ -458,6 +591,21 @@ function ha_get_query_skope() {
 
   return apply_filters( 'ha_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $current_obj );
 }
+
+
+
+
+/**
+* Used when localizing the customizer js params
+* Can be a post ( post, pages, CPT) , tax(tag, cats, custom taxs), author, date, search page, 404.
+* @param $args : array(
+*    'level'       => string,
+*    'meta_type'   => string
+*    'long'        => bool
+*    'is_prefixed' => bool //<= indicated if we should add the "Options for" prefix
+* )
+* @return string title of the current ctx if exists. If not => false.
+*/
 function ha_get_skope_title( $args = array() ) {
     $defaults = array(
         'level'       =>  '',
@@ -486,18 +634,18 @@ function ha_get_skope_title( $args = array() ) {
             switch ($meta_type) {
                 case 'post':
                   $type_obj = get_post_type_object( $type );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
                   break;
 
                 case 'tax':
                   $type_obj = get_taxonomy( $type );
                   $term = get_term( $_id, $type );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
                   break;
 
                 case 'user':
                   $author = get_userdata( $_id );
-                  $title .= sprintf( '%1$s (%2$s), "%3$s"', __('user', 'hueman-addons'), $_id, $author -> user_login );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'hueman-addons'), $_id, $author -> user_login );
                   break;
             }
         } else if ( ( 'trans' == $_dyn_type || ha_skope_has_no_group( $skope ) ) ) {
@@ -579,6 +727,15 @@ function ha_get_raw_option( $opt_name = null, $opt_group = null ) {
 function ha_is_partial_ajax_request() {
   return isset( $_POST['wp_customize_render_partials'] ) || ( isset($_POST['partials']) && ! empty( $_POST['partials'] ) );
 }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ * SKOPIFY LAYOUT CLASS
+/* ------------------------------------------------------------------------- */
 add_filter('hu_enable_singular_layout_meta_box', '__return_false');
 add_filter( 'hu_layout_class', 'hu_skopify_layout_class' , 10, 2 );
 function hu_skopify_layout_class( $layout, $has_post_meta ) {
@@ -672,7 +829,33 @@ function ha_deregister_layout_settings( $settings ) {
   }
   return $new_settings;
 }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  DISABLE PARTIAL REFRESH FOR NOW IF SKOPE IS ON
+/* ------------------------------------------------------------------------- */
 add_filter( 'hu_partial_refresh_on', '__return_true');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*****************************************************
+* ADMIN CONTEXT
+*****************************************************/
 function ha_get_admin_ctx() {
     if ( ! is_admin() )
       return array();
@@ -726,6 +909,15 @@ function ha_trim_text( $text, $text_length, $more ) {
   }
   return ( ( $end_substr < $text_length ) && $more ) ? $text : $text . ' ' .$more ;
 }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  DISMISS CUSTOMIZER TOP NOTE AJAX ACTIONS
+/* ------------------------------------------------------------------------- */
 add_action( 'wp_ajax_czr_dismiss_top_note',  'ha_ajax_czr_dismiss_top_note' );
 function ha_ajax_czr_dismiss_top_note() {
   global $wp_customize;
@@ -757,12 +949,27 @@ function ha_ajax_czr_dismiss_top_note() {
 }
 ?>
 <?php
+
+/**
+ * This Class is instantiated on 'plugin_init', declared in /init-skop.php
+ */
 if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
     class HA_Skop_Chset_Base {
 
         function __construct() {
             add_action( 'wp_ajax_customize_skope_changeset_save', array( $this, 'ha_ajax_skope_changeset_save' ) );
         }
+
+
+        /* ------------------------------------------------------------------------- *
+         *  SAVE OR PUBLISH SKOPE CHANGESET
+         *  => as a meta of the _temp changeset post if status != "publish"
+         *  => as a meta of the option changeset post if status == "publish" and skope is not 'global'
+        /* ------------------------------------------------------------------------- */
+        /**
+          * Handle customize_skope_changet_save WP Ajax request to save/update a changeset.
+         *
+         */
         function ha_ajax_skope_changeset_save() {
             if ( isset( $_POST['skope']) && 'global' == $_POST['skope'] )
                 return wp_send_json_success( 'Global skope changeset is not saved as meta' );
@@ -886,6 +1093,7 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
                 $validity = $setting->validate( $unsanitized_value );
               }
               if ( ! is_wp_error( $validity ) ) {
+                /** This filter is documented in wp-includes/class-wp-customize-setting.php */
                 $late_validity = apply_filters( "customize_validate_{$setting->id}", new WP_Error(), $unsanitized_value, $setting );
                 if ( ! empty( $late_validity->errors ) ) {
                   $validity = $late_validity;
@@ -910,6 +1118,12 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
 endif;
 
 ?><?php
+
+
+/* ------------------------------------------------------------------------- *
+ *  PUBLISH SKOPE CHANGESET
+ *  => as a meta of the option changeset post if stats == "publish"
+/* ------------------------------------------------------------------------- */
 if ( ! class_exists( 'HA_Skop_Chset_Publish' ) ) :
     class HA_Skop_Chset_Publish extends HA_Skop_Chset_Base {
         function __construct() {
@@ -1002,6 +1216,12 @@ if ( ! class_exists( 'HA_Skop_Chset_Publish' ) ) :
             }
 
             $invalid_setting_count = count( array_filter( $setting_validities, 'is_wp_error' ) );
+
+
+            /*
+             * Short-circuit if there are invalid settings the update is transactional.
+             * A changeset update is transactional when a status is supplied in the request.
+             */
             if ( $update_transactionally && $invalid_setting_count > 0 ) {
                 $response = array(
                   'setting_validities' => $setting_validities,
@@ -1100,6 +1320,10 @@ if ( ! class_exists( 'HA_Skop_Chset_Publish' ) ) :
 endif;
 
 ?><?php
+/* ------------------------------------------------------------------------- *
+ *  SAVE SKOPE CHANGESET
+ *  => as a meta of the _temp changeset post if status != "publish"
+/* ------------------------------------------------------------------------- */
 if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
     class HA_Skop_Chset_Save extends HA_Skop_Chset_Publish {
 
@@ -1148,6 +1372,15 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
             $update_transactionally = (bool) $args['status'];
             $allow_revision = (bool) $args['status'];
             $customized_data = $args['data'];
+
+            /*
+             * Get list of IDs for settings that have values different from what is currently
+             * saved in the changeset. By skipping any values that are already the same, the
+             * subset of changed settings can be passed into validate_setting_values to prevent
+             * an underprivileged modifying a single setting for which they have the capability
+             * from being blocked from saving. This also prevents a user from touching of the
+             * previous saved settings and overriding the associated user_id if they made no change.
+             */
             $changed_setting_ids = array();
             foreach ( $customized_data as $setting_id => $setting_value ) {
                 if ( ! isset( $setting_value['value'] ) )
@@ -1175,6 +1408,18 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
             $customized_data = wp_array_slice_assoc( $customized_data, $changed_setting_ids );
             if ( empty( $customized_data) )
               return wp_send_json_success( $response );
+
+            /**
+             * Fires before save validation happens.
+             *
+             * Plugins can add just-in-time {@see 'customize_validate_{$wp_customize->ID}'} filters
+             * at this point to catch any settings registered after `customize_register`.
+             * The dynamic portion of the hook name, `$wp_customize->ID` refers to the setting ID.
+             *
+             * @since 4.6.0
+             *
+             * @param WP_Customize_Manager $wp_customize WP_Customize_Manager instance.
+             */
             do_action( 'customize_save_validation_before', $wp_customize );
             $setting_validities = array();
             $customized_values = array();
@@ -1197,6 +1442,10 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
             }
 
             $invalid_setting_count = count( array_filter( $setting_validities, 'is_wp_error' ) );
+            /*
+             * Short-circuit if there are invalid settings the update is transactional.
+             * A changeset update is transactional when a status is supplied in the request.
+             */
             if ( $update_transactionally && $invalid_setting_count > 0 ) {
                 $response = array(
                   'setting_validities' => $setting_validities,
@@ -1270,6 +1519,17 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             add_action( 'wp_ajax_czr_published_setting_reset',  array( $this, 'ha_ajax_reset_published_setting' ) );
             add_action( 'wp_ajax_czr_published_skope_reset',    array( $this, 'ha_ajax_reset_published_skope' ) );
         }
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  GET OPTION
+        /* ------------------------------------------------------------------------- */
+        /**
+         * Ajax handler for getting an attachment.
+         *
+         * @since 3.5.0
+         */
         function ha_ajax_get_opt() {
           if ( ! isset( $_REQUEST['opt_name'] ) || ! isset( $_REQUEST['dyn_type'] ) || ! isset( $_REQUEST['stylesheet'] ) )
             wp_send_json_error();
@@ -1292,6 +1552,16 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
 
           return array_key_exists( $setting_id, $dependencies ) ? $dependencies[$setting_id] : false;
         }
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  RESET SETTING CHANGESET
+        /* ------------------------------------------------------------------------- */
         function ha_ajax_reset_changeset_setting() {
             global $wp_customize;
             if ( ! $wp_customize->is_preview() ) {
@@ -1362,6 +1632,19 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
             wp_send_json_success( '||| ' . $setting_id . ' has been deleted from changeset in skope ' . $skope_id . '|||' );
         }
+
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  RESET SKOPE CHANGESET
+        /* ------------------------------------------------------------------------- */
         function ha_ajax_reset_changeset_skope() {
             global $wp_customize;
             if ( ! $wp_customize->is_preview() ) {
@@ -1420,6 +1703,20 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
             wp_send_json_success( '||| The changeset has been deleted for skope ' . $skope_id . '|||' );
         }
+
+
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  RESET SETTING PUBLISHED
+        /* ------------------------------------------------------------------------- */
         function ha_ajax_reset_published_setting() {
             global $wp_customize;
             if ( ! $wp_customize->is_preview() ) {
@@ -1512,6 +1809,16 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
             wp_send_json_success( '||| ' . $setting_id . ' has been deleted from changeset in skope ' . $skope_id . '|||' );
         }
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  RESET SKOPE PUBLISHED
+        /* ------------------------------------------------------------------------- */
         function ha_ajax_reset_published_skope() {
             global $wp_customize;
             if ( ! $wp_customize->is_preview() ) {
@@ -1564,6 +1871,17 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
             wp_send_json_success( '||| The published values have been deleted for skope ' . $skope_id . '|||' );
         }
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * HELPERS
+        /* ------------------------------------------------------------------------- */
         function get_unsanitized_skope_changeset( $skope_id ) {
             if ( ! HU_AD() -> ha_is_customize_preview_frame() )
               return array();
@@ -1606,6 +1924,11 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             return $values;
         }
 
+
+        /* ------------------------------------------------------------------------- *
+         *  RESET SKOPE : _DEPRECATED
+        /* ------------------------------------------------------------------------- */
+
     }//class
 endif;
 
@@ -1614,6 +1937,9 @@ endif;
 if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
     final class HA_Skop_Cust_Prev {
         function __construct() {
+            /* ------------------------------------------------------------------------- *
+             *  CUSTOMIZE PREVIEW : export skope data
+            /* ------------------------------------------------------------------------- */
             add_action( 'wp_footer', array( $this, 'ha_print_server_skope_data' ), 30 );
         }
         function ha_print_server_skope_data() {
@@ -1663,6 +1989,12 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
 
             return $is_dirty;
         }
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  CUSTOMIZE PREVIEW : BUILD SKOPES JSON
+        /* ------------------------------------------------------------------------- */
         function _ha_get_json_export_ready_skopes() {
             $skopes = array();
             $_meta_type = ha_get_skope( 'meta_type', true );
@@ -1726,6 +2058,21 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
           );
           return $skopes;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  GET CHANGESETS
+        /* ------------------------------------------------------------------------- */
         function _ha_get_api_ready_skope_changeset( $args ) {
             if ( ! HU_AD() -> ha_is_changeset_enabled() )
               return array();
@@ -1792,6 +2139,20 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
 
             return $api_ready_changeset_val;
         }
+
+
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  GET OPTIONS SAVED IN DB
+        /* ------------------------------------------------------------------------- */
         function _ha_get_api_ready_skope_db_option( $args ) {
             $defaults = array(
                 'level' => '',
@@ -1896,6 +2257,17 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
             }
             return $js_sanitized_saved_opts;
         }
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  CUTE LITTLE HELPERS
+        /* ------------------------------------------------------------------------- */
         function _ha_is_option_set_to_default( $opt_name, $value, $defaults ) {
             if ( ! is_array( $defaults ) || ! array_key_exists( $opt_name, $defaults ) )
               return;
@@ -1919,9 +2291,42 @@ endif;
 if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
     final class HA_Skop_Cust_Register {
         function __construct() {
+            /* ------------------------------------------------------------------------- *
+             *  Modify some WP built-in settings
+            /* ------------------------------------------------------------------------- */
             add_action( 'customize_register' , array( $this, 'ha_alter_wp_customizer_settings' ) , 100, 1 );
+            add_filter( 'hu_admin_sec'   , array( $this, 'ha_register_skop_infos_settings'));
+
+            /* ------------------------------------------------------------------------- *
+             *  CUSTOMIZE PANE : Add skope server params to the Hueman theme control server params
+            /* ------------------------------------------------------------------------- */
             add_filter( 'hu_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
+            /* ------------------------------------------------------------------------- *
+             *  Skopify the save DEPRECATED
+             *  1) Dynamically set the type in WP_Customize_Setting::save()
+             *  2) Then add skope save actions by type on WP_Customize_Setting::update()
+            /* ------------------------------------------------------------------------- */
         }
+        function ha_register_skop_infos_settings( $settings ) {
+            $settings = is_array( $settings ) ? $settings : array();
+            return array_merge( $settings, array(
+                'show-skope-infos' => array(
+                    'default'   => 1,
+                    'control'   => 'HU_controls',
+                    'label'     => __('Display an informations block at the bottom of the preview', 'hueman-addons'),
+                    'section'   => 'admin_sec',
+                    'type'      => 'checkbox',
+                    'notice'    => __('When this option is checked, a block of informations about the current customization scope is displayed at the bottom of the preview.', 'hueman-addons'),
+                    'priority'  => 30,
+                    'transport' => 'postMessage'
+                )
+            ));
+        }
+
+
+        /* ------------------------------------------------------------------------- *
+         *  Modify some WP built-in settings
+        /* ------------------------------------------------------------------------- */
         function ha_alter_wp_customizer_settings( $manager ) {
           if ( is_object( $manager->get_setting( 'header_image_data' ) ) ) {
               $manager -> remove_setting( 'header_image_data' );
@@ -1940,6 +2345,11 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
               $manager->get_control( 'hu_theme_options[layout-global]' ) -> notice = __( 'Pick a content layout in the dropdown list. Note : selecting a "1 column" layout won\'t let you display any sidebar widgets.', 'hueman-addons' );
           }
         }
+
+
+        /* ------------------------------------------------------------------------- *
+         *  CUSTOMIZE PANEL : ADD LOCALIZED PARAMS
+        /* ------------------------------------------------------------------------- */
         function ha_add_skope_control_params( $_params ) {
             return array_merge(
               $_params,
@@ -1954,8 +2364,8 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
                   'isWPCustomCssSkoped'    => (bool)apply_filters( 'ha_skope_wp_custom_css', false ),
                   'isNavMenuLocationsSkoped'  => (bool)apply_filters( 'ha_skope_navmenu', true ),
                   'isChangeSetOn'         => HU_AD() -> ha_is_changeset_enabled(),
-                  'isLocalSkope'          => isset( $_GET['url'] ),
-                  'isTopNoteOn'           => apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('TC_DEV') && true === TC_DEV ) ),
+                  'isLocalSkope'          => apply_filters( 'skope_is_local', isset( $_GET['url'] ) ),
+                  'isTopNoteOn'           => apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('CZR_DEV') && true === CZR_DEV ) ),
                   'topNoteParams'         => array(
                       'title'   => __( 'Welcome in the new customizer interface !', 'hueman-addons' ),
                       'message' => sprintf ( __( 'Discover a new way to customize your pages on %1$s.', 'hueman-addons' ),
@@ -1969,15 +2379,42 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
                 )
               );
         }
+
+
+        /* ------------------------------------------------------------------------- *
+         *  CUSTOMIZE PANEL : ADD TRANSLATED STRINGS
+        /* ------------------------------------------------------------------------- */
         function hu_add_skp_translated_strings( $strings ) {
               return array_merge( $strings, array(
 
               ));
         }//hu_add_skp_translated_strings
+
+
+        /* ------------------------------------------------------------------------- *
+         *  Set Changeset Data for skope
+        /* ------------------------------------------------------------------------- */
+
+
+        /* ------------------------------------------------------------------------- *
+         *  Set the dynamic type sent by $_POST
+        /* ------------------------------------------------------------------------- */
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  Write the skope options in DB
+        /* ------------------------------------------------------------------------- */
     }//class
 endif;
 
 ?><?php
+/**
+ * This Class is instantiated on 'hu_hueman_loaded', declared in /init-core.php
+ * 'hu_hueman_loaded' is fired in setup_theme
+ */
 if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
     class HA_Skop_Option_Base {
         public static $instance;
@@ -1993,13 +2430,33 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
             add_filter('sidebars_widgets', array($this, 'ha_use_skope_widgets') );
             $this -> ha_cache_skope_excluded_settings();
             add_filter( 'ha_get_skope_excluded_options', array( $this, 'ha_set_excluded_skope_settings') );
-            add_action( 'wp' , array( $this, 'ha_cache_options' ), 99999 );
-            if ( ! ha_is_partial_ajax_request() ) {
-              add_action( 'wp',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+            if ( hu_is_ajax() && ! ha_is_partial_ajax_request() ) {
+
+              add_action( 'ajax_query_ready',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+
+              add_action( 'ajax_query_ready' , array( $this, 'ha_cache_options' ), 99999 );
+
             }
-            $theme_name = strtolower(THEMENAME);
+            else {
+              if ( ! ha_is_partial_ajax_request() ) {
+                add_action( 'wp',  array( $this, 'ha_setup_skope_option_filters' ), 1000 );
+              }
+
+              add_action( 'wp' , array( $this, 'ha_cache_options' ), 99999 );
+
+            }
+            $theme_name = ha_get_skope_theme_name();
             $this -> global_skope_optname = "{$theme_name}_global_skope";
+
         }//construct
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  SET AND GET CACHED OPTIONS
+        /* ------------------------------------------------------------------------- */
         function ha_cache_options() {
             $meta_type = ha_get_skope( 'meta_type', true );
             $_skope_list = array( 'global', 'group', 'special_group', 'local' );
@@ -2066,17 +2523,23 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
                   $_opt_array = self::$_local_opt;
                 break;
             }
+            $_opt_array = ! is_array( $_opt_array ) ? array() : $_opt_array;
+
             if ( is_null( $opt_name ) )
               return $_opt_array;
             else {
-              if ( in_array( $opt_name, HU_utils::$_theme_setting_list ) ) {
-                  $_theme_option_prefix = strtolower(HU_THEME_OPTIONS);
-                  $opt_name = "{$_theme_option_prefix}[{$opt_name}]";
-              }
-
-              return array_key_exists($opt_name, $_opt_array) ? $_opt_array[$opt_name] : '_no_set_';
+                if ( in_array( $opt_name, HU_utils::$_theme_setting_list ) ) {
+                    $_theme_option_prefix = strtolower(HU_THEME_OPTIONS);
+                    $opt_name = "{$_theme_option_prefix}[{$opt_name}]";
+                }
+                return array_key_exists( $opt_name, $_opt_array ) ? $_opt_array[$opt_name] : '_no_set_';
             }
         }
+
+
+        /* ------------------------------------------------------------------------- *
+        *  CACHE AND SET SETTINGS EXCLUDED FROM SKOPE
+        /* ------------------------------------------------------------------------- */
         function ha_cache_skope_excluded_settings() {
              if ( is_array(self::$_skope_excluded_settings) && ! empty( self::$_skope_excluded_settings ) )
                return;
@@ -2086,11 +2549,31 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
                if ( isset($data['skoped']) && false === $data['skoped'] )
                  $_excluded[] = $_id;
              }
-             self::$_skope_excluded_settings = $_excluded;
+            if ( class_exists( 'TC_utils_wfc' ) ) {
+                $wfc_setting_map = TC_utils_wfc::$instance -> tc_customizer_map();
+                if ( array_key_exists( 'add_setting_control', $wfc_setting_map ) ) {
+                    foreach ( $wfc_setting_map['add_setting_control'] as $_id => $data ) {
+                          $_excluded[] = $_id;
+                    }
+                }
+            }
+            self::$_skope_excluded_settings = $_excluded;
         }
+
+
+        /* ------------------------------------------------------------------------- *
+         *  FILTER THE LIST OF SKOPE EXCLUDED SETTINGS
+        /* ------------------------------------------------------------------------- */
         function ha_set_excluded_skope_settings( $_default_excluded ) {
             return array_merge( $_default_excluded, self::$_skope_excluded_settings );
         }
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  FILTER WP AND THEME OPTIONS
+        /* ------------------------------------------------------------------------- */
         function ha_setup_skope_option_filters() {
             add_filter( 'hu_opt', array( $this, 'ha_filter_hu_opt_for_skope' ), 1000, 4 );
             $theme = get_option( 'stylesheet' );
@@ -2156,6 +2639,15 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
             }
             return $_new_val;
         }
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * SET OPTION
+        /* ------------------------------------------------------------------------- */
         function ha_set_skope_option_val( $opt_name, $new_value, $skope_meta_key = null ) {
             if ( empty($opt_name) || is_null($skope_meta_key ) ) {
               return new WP_Error( 'missing param(s) in HA_SKOP_OPT::ha_set_skope_option_val' );
@@ -2173,6 +2665,18 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
 
             return $r;
         }
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * SIDEBARS AND WIDGETS SPECIFICS
+        /* ------------------------------------------------------------------------- */
         function ha_use_skope_widgets( $original ) {
           if ( ! apply_filters( 'ha_skope_sidebars_widgets', false ) )
             return $original;
@@ -2220,9 +2724,17 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
 endif;
 
 ?><?php
+/**
+ * This Class is instantiated on 'hu_hueman_loaded', declared in /init-core.php
+ * 'hu_hueman_loaded' is fired in setup_theme
+ */
 if ( ! class_exists( 'HA_Skop_Option_Front' ) ) :
     class HA_Skop_Option_Front extends HA_Skop_Option_Base {
         public $_front_values = array();
+
+        /* ------------------------------------------------------------------------- *
+         *  GET FRONT END VALUES : APPLY INHERITANCE
+        /* ------------------------------------------------------------------------- */
         function _get_front_end_val( $original_opt_val, $opt_name, $skope = 'local', $do_inherit = false ) {
             $cache_front = $this -> _front_values;
             if ( ! HU_AD() -> ha_is_customize_preview_frame() && ! HU_AD() -> ha_is_previewing_live_changeset() ) {
@@ -2303,10 +2815,20 @@ if ( ! class_exists( 'HA_Skop_Option_Front' ) ) :
 endif;
 
 ?><?php
+/**
+ * This Class is instantiated on 'hu_hueman_loaded', declared in /init-core.php
+ * 'hu_hueman_loaded' is fired in setup_theme
+ */
 if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
     class HA_Skop_Option_Preview extends HA_Skop_Option_Front {
         public $_skope_preview_values = array();
         public $all_skopes_customized_values = array();
+
+
+
+        /* ------------------------------------------------------------------------- *
+         *  GET CUSTOMIZER PREVIEW VAL
+        /* ------------------------------------------------------------------------- */
 
         function _get_sanitized_preview_val( $_opt_val , $opt_name ) {
             $rev_index        = $this -> ha_get_sanitized_post_value( 'revisionIndex' );
@@ -2365,6 +2887,12 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
 
             return $val_candidate;
         }
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * GET CUSTOMIZED VALUE FOR A SINGLE SETTING: APPLY INHERITANCE
+        /* ------------------------------------------------------------------------- */
         function _ha_get_simple_sanitized_customized_value( $opt_name, $skope_id = null , $_original_val = null, $do_inherit = false ) {
 
             $_customized_val  = '_not_customized_';
@@ -2394,6 +2922,16 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
             }
             return apply_filters( "ha_get_customize_val_{$opt_name}", $_customized_val, $opt_name );
         }
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * GET SKOPE CUSTOMIZED VALUES
+        /* ------------------------------------------------------------------------- */
         function ha_get_unsanitized_customized_values( $skope_id = null ) {
             if ( ! HU_AD() -> ha_is_customize_preview_frame() )
               return array();
@@ -2606,6 +3144,29 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
           }
           return ( ! empty( $meta_key ) && is_string( $meta_key ) ) ? $meta_key : false;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /* ------------------------------------------------------------------------- *
+        * HELPERS
+        /* ------------------------------------------------------------------------- */
         public function _is_value_customized( $value ) {
             $value = is_object($value) ? (array)$value : $value;
             if ( is_array($value) )
@@ -2616,16 +3177,17 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
         function ha_get_skope_opt_name( $level = 'local', $special = '' ) {
             $name = '__not_available__';
             $skp_type = ha_get_skope('type');
+            $theme_name = ha_get_skope_theme_name();
             switch ($level) {
               case 'local':
-                $name = strtolower( THEMENAME . '_czr_' . ha_get_skope() );
+                $name = strtolower( $theme_name . '_czr_' . ha_get_skope() );
                 break;
               case 'group' :
                 if ( ! empty( $skp_type ) )
-                  $name = strtolower( THEMENAME . '_czr_all_' . $skp_type );
+                  $name = strtolower( $theme_name . '_czr_all_' . $skp_type );
                 break;
               case 'special_group' :
-                $name = strtolower( THEMENAME . '_czr_all_' . $skp_type . $special );
+                $name = strtolower( $theme_name . '_czr_all_' . $skp_type . $special );
                 break;
               case 'global':
                 $name = HU_THEME_OPTIONS;
@@ -2669,6 +3231,10 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
 endif;
 
 ?><?php
+/**
+ * This Class is instantiated on 'hu_hueman_loaded', declared in /init-core.php
+ * 'hu_hueman_loaded' is fired in setup_theme
+ */
 if ( ! class_exists( 'HA_Skop_Option' ) ) :
     final class HA_Skop_Option extends HA_Skop_Option_Preview {
 
@@ -2809,17 +3375,21 @@ if ( ! class_exists( 'HA_Skop_Option' ) ) :
 endif;
 
 ?><?php
+
+/* ------------------------------------------------------------------------- *
+ *  LOAD
+/* ------------------------------------------------------------------------- */
 function HA_SKOP_OPT() {
     return HA_Skop_Option::ha_skop_opt_instance();
 }
 
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-0-init-base.php' );
 }
 
 add_action('hu_hueman_loaded', 'ha_load_skop_options');
 function ha_load_skop_options() {
-    if ( defined('TC_DEV') && true === TC_DEV ) {
+    if ( defined('CZR_DEV') && true === CZR_DEV ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-base.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-front-end-value.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-preview-value.php' );
@@ -2829,7 +3399,7 @@ function ha_load_skop_options() {
 }
 
 
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-register.php' );
 }
 require_once( HA_BASE_PATH . 'addons/skop/tmpl/skope-tmpls.php' );
@@ -2840,14 +3410,14 @@ add_action('hu_hueman_loaded', 'ha_load_skop_ajax');
 add_action('init', 'ha_load_skop_customizer_preview' );
 function ha_load_skop_customizer_preview() {
     if ( HU_AD() -> ha_is_customize_preview_frame() ) {
-        if ( defined('TC_DEV') && true === TC_DEV ) {
+        if ( defined('CZR_DEV') && true === CZR_DEV ) {
             require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-preview.php' );
         }
         new HA_Skop_Cust_Prev();
     }
 }
 function ha_load_skop_ajax() {
-    if ( defined('TC_DEV') && true === TC_DEV ) {
+    if ( defined('CZR_DEV') && true === CZR_DEV ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-base.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-publish.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-save.php' );
@@ -2855,7 +3425,7 @@ function ha_load_skop_ajax() {
     }
     new HA_Skop_Chset_Reset();
 }
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     if ( apply_filters('ha_print_skope_logs' , true ) ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/_dev_skop-logs.php' );
         function ha_instantiate_dev_logs() {

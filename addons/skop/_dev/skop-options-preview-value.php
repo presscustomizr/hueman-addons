@@ -640,16 +640,17 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
         function ha_get_skope_opt_name( $level = 'local', $special = '' ) {
             $name = '__not_available__';
             $skp_type = ha_get_skope('type');
+            $theme_name = ha_get_skope_theme_name();
             switch ($level) {
               case 'local':
-                $name = strtolower( THEMENAME . '_czr_' . ha_get_skope() );
+                $name = strtolower( $theme_name . '_czr_' . ha_get_skope() );
                 break;
               case 'group' :
                 if ( ! empty( $skp_type ) )
-                  $name = strtolower( THEMENAME . '_czr_all_' . $skp_type );
+                  $name = strtolower( $theme_name . '_czr_all_' . $skp_type );
                 break;
               case 'special_group' :
-                $name = strtolower( THEMENAME . '_czr_all_' . $skp_type . $special );
+                $name = strtolower( $theme_name . '_czr_all_' . $skp_type . $special );
                 break;
               case 'global':
                 $name = HU_THEME_OPTIONS;

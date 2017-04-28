@@ -7,13 +7,13 @@ function HA_SKOP_OPT() {
     return HA_Skop_Option::ha_skop_opt_instance();
 }
 
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-0-init-base.php' );
 }
 
 add_action('hu_hueman_loaded', 'ha_load_skop_options');
 function ha_load_skop_options() {
-    if ( defined('TC_DEV') && true === TC_DEV ) {
+    if ( defined('CZR_DEV') && true === CZR_DEV ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-base.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-front-end-value.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-options-preview-value.php' );
@@ -23,7 +23,7 @@ function ha_load_skop_options() {
 }
 
 
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-register.php' );
 }
 require_once( HA_BASE_PATH . 'addons/skop/tmpl/skope-tmpls.php' );
@@ -37,7 +37,7 @@ add_action('init', 'ha_load_skop_customizer_preview' );
 function ha_load_skop_customizer_preview() {
     //CUSTOMIZE PREVIEW : export skope data
     if ( HU_AD() -> ha_is_customize_preview_frame() ) {
-        if ( defined('TC_DEV') && true === TC_DEV ) {
+        if ( defined('CZR_DEV') && true === CZR_DEV ) {
             require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-preview.php' );
         }
         new HA_Skop_Cust_Prev();
@@ -47,7 +47,7 @@ function ha_load_skop_customizer_preview() {
 
 //hook : 'hu_hueman_loaded'
 function ha_load_skop_ajax() {
-    if ( defined('TC_DEV') && true === TC_DEV ) {
+    if ( defined('CZR_DEV') && true === CZR_DEV ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-base.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-publish.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-save.php' );
@@ -55,7 +55,7 @@ function ha_load_skop_ajax() {
     }
     new HA_Skop_Chset_Reset();
 }
-if ( defined('TC_DEV') && true === TC_DEV ) {
+if ( defined('CZR_DEV') && true === CZR_DEV ) {
     if ( apply_filters('ha_print_skope_logs' , true ) ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/_dev_skop-logs.php' );
         function ha_instantiate_dev_logs() {

@@ -12,6 +12,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON( 'package.json' ),
         paths : {
           addons_php : 'addons/',
+          skop_php : 'addons/skop/',
           front_js : 'assets/front/js/',
           czr_assets : 'addons/assets/czr/',
           lang : 'lang/'
