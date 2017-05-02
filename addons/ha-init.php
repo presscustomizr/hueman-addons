@@ -30,56 +30,51 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
 
       function __construct() {
-        self::$instance =& $this;
+          self::$instance =& $this;
 
-        //checks if is customizing : two context, admin and front (preview frame)
-        $this -> is_customizing = $this -> ha_is_customizing();
+          //checks if is customizing : two context, admin and front (preview frame)
+          $this -> is_customizing = $this -> ha_is_customizing();
 
-        self::$theme          = $this -> ha_get_theme();
-        self::$theme_name     = $this -> ha_get_theme_name();
+          self::$theme          = $this -> ha_get_theme();
+          self::$theme_name     = $this -> ha_get_theme_name();
 
-        //did_action('plugins_loaded') ?
-
-
-        if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
-
-        //are we in pro theme?
-        if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
-
-            if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , HU_BASE_URL );
-
-        }
-        else {
-
-            if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
-
-        }
+          //did_action('plugins_loaded') ?
 
 
-        if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
+          if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
 
-        //PRO THEME / PRO ADDON ?
-        $this->is_pro_theme   = did_action('plugins_loaded');
-        $this->is_pro_addons  = ! did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' );
-
-        //stop execution if not Hueman or if minimal version of Hueman is not installed
-        if ( ! defined( 'HU_IS_PRO' ) || ! HU_IS_PRO ) {
-            if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, MINIMAL_AUTHORIZED_THEME_VERSION, '<' ) ) {
-              add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
-              $this->is_pro_theme = $this->is_pro_addons = false;
-              return;
-            }
-        }
+          //are we in pro theme?
+          if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
+              if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , HU_BASE_URL );
+          } else {
+              if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
+          }
 
 
-        //TEXT DOMAIN
-        //adds plugin text domain
-        add_action( 'plugins_loaded', array( $this , 'ha_plugin_lang' ) );
+          if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
 
-        //fire
-        $this -> ha_load();
+          //PRO THEME / PRO ADDON ?
+          $this->is_pro_theme   = ( ! defined( 'HU_IS_PRO_ADDONS' ) || ( defined( 'HU_IS_PRO_ADDONS' ) && false == HU_IS_PRO_ADDONS ) ) && ! defined( 'IS_HUEMAN_ADDONS' );
+          $this->is_pro_addons  = ( defined( 'HU_IS_PRO_ADDONS' ) && false != HU_IS_PRO_ADDONS ) || ( ! did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' ) );
 
-        add_action('wp_head', array( $this, 'hu_admin_style') );
+          //stop execution if not Hueman or if minimal version of Hueman is not installed
+          if ( ! defined( 'HU_IS_PRO' ) || ! HU_IS_PRO ) {
+              if ( false === strpos( self::$theme_name, 'hueman' ) || version_compare( self::$theme -> version, MINIMAL_AUTHORIZED_THEME_VERSION, '<' ) ) {
+                add_action( 'admin_notices', array( $this , 'ha_admin_notice' ) );
+                $this->is_pro_theme = $this->is_pro_addons = false;
+                return;
+              }
+          }
+
+
+          //TEXT DOMAIN
+          //adds plugin text domain
+          add_action( 'plugins_loaded', array( $this , 'ha_plugin_lang' ) );
+
+          //fire
+          $this -> ha_load();
+
+          add_action('wp_head', array( $this, 'hu_admin_style') );
       }//construct
 
 

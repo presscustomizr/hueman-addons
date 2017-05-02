@@ -45,7 +45,7 @@ class HA_Czr {
     //Enqueue most recent fmk for js and css
     $hu_theme = wp_get_theme();
     $is_pro = HU_AD() -> ha_is_pro_addons() || HU_AD() -> ha_is_pro_theme();
-    if ( true == version_compare( $hu_theme -> version, LAST_THEME_VERSION_FMK_SYNC , '<' ) || $is_pro ) {
+    if ( $is_pro || true == version_compare( $hu_theme -> version, LAST_THEME_VERSION_FMK_SYNC , '<' ) ) {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {

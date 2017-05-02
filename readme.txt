@@ -4,8 +4,8 @@ Author URI: http://presscustomizr.com
 Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
-Tested up to: 4.7
-Stable tag: 2.0.9
+Tested up to: 4.7.4
+Stable tag: 2.0.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,11 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.10 April 28th 2017 =
+* added : customizer help blocks
+* improved : customizer performance on load
+* improved : sharre bar behaviour for mobile devices and on scroll
+
 = 2.0.9 March 2nd 2017 =
 * fixed : Google Plus button disappeared in v2.0.8
 
