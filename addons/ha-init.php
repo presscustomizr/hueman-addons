@@ -1,4 +1,6 @@
 <?php
+if( ! defined( 'IS_PRESSCUSTOMIZR' ) ) define( 'IS_PRESSCUSTOMIZR' , false );
+
 /**
 * Fires the plugin or the theme addon
 * @author Nicolas GUILLAUME
@@ -21,6 +23,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
       public $pro_grids;//Will store the pro grids instance
       public $pro_infinite;//Will store the pro infinite scroll instance
       public $pro_skins;
+      public $pro_related_posts;
 
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )

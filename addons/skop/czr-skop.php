@@ -132,6 +132,7 @@ function ha_get_skope_excluded_options() {
         'about-page',
         'help-button',
         'show-skope-infos',
+        'attachments-in-search',
         'show_on_front',
         'page_on_front',
         'page_for_posts',

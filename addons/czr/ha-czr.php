@@ -149,17 +149,20 @@ class HA_Czr {
                           dominus : 'pro_header_type',
                           servi : [
                             'use-header-image',
+                            'logo-title-on-header-image',
                             'header_image',
+                            'color-topbar',
+                            'color-header',
+                            'color-header-menu',
                             pro_header_slider_short_opt_name//pro_header_bg
                           ],
                           visibility : function ( to, servusShortId ) {
                               if ( pro_header_slider_short_opt_name == servusShortId ) {
                                   return 'classical' != to;
-                              } else if ( 'header_image' == servusShortId ) {
+                              } else if ( 'header_image' == servusShortId || 'logo-title-on-header-image' == servusShortId ) {
                                   var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );
                                   return 'classical' == to && _is_checked( api( wpServusId )() );
-                              }
-                              else {
+                              } else {
                                   return 'classical' == to;
                               }
                           }
