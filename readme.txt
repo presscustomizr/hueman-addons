@@ -38,6 +38,7 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 == Changelog ==
 = 2.0.12 October 14th 2017 =
+* fix : customizer preview not working in hueman pro when the hueman addons plugin activated. fixes #35.
 * improved : various minor improvements in the customizer control javascript
 * added : a search doc field to the welcome page
 

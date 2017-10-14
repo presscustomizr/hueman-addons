@@ -10,11 +10,6 @@
 * License: GPLv2 or later
 */
 
-//last version sync
-if( ! defined( 'LAST_THEME_VERSION_FMK_SYNC' ) ) define( 'LAST_THEME_VERSION_FMK_SYNC' , '3.3.21' );
-if( ! defined( 'MINIMAL_AUTHORIZED_THEME_VERSION' ) ) define( 'MINIMAL_AUTHORIZED_THEME_VERSION' , '3.3.0' );
-if( ! defined( 'IS_HUEMAN_ADDONS' ) ) define( 'IS_HUEMAN_ADDONS' , true );
-if( ! defined( 'HU_IS_PRO_ADDONS' ) ) define( 'HU_IS_PRO_ADDONS' , false );
 /**
 * helper ( can be already defined in the hueman theme)
 * Check if we are really on home, all cases covered
@@ -43,11 +38,17 @@ if ( ha_is_hueman_pro() ) {
     //hook : admin_notices
     function ha_is_pro_admin_notice() {
       ?>
-        <div class="error"><p><?php _e( 'The Hueman Addons plugin is already included in Hueman Pro. You can disable it.', 'hueman-addons' ) ?></p></div>
+        <div class="error">
+          <p><?php _e( 'The Hueman Addons plugin is already included in Hueman Pro. You can disable it.', 'hueman-addons' ); ?>&nbsp;<a href="<?php echo admin_url() . 'plugins.php?plugin_status=active'; ?>" title="<?php _e( 'Deactivate it in the plugins page.', 'hueman-addons' ); ?>"><?php _e( 'Deactivate it in the plugins page.', 'hueman-addons' ); ?></a></p>
+        </div>
       <?php
     }
     add_action( 'admin_notices', 'ha_is_pro_admin_notice' );
-
 } else {
+    //last version sync
+    if( ! defined( 'LAST_THEME_VERSION_FMK_SYNC' ) ) define( 'LAST_THEME_VERSION_FMK_SYNC' , '3.3.21' );
+    if( ! defined( 'MINIMAL_AUTHORIZED_THEME_VERSION' ) ) define( 'MINIMAL_AUTHORIZED_THEME_VERSION' , '3.3.0' );
+    if( ! defined( 'IS_HUEMAN_ADDONS' ) ) define( 'IS_HUEMAN_ADDONS' , true );
+    if( ! defined( 'HU_IS_PRO_ADDONS' ) ) define( 'HU_IS_PRO_ADDONS' , false );
     require_once( plugin_dir_path( __FILE__ ) . 'addons/ha-init.php' );
 }
