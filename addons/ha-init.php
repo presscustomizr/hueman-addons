@@ -20,6 +20,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
       public $models;
 
       public $pro_header;//Will store the pro header instance
+      public $pro_footer;//Will store the pro footer instance
       public $pro_grids;//Will store the pro grids instance
       public $pro_infinite;//Will store the pro infinite scroll instance
       public $pro_skins;
@@ -143,6 +144,9 @@ if ( ! class_exists( 'HU_AD' ) ) :
         new HA_Sharrre();
         require_once( HA_BASE_PATH . 'addons/shortcodes/ha-shortcodes.php' );
         new HA_Shortcodes();
+        if ( is_admin() && ! $this -> ha_is_customizing() ) {
+          require_once( HA_BASE_PATH . 'addons/admin/ha-hs-doc.php' );
+        }
 
         /* ------------------------------------------------------------------------- *
          *  Loads Customizer
