@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: http://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 2.0.11
+* Version: 2.0.12
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: http://presscustomizr.com
@@ -11,7 +11,7 @@
 */
 
 //last version sync
-if( ! defined( 'LAST_THEME_VERSION_FMK_SYNC' ) ) define( 'LAST_THEME_VERSION_FMK_SYNC' , '3.3.11' );
+if( ! defined( 'LAST_THEME_VERSION_FMK_SYNC' ) ) define( 'LAST_THEME_VERSION_FMK_SYNC' , '3.3.21' );
 if( ! defined( 'MINIMAL_AUTHORIZED_THEME_VERSION' ) ) define( 'MINIMAL_AUTHORIZED_THEME_VERSION' , '3.3.0' );
 if( ! defined( 'IS_HUEMAN_ADDONS' ) ) define( 'IS_HUEMAN_ADDONS' , true );
 if( ! defined( 'HU_IS_PRO_ADDONS' ) ) define( 'HU_IS_PRO_ADDONS' , false );

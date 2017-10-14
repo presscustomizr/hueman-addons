@@ -42,7 +42,7 @@ function ha_enqueue_hs_doc_js() {
 
     wp_enqueue_script(
       'hs-search',
-      sprintf('%1$s/addons/assets/back/js/hs-search.min.js' , HA_BASE_URL ),
+      sprintf('%1$saddons/assets/back/js/hs-search.min.js' , HA_BASE_URL ),
       array( 'jquery', 'underscore' ),
       null,
       $in_footer = false

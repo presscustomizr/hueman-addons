@@ -1,11 +1,11 @@
 # Hueman Addons #
 * Contributors: nikeo
-* Author URI: http://presscustomizr.com
+* Author URI: https://presscustomizr.com
 * Plugin URI: https://wordpress.org/plugins/hueman-addons/
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
-* Tested up to: 4.7.4
-* Stable tag: 2.0.11
+* Tested up to: 4.8.2
+* Stable tag: 2.0.12
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,10 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.0.12 October 14th 2017 =
+* improved : various minor improvements in the customizer control javascript
+* added : a search doc field to the welcome page
+
 = 2.0.11 May 8th 2017 =
 * improved : better initialization process for the customizer preview when fired from appearance > themes
 
