@@ -6,6 +6,8 @@ class HA_Czr {
     add_action( 'customize_register'                      ,  array( $this, 'ha_augment_customizer_setting') );//extend WP_Customize_Setting
     //CUSTOMIZER PANEL JS
     add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_extend_dependencies' ), 100 );
+    add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_react_to_skope_enable_changes' ), 100 );
+
     //Various DOM ready actions + print rate link + template
     add_action( 'customize_controls_print_footer_scripts' , array( $this, 'hu_various_dom_ready' ) );
     //control style
@@ -58,6 +60,8 @@ class HA_Czr {
                 $is_pro ? 'czr-control-full' : 'czr-control-base',
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
+            $ver = $wp_scripts->registered['hu-customizer-controls'] -> ver;
+            $wp_scripts->registered['hu-customizer-controls'] -> ver = ( defined('CZR_DEV') && true === CZR_DEV ) ? $ver . time() : $ver;
         }
     }
   }
@@ -175,6 +179,33 @@ class HA_Czr {
     }
 
 
+    //hook : 'customize_controls_enqueue_scripts'
+    function hu_react_to_skope_enable_changes() {
+      ?>
+      <script type="text/javascript">
+      (function (api, $, _) {
+          //style select
+          api.when( 'hu_theme_options[enable-skope]', function( _set ) {
+              _set.bind( function() {
+                    api.previewer.save().always( function() {
+                          if ( _wpCustomizeSettings && _wpCustomizeSettings.url && _wpCustomizeSettings.url.parent ) {
+                                var url = [ _wpCustomizeSettings.url.parent ];
+                                url.push( 'customize.php?&autofocus%5Bcontrol%5D=' + _set.id );
+                                _.delay( function() {
+                                      window.location.href = url.join('');
+                                }, 500 );
+                          } else {
+                                _.delay( function() {
+                                      window.parent.location.reload();
+                                });
+                          }
+                    });
+              });
+          });
+       }) ( wp.customize, jQuery, _);
+      </script>
+      <?php
+    }
 
     //declared this way:
     //wp_send_json_success( array(

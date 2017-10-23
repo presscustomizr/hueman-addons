@@ -53,9 +53,10 @@ if ( ! class_exists( 'HU_AD' ) ) :
           } else {
               if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
           }
-
-
-          if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , true );
+          //'enable-skope' option can take two string values : "yes" and "no".
+          //If the option is not set yet, which is the most common case, it means that it is enabled ( @see default value == "yes" when registering the setting )
+          $_skope_enable_val = $this -> ha_get_raw_option( 'enable-skope' , 'hu_theme_options');
+          if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , ! is_string( $_skope_enable_val ) || 'yes' == $_skope_enable_val );
 
           //PRO THEME / PRO ADDON ?
           $this->is_pro_theme   = ( ! defined( 'HU_IS_PRO_ADDONS' ) || ( defined( 'HU_IS_PRO_ADDONS' ) && false == HU_IS_PRO_ADDONS ) ) && ! defined( 'IS_HUEMAN_ADDONS' );
@@ -79,9 +80,33 @@ if ( ! class_exists( 'HU_AD' ) ) :
           $this -> ha_load();
 
           add_action('wp_head', array( $this, 'hu_admin_style') );
+
+          //register skope customizer setting-control to enable / disable
+          add_filter( 'hu_admin_sec'   , array( $this, 'ha_register_skope_option' ) );
+
       }//construct
 
 
+      //hook : 'hu_admin_sec'
+      function ha_register_skope_option( $settings ) {
+        $settings = is_array( $settings ) ? $settings : array();
+        $skope_settings = array(
+          'enable-skope' => array(
+              'default'   => 'yes',
+              'control'   => 'HU_controls',
+              'label'     => __('Enable a "per page" customization', 'hueman-addons'),
+              'notice'    => __('Enabling this option allows you to customize each page as a stand alone website.', 'hueman-addons'),
+              'section'   => 'admin_sec',
+              'type'      => 'select',
+              'choices'   => array(
+                  'yes'     => __( 'Enable', 'hueman'),
+                  'no'      => __( 'Disable', 'hueman')
+              ),
+              'priority'  => 0
+          )
+        );
+        return array_merge( $skope_settings, $settings );
+      }
 
       /* ------------------------------------------------------------------------- *
       *  MODELS UTILITIES
@@ -138,6 +163,11 @@ if ( ! class_exists( 'HU_AD' ) ) :
       /* ------------------------------------------------------------------------- */
       function ha_load() {
         /* ------------------------------------------------------------------------- *
+         *  Loads Functions
+        /* ------------------------------------------------------------------------- */
+        require_once( HA_BASE_PATH . 'addons/ha-functions.php' );
+
+        /* ------------------------------------------------------------------------- *
          *  Loads Features
         /* ------------------------------------------------------------------------- */
         require_once( HA_BASE_PATH . 'addons/sharrre/ha-sharrre.php' );
@@ -158,13 +188,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
          *  Loads SKOP
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_skop_on() ) {
-          if ( defined('CZR_DEV') && true === CZR_DEV ) {
-              if ( file_exists( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' ) ) {
-                  require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' );
-              }
-          } else {
-              require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
-          }
+          require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
         }
         /* ------------------------------------------------------------------------- *
          *  Loads PRO
@@ -288,12 +312,11 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
       //@return bool
       //skop shall not be activated when previewing the theme from the customizer
-
       function ha_is_skop_on() {
         global $wp_version;
         if ( $this -> ha_isprevdem() )
           return;
-        return apply_filters( 'ha_is_skop_on', version_compare( $wp_version, '4.7', '>=' ) );
+        return apply_filters( 'ha_is_skop_on', HA_SKOP_ON && version_compare( $wp_version, '4.7', '>=' ) );
       }
 
 
