@@ -4,7 +4,7 @@ Author URI: https://presscustomizr.com
 Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
-Tested up to: 4.8.2
+Tested up to: 4.9.0
 Stable tag: 2.0.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -37,6 +37,13 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.13 November 11th 2017 =
+* Fix : admin bar style printed when user not logged in
+* Fix : polylang compat => exclude nav_menu_locations, blogname and blogdescription from "by page customization" when polylang is active. Fixes #34. Fix presscustomizr/hueman#377
+* added : a set of shared functions in a new separated file : addons/ha-functions.php
+* Fix : remove unused skop _dev files
+* Improved : compatibility with WordPress 4.9, release target date November 14th 2017
+
 = 2.0.12 October 14th 2017 =
 * fix : customizer preview not working in hueman pro when the hueman addons plugin activated. fixes #35.
 * improved : various minor improvements in the customizer control javascript
