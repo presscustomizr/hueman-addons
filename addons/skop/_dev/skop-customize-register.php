@@ -52,14 +52,16 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
         function ha_alter_wp_customizer_settings( $manager ) {
           if ( is_object( $manager->get_setting( 'header_image_data' ) ) ) {
               $manager -> remove_setting( 'header_image_data' );
-              $manager -> add_setting( new HA_Customize_Header_Image_Data_Setting( $manager, 'header_image_data', array(
-                'theme_supports' => 'custom-header',
-              ) ) );
-              $manager -> remove_setting( 'header_image' );
-              $manager -> add_setting( new HA_Customize_Header_Image_Setting( $manager, 'header_image', array(
-                'default'        => get_theme_support( 'custom-header', 'default-image' ),
-                'theme_supports' => 'custom-header',
-              ) ) );
+              if ( class_exists( 'HA_Customize_Header_Image_Data_Setting' ) && class_exists( 'HA_Customize_Header_Image_Setting' ) ) {
+                  $manager -> add_setting( new HA_Customize_Header_Image_Data_Setting( $manager, 'header_image_data', array(
+                    'theme_supports' => 'custom-header',
+                  ) ) );
+                  $manager -> remove_setting( 'header_image' );
+                  $manager -> add_setting( new HA_Customize_Header_Image_Setting( $manager, 'header_image', array(
+                    'default'        => get_theme_support( 'custom-header', 'default-image' ),
+                    'theme_supports' => 'custom-header',
+                  ) ) );
+              }
           }
 
           if ( is_object( $manager->get_control( 'hu_theme_options[layout-global]' ) ) ) {

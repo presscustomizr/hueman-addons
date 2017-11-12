@@ -71,7 +71,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
               }
           }
 
-
           //TEXT DOMAIN
           //adds plugin text domain
           add_action( 'plugins_loaded', array( $this , 'ha_plugin_lang' ) );
@@ -385,6 +384,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
           }
       }
 
+      //@return bool
       function ha_isprevdem() {
           $_active_theme  = $this -> ha_get_raw_option( 'template' );
           $hu_theme       = wp_get_theme();
