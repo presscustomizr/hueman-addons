@@ -51,7 +51,13 @@ class HA_Czr {
         $wp_styles = wp_styles();
         $wp_scripts = wp_scripts();
         if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf( '%1$saddons/assets/czr/css/czr-control-base%2$s.css' , HU_AD() -> ha_get_base_url(), ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min' );
+            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf(
+                '%1$saddons/assets/czr/css/czr-control-base%2$s.css',
+                HU_AD() -> ha_get_base_url(),
+                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
+            );
+            $ver_css = $wp_styles->registered['hu-customizer-controls-style'] -> ver;
+            $wp_styles->registered['hu-customizer-controls-style'] -> ver = ( defined('CZR_DEV') && true === CZR_DEV ) ? $ver_css . time() : $ver_css;
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
             $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
@@ -187,6 +193,10 @@ class HA_Czr {
           //style select
           api.when( 'hu_theme_options[enable-skope]', function( _set ) {
               _set.bind( function() {
+                    // since WP4.9, we need to make sure the wp.customize.state( 'selectedChangesetStatus' )() is set to publish before saving
+                    if ( api.state.has( 'selectedChangesetStatus' ) ) {
+                          api.state( 'selectedChangesetStatus' )( 'publish' );
+                    }
                     api.previewer.save().always( function() {
                           if ( _wpCustomizeSettings && _wpCustomizeSettings.url && _wpCustomizeSettings.url.parent ) {
                                 var url = [ _wpCustomizeSettings.url.parent ];

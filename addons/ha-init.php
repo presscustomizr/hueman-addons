@@ -188,13 +188,42 @@ if ( ! class_exists( 'HU_AD' ) ) :
          *  Loads SKOP
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_skop_on() ) {
-          require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
+          if ( defined('CZR_DEV') && true === CZR_DEV ) {
+              if ( file_exists( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' ) ) {
+                  require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' );
+              }
+          } else {
+              require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
+          }
         }
         /* ------------------------------------------------------------------------- *
          *  Loads PRO
         /* ------------------------------------------------------------------------- */
         if ( $this -> ha_is_pro_addons() || $this -> ha_is_pro_theme() ) {
           require_once( HA_BASE_PATH . 'addons/ha-init-pro.php' );
+        }
+        /* ------------------------------------------------------------------------- *
+         *  Print customizer infos
+        /* ------------------------------------------------------------------------- */
+        if ( ! $this -> ha_is_skop_on() ) {
+            if ( defined( 'CZR_PRINT_CUSTOMIZER_DATA_WHEN_SKOPE_DISABLED') && CZR_PRINT_CUSTOMIZER_DATA_WHEN_SKOPE_DISABLED ) {
+                if ( file_exists( HA_BASE_PATH . 'addons/_dev_print_customizer_data.php' ) ) {
+                    require_once( HA_BASE_PATH . 'addons/_dev_print_customizer_data.php' );
+                    function ha_instantiate_customizer_logs() {
+                        if ( class_exists( 'HA_dev_customizer_data') ) {
+                            new HA_dev_customizer_data(
+                                array(
+                                    'hook' => '__header_after_container_inner',
+                                    'display_header' => true,
+                                    //'tested_option' => 'header_image'
+                                )
+
+                            );
+                        }
+                    }
+                    add_action('hu_hueman_loaded', 'ha_instantiate_customizer_logs', 100 );
+                }
+            }
         }
       }
 
@@ -368,6 +397,8 @@ if ( ! class_exists( 'HU_AD' ) ) :
       //hook : wp_head
       //only on front end and if user is logged-in
       function hu_admin_style() {
+        if ( ! is_user_logged_in() )
+          return;
         ?>
             <script type="text/javascript" id="ha-customize-btn">
               jQuery( function($) {

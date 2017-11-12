@@ -195,7 +195,13 @@ function ha_get_skope_excluded_options() {
 function ha_get_protected_options() {
   return apply_filters(
       'ha_protected_options',
-      array( 'defaults', 'ver', 'has_been_copied', 'last_update_notice', 'last_update_notice_pro' )
+      array(
+        'defaults',
+        'ver',
+        'has_been_copied',
+        'last_update_notice',
+        'last_update_notice_pro'
+      )
   );
 }
 
@@ -261,7 +267,7 @@ function ha_is_wp_builtin_skoped_theme_mod( $opt_name ) {
 // )
 //
 // When publishing ($status == 'publish'), the purpose of this callback is :
-// 1) to keep only the value when publishing the skope in database (save action)
+// 1) to keep only the "value" when publishing the skope in database (save action) so that it becomes : [hu_theme_options[copyright]] => copyright SAMPLE
 // 2) to make sure that multidimensionals theme_mod types settings are being saved as...multidimensional options
 // Typically :
 // A theme_mod like nav_menu_locations has to be saved saved as :
@@ -284,7 +290,6 @@ function ha_is_wp_builtin_skoped_theme_mod( $opt_name ) {
 //     [user_id] => 1
 // )
 //
-// And in the changeset like :
 function ha_prepare_skope_changeset_for_front_end( $data ) {
   global $wp_customize;
   $new_data = array();
@@ -520,7 +525,7 @@ function ha_get_skope_db_data( $args ) {
   // ha_error_log( print_R( $args, true ) );
   $db_data = array();
   $defaults = array(
-      'post_id'         => '',
+      'post_id'         => '',//<= can be our skope post id or the WP changeset post id
       'skope_meta_key'  => '',
       'level'           => '',
       'is_option_post'  => false
@@ -548,12 +553,18 @@ function ha_get_skope_db_data( $args ) {
 
   } else {
       $changeset_post = get_post( $args['post_id'] );
-      if ( 'customize_changeset' !== $changeset_post->post_type ) {
-        return new WP_Error( 'wrong_post_type_for_changeset' );
-      }
       if ( ! $changeset_post ) {
         return new WP_Error( 'missing_changeset_post' );
       }
+
+      if ( 'revision' === $changeset_post->post_type ) {
+        if ( 'customize_changeset' !== get_post_type( $changeset_post->post_parent ) ) {
+          return new WP_Error( 'wrong_post_type_for_changeset' );
+        }
+      } elseif ( 'customize_changeset' !== $changeset_post->post_type ) {
+        return new WP_Error( 'wrong_post_type_for_changeset' );
+      }
+
       if ( in_array( get_post_status( $args['post_id'] ), array( 'publish', 'trash' ) ) ) {
         $db_data = array();
       }
@@ -1038,8 +1049,48 @@ add_filter( 'hu_partial_refresh_on', '__return_true');
 
 
 
+/* ------------------------------------------------------------------------- *
+ *  @4.9compat
+ * the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+/* ------------------------------------------------------------------------- */
+function ha_get_real_wp_changeset_post_id() {
+  global $wp_customize;
+  // We are customizing
+  $changeset_post_id = $wp_customize->changeset_post_id();
+  // error_log('<in ha_get_real_wp_changeset_post_id()>');
+  // error_log('ha_is_customize_preview_frame()' . HU_AD() -> ha_is_customize_preview_frame() );
+  // error_log('ha_doing_customizer_ajax' . HU_AD() -> ha_doing_customizer_ajax() );
+  // error_log('$changeset_post_id : ' . $changeset_post_id );
+  // error_log('</in ha_get_real_wp_changeset_post_id()>');
+  // error_log( '$changeset_post_id;' . $changeset_post_id );
+  // // error_log( 'in ha_get_real_wp_changeset_post_id');
+  // // error_log( '$wp_customize->autosaved() ? ' . $wp_customize->autosaved() );
+  // error_log('method_exists autosaved?' . method_exists ( $wp_customize, 'autosaved' ) );
+  // error_log( '$wp_customize->autosaved()' . $wp_customize->autosaved()  );
+  // error_log( 'get_current_user_id()' . get_current_user_id() );
+  // error_log( print_r( wp_get_post_autosave( $changeset_post_id, get_current_user_id() ), true ) );
 
-
+  //are we in 4.9 ?
+  // if ( method_exists ( $wp_customize, 'autosaved' ) ) {
+  //   if ( $wp_customize->autosaved() ) {
+  //     $autosave_post = false;
+  //     //$autosave_post = wp_get_post_autosave( $changeset_post_id, get_current_user_id() );
+  //     if ( is_wp_error( $autosave_post ) ) {
+  //         error_log( 'is WP error');
+  //         error_log( print_r( $autosave_post -> get_error_message(), true ) );
+  //     } else {
+  //         error_log('AUTOSAVE POST ?');
+  //         error_log( print_r( $autosave_post, true ) );
+  //         if ( $autosave_post ) {
+  //           error_log('HAS AUTOSAVE POST');
+  //           $changeset_post_id = $autosave_post->ID;
+  //         }
+  //     }
+  //   }
+  // }
+  //error_log( '$changeset_post_id after;' . $changeset_post_id );
+  return $changeset_post_id;
+}
 
 
 
@@ -1160,9 +1211,10 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
 
 
         /* ------------------------------------------------------------------------- *
-         *  SAVE OR PUBLISH SKOPE CHANGESET
+         *  SAVE SKOPE CHANGESET
          *  => as a meta of the _temp changeset post if status != "publish"
-         *  => as a meta of the option changeset post if status == "publish" and skope is not 'global'
+         *  => publishing as a post meta of the skope post will be handled when the WP customize_changeset post will transition to "publish"
+         *  @see add_action( 'transition_post_status', 'ha_publish_skope_changeset_metas_on_post_status_transition', 0, 3 );
         /* ------------------------------------------------------------------------- */
         /**
           * Handle customize_skope_changet_save WP Ajax request to save/update a changeset.
@@ -1198,7 +1250,10 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
                 if ( ! get_post_status_object( $changeset_status ) || ! in_array( $changeset_status, array( 'draft', 'pending', 'publish', 'future' ), true ) ) {
                     wp_send_json_error( 'bad_customize_changeset_status', 400 );
                 }
-                $is_publish = ( 'publish' === $changeset_status || 'future' === $changeset_status );
+                //<@4.9compat>
+                $is_publish = 'publish' === $changeset_status;
+                // was $is_publish = ( 'publish' === $changeset_status || 'future' === $changeset_status );
+                //</@4.9compat>
                 if ( $is_publish && HU_AD() -> ha_is_changeset_enabled() ) {
                     if ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->publish_posts ) ) {
                         wp_send_json_error( 'changeset_publish_unauthorized', 403 );
@@ -1214,32 +1269,12 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
               wp_send_json_error( 'changeset_feature_is_not_enabled' );
             }
 
-            $skope_post_id = null;
-            // Are we customizing or publishing ?
-            // => set the right changeset post id
-            // => check the post status
-            // Ensure retro compat with version < 4.7
-            if ( ! is_null( $changeset_status ) && $is_publish ) {
-                $skope_post_id  = get_option('skope-post-id');
-                if ( false === $skope_post_id || empty( $skope_post_id ) ) {
-                    wp_send_json_error( 'missing skope_post_id when attempting to publish the skope meta option' );
-                }
-            } else {
-                $changeset_post_id = $wp_customize->changeset_post_id();
-                if ( $changeset_post_id && in_array( get_post_status( $changeset_post_id ), array( 'publish', 'trash' ) ) ) {
-                    wp_send_json_error( 'changeset_already_published' );
-                }
+
+            $changeset_post_id = ha_get_real_wp_changeset_post_id();
+            if ( $changeset_post_id && in_array( get_post_status( $changeset_post_id ), array( 'publish', 'trash' ) ) ) {
+                wp_send_json_error( 'changeset_already_published' );
             }
 
-            // if ( empty( $changeset_post_id ) ) {
-            //     if ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->create_posts ) ) {
-            //         wp_send_json_error( 'cannot_create_changeset_post' );
-            //     }
-            // } else {
-            //     if ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->edit_post, $changeset_post_id ) ) {
-            //         wp_send_json_error( 'cannot_edit_changeset_post' );
-            //     }
-            // }
             // CUSTOMIZE CHANGESET DATA IS SENT AS A JSON, WHEN DECODED, LOOKS LIKE :
             // Array(
 
@@ -1270,35 +1305,38 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
 
 
 
-            //ATTEMPT TO SAVE OR PUBLISH THE SKOPE CHANGESET META
-            if ( 'publish' == $changeset_status ) {
-                $r = $this -> _publish_skope_changeset_metas( array(
-                    'status' => $changeset_status,
-                    // 'title' => $changeset_title,
-                    // 'date_gmt' => $changeset_date_gmt,
-                    'data' => $input_changeset_data,
-                ) );
-            } else {
-                $r = $this -> _save_skope_changeset_metas( array(
-                    'status' => $changeset_status,
-                    // 'title' => $changeset_title,
-                    // 'date_gmt' => $changeset_date_gmt,
-                    'data' => $input_changeset_data,
-                ) );
-            }
+            //ATTEMPT TO SAVE THE SKOPE CHANGESET META
+            // if ( 'publish' == $changeset_status ) {
+            //     $r = $this -> _publish_skope_changeset_metas( array(
+            //         'status' => $changeset_status,
+            //         // 'title' => $changeset_title,
+            //         // 'date_gmt' => $changeset_date_gmt,
+            //         'data' => $input_changeset_data,
+            //     ) );
+            // } else {
+            //     $r = $this -> _save_skope_changeset_metas( array(
+            //         'status' => $changeset_status,
+            //         // 'title' => $changeset_title,
+            //         // 'date_gmt' => $changeset_date_gmt,
+            //         'data' => $input_changeset_data,
+            //     ) );
+            // }
+            //@4.9compat>
+            ////
+            $r = $this -> _save_skope_changeset_metas( array(
+                'status' => $changeset_status,
+                // 'title' => $changeset_title,
+                // 'date_gmt' => $changeset_date_gmt,
+                'data' => $input_changeset_data,
+            ) );
 
             if ( is_wp_error( $r ) ) {
               $response = $r->get_error_data();
             } else {
                 $response = $r;
                 if ( HU_AD() -> ha_is_changeset_enabled() ) {
-                    if ( $is_publish ) {
-                        $response['changeset_status'] = get_post_status( $skope_post_id );
-                    } else {
-                        // Note that if the changeset status was publish, then it will get set to trash if revisions are not supported.
-                        $response['changeset_status'] = get_post_status( $wp_customize->changeset_post_id() );
-                    }
-
+                    // Note that if the changeset status was publish, then it will get set to trash if revisions are not supported.
+                    $response['changeset_status'] = get_post_status( ha_get_real_wp_changeset_post_id() );
                 }
                 // if ( $is_publish && 'trash' === $response['changeset_status'] ) {
                 //   $response['changeset_status'] = 'publish';
@@ -1371,8 +1409,6 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
             return $validities;
           }
 
-
-
         //this utility is used to preprocess the value for any type : trans, meta
         //@param value : array()
         //@param $setting : setting instance
@@ -1415,373 +1451,6 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
 endif;
 
 ?><?php
-
-
-/* ------------------------------------------------------------------------- *
- *  PUBLISH SKOPE CHANGESET
- *  => as a meta of the option changeset post if stats == "publish"
-/* ------------------------------------------------------------------------- */
-//Same as save_changeset_post() but for the skope customized values
-//It would have been better to use the existing core method but it's not possible with the current version
-// => there's no way to populate the $post_array with a filter to add the meta_input entry
-// $args = array(
-//  'status' => '',
-//  'data' => json_decode( wp_unslash( $_POST['customize_changeset_data'] ), true )
-// )
-if ( ! class_exists( 'HA_Skop_Chset_Publish' ) ) :
-    class HA_Skop_Chset_Publish extends HA_Skop_Chset_Base {
-        function __construct() {
-          parent::__construct();
-          add_action( 'wp_ajax_czr_clean_skope_changeset_metas_after_publish',  array( $this, 'ha_ajax_clean_skope_changeset_metas_after_publish' ) );
-        }
-
-        function _publish_skope_changeset_metas( $args = array() ) {
-            // ha_error_log( '//////////////// START ARGS PARAM ////////////////// ');
-            // ha_error_log( print_R( $args, TRUE ) );
-            // ha_error_log( '//////////////// END ARGS PARAM ////////////////// ');
-            global $wp_customize;
-            if ( 'publish' != $args['status'] ) {
-                wp_send_json_error( '_publish_skope_changeset_metas : status must be set to publish' );
-                return;
-            }
-            if ( 'global' == HA_SKOP_OPT() -> ha_get_current_customized_skope() ) {
-                wp_send_json_error( '_publish_skope_changeset_metas() : the global skope can not be saved this way' );
-                return;
-            }
-
-            if ( ! isset( $_POST['opt_name']) || ! isset( $_POST['skope_id'] ) || ! isset( $_POST['skopeCustomized'] ) ) {
-                wp_send_json_error( '_publish_skope_changeset_metas() : Missing opt_name or skope_id or skopeCustomized' );
-                return;
-            }
-
-            $skope_meta_key = HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'opt_name');
-            $skope_id       = HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id' );
-
-            $args = array_merge(
-                array(
-                  'status' => null,
-                  'data' => array(),
-                  'user_id' => get_current_user_id()
-                ),
-                $args
-            );
-
-            //We are publishing
-            $skope_post_id  = get_option('skope-post-id');
-            if ( false === $skope_post_id || empty( $skope_post_id ) ) {
-                wp_send_json_error( 'missing skope_post_id when attempting to publish the meta changeset' );
-            }
-
-            if ( ! $skope_post_id ) {
-                wp_send_json_error( 'NO SKOPE CHANGESET POST ID' );
-                return;
-            }
-
-            $_already_published_data = ha_get_skope_db_data(
-                array(
-                  'post_id' => $skope_post_id,
-                  'skope_meta_key' => $skope_meta_key,
-                  'is_option_post' => true,
-                  'level' => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope')
-                )
-            );
-
-            if ( is_wp_error( $_already_published_data ) ) {
-                $response['publish_skope_changeset_failure'] = $_already_published_data -> get_error_code();
-                return new WP_Error( 'publish_skope_changeset_failure', '', $response );
-            }
-
-            // ha_error_log( '//////////////// START ORIGINAL CHANGESET DATA ////////////////// ');
-            // ha_error_log( $skope_post_id );
-            // ha_error_log( $skope_meta_key );
-            // ha_error_log( print_R( $existing_changeset_data, TRUE ) );
-            // ha_error_log( '//////////////// END ORIGINAL CHANGESET DATA////////////////// ');
-            //in publish context, the saved data looks like
-            // [hu_theme_options[copyright]] => copyright SAMPLE 7
-            //
-            // in changeset update context, the saved data looks like
-            // [hu_theme_options[copyright]] => Array
-            // (
-            //     [value] => copyright SAMPLE
-            //     [type] => option
-            //     [user_id] => 1
-            // )
-            $normalized_published_data = array();
-            // An option like nav_menu_locations is saved as :
-            //  [nav_menu_locations] => Array
-            // (
-            //     [footer] => 2
-            //     [topbar] => 4
-            //     [header] => 3
-            // )
-            // => it must be turned into changeset compatible settings looking like :
-            // nav_menu_locations[footer] = array( 'value' => 2 )
-            // nav_menu_locations[topbar] = array( 'value' => 4 )
-            // nav_menu_locations[header] = array( 'value' => 3 )
-            foreach ( $_already_published_data as $_setid => $_value ) {
-                if ( 'skope_infos' == $_setid ) {
-                    $normalized_published_data[$_setid] = $_value;
-                } else if ( _ha_is_wp_setting_multidimensional( $_setid ) ) {
-                    $to_merge = _ha_build_multidimensional_db_option( $_setid, $_value );
-                    foreach ( $to_merge as $_id => $val ) {
-                        $normalized_published_data[$_id] = array( 'value' => $val );
-                    }
-                } else {
-                    $normalized_published_data[$_setid] = array( 'value' => $_value );
-                }
-            }
-
-            //ha_error_log( '//////////////// START ORIGINAL CHANGESET DATA ////////////////// ');
-            // ha_error_log( $skope_post_id );
-            // ha_error_log( $skope_meta_key );
-            //ha_error_log( print_R( ha_get_skope_db_data( array( 'post_id' => $skope_post_id, 'skope_meta_key' => $skope_meta_key, 'is_option_post' => true ) ), TRUE ) );
-            // ha_error_log( print_R( HA_SKOP_OPT() -> ha_get_unsanitized_customized_values( $skope_id ) ), true );
-            //ha_error_log( '//////////////// END ORIGINAL CHANGESET DATA////////////////// ');
-
-
-            // The request was made via wp.customize.previewer.save().
-            $update_transactionally = (bool) $args['status'];
-            $allow_revision = (bool) $args['status'];
-            //Default response
-            $response = array(
-              'setting_validities'  => array()
-            );
-
-            // The customized data are already structured like in the changeset.
-            // With setting_id => array( 'value' => '...' )
-            $customized_data = HA_SKOP_OPT() -> ha_get_unsanitized_customized_values( $skope_id );
-
-
-            // ha_error_log( '//////////////// START CUSTOMIZED DATA ////////////////// ');
-            // ha_error_log( $skope_id );
-            // ha_error_log( print_R( HA_SKOP_OPT() -> ha_get_unsanitized_customized_values( $skope_id ) , true ) );
-            // ha_error_log( '//////////////// END CUSTOMIZED DATA////////////////// ');
-
-            // /*
-            //  * Get list of IDs for settings that have values different from what is currently
-            //  * saved in the changeset. By skipping any values that are already the same, the
-            //  * subset of changed settings can be passed into validate_setting_values to prevent
-            //  * an underprivileged modifying a single setting for which they have the capability
-            //  * from being blocked from saving. This also prevents a user from touching of the
-            //  * previous saved settings and overriding the associated user_id if they made no change.
-            //  */
-            // $changed_setting_ids = array();
-            // foreach ( $customized_data as $setting_id => $setting_value ) {
-            //     if ( ! isset( $setting_value['value'] ) )
-            //       continue;
-
-            //     $setting = $wp_customize->get_setting( $setting_id );
-
-            //     if ( $setting && 'theme_mod' === $setting->type ) {
-            //         $prefixed_setting_id = $wp_customize->get_stylesheet() . '::' . $setting->id;
-            //     } else {
-            //         $prefixed_setting_id = $setting_id;
-            //     }
-
-            //     $is_value_changed = (
-            //         ! isset( $_already_published_data[ $prefixed_setting_id ] )
-            //         ||
-            //         ! array_key_exists( 'value', $_already_published_data[ $prefixed_setting_id ] )
-            //         ||
-            //       $_already_published_data[ $prefixed_setting_id ]['value'] !== $setting_value['value']
-            //     );
-            //     if ( $is_value_changed ) {
-            //         $changed_setting_ids[] = $setting_id;
-            //     }
-            // }//foreach()
-            // $customized_data = wp_array_slice_assoc( $customized_data, $changed_setting_ids );
-
-
-            //AT THIS STAGE, ONLY THE CUSTOMIZED VALUES WITH A DIFFERENT VALUE OF THE ONE CURRENTLY SAVED ARE KEPT In $customized_data
-            do_action( 'customize_save_validation_before', $wp_customize );
-
-            ///////////////////////////////////
-            /// VALIDATE AND SANITIZE
-            $setting_validities = array();
-
-            //setting validation has been implemented in WP 4.6
-            //=> check if the feature exists in the user WP version
-            if ( method_exists( $wp_customize, 'validate_setting_values' ) ) {
-                // Validate settings.
-                $setting_validities = $wp_customize -> validate_setting_values( $customized_data, array(
-                    'validate_capability' => true,
-                    'validate_existence' => true
-                ) );
-
-            } else { // WP version < 4.6
-                $setting_validities = $this -> _ha_validate_setting_values( $customized_data, array(
-                    'validate_capability' => true,
-                    'validate_existence' => true
-                ) );
-            }
-
-            $invalid_setting_count = count( array_filter( $setting_validities, 'is_wp_error' ) );
-
-
-            /*
-             * Short-circuit if there are invalid settings the update is transactional.
-             * A changeset update is transactional when a status is supplied in the request.
-             */
-            if ( $update_transactionally && $invalid_setting_count > 0 ) {
-                $response = array(
-                  'setting_validities' => $setting_validities,
-                  'message' => sprintf( _n( 'There is %s invalid setting.', 'There are %s invalid settings.', $invalid_setting_count ), number_format_i18n( $invalid_setting_count ) ),
-                );
-                return new WP_Error( 'transaction_fail', '', $response );
-            }
-
-            $response = array(
-              'setting_validities'  => $setting_validities,
-              'skope_meta_key'      => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'opt_name'),
-              'skope_id'            => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id' )
-            );
-
-            // Obtain/merge data for changeset.
-            $data = $normalized_published_data;
-            if ( is_wp_error( $data ) ) {
-              $data = array();
-            }
-            // ha_error_log( '//////////////// START EXISTING DATA ////////////////// ');
-            // ha_error_log( print_R( $data , true ) );
-            // ha_error_log( '//////////////// END EXISTING DATA////////////////// ');
-            ///////////////////////////////////
-            /// Ensure that all customized values are included in the changeset data.
-            foreach ( $customized_data as $setting_id => $cust_value ) {
-              if ( ! isset( $data[ $setting_id ] ) ) {
-                $data[ $setting_id ] = array();
-              }
-              $data[ $setting_id ]['value'] = $cust_value;
-            }//foreach()
-
-
-            ///////////////////////////////////
-            /// BUILD DATA TO BE SAVED
-            foreach ( $data as $setting_id => $setting_params ) {
-                if ( 'skope_infos' == $setting_id )
-                  continue;
-                $setting = $wp_customize->get_setting( $setting_id );
-                if ( ! $setting || ! $setting->check_capabilities() ) {
-                    ha_error_log( 'In _publish_skope_changeset_metas, ' . $setting_id . ' is not registered in $wp_customize.' );
-                    continue;
-                }
-
-                // Skip updating changeset for invalid setting values.
-                if ( isset( $setting_validities[ $setting_id ] ) && is_wp_error( $setting_validities[ $setting_id ] ) ) {
-                    continue;
-                }
-
-                // $changeset_setting_id = $setting_id;
-
-                // if ( null === $setting_params ) {
-                //     // Remove setting from changeset entirely.
-                //     unset( $data[ $changeset_setting_id ] );
-                // } else {
-                //     // Merge any additional setting params that have been supplied with the existing params.
-                //     if ( ! isset( $data[ $changeset_setting_id ] ) ) {
-                //       $data[ $changeset_setting_id ] = array();
-                //     }
-                //     $data[ $changeset_setting_id ] = array_merge(
-                //         $data[ $changeset_setting_id ],
-                //         $setting_params,
-                //         array(
-                //           'type' => $setting->type,
-                //           'user_id' => $args['user_id']
-                //         )
-                //     );
-                // }
-            }//foreach()
-
-            // ha_error_log('////////////////// DATA BEFORE FILTER FOR SKOPE : ' . $skope_id );
-            // ha_error_log( print_R( $data, true) );
-
-            //////////////////////////////////////
-            /// PREPARE DATA FOR FRONT END :
-            /// 1) Keep only the value
-            /// 2) Handle multidim theme_mod type
-            $data = ha_prepare_skope_changeset_for_front_end( $data );
-            if ( is_wp_error( $data ) || ! is_array( $data ) ) {
-              $response['publish_skope_changeset_failure'] = 'skope data not valid';
-              return new WP_Error( 'publish_skope_changeset_failure', '', $response );
-            }
-
-            //////////////////////////////////////
-            /// ADD / UPDATE SKOPE INFOS IF NEEDED
-            $data['skope_infos'] = array(
-                'skope_id'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id'),
-                'level_id'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'level_id'),
-                'skope'     => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope'),
-                'obj_id'    => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'obj_id'),
-                'meta_key'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'opt_name')
-            );
-
-            // ha_error_log('////////////////// INFOS : ' . $skope_post_id );
-            // ha_error_log( $skope_meta_key );
-
-            // ha_error_log('////////////////// DATA AFTER FILTER AND BEFORE BEING SAVED FOR SKOPE : ' . $skope_id );
-            // ha_error_log( print_R( $data, true) );
-
-            //////////////////////////////////////
-            /// PUBLISH
-            $r = update_post_meta( $skope_post_id, $skope_meta_key, $data );
-
-            if ( is_wp_error( $r ) ) {
-              $response['changeset_post_save_failure'] = $r->get_error_code();
-              return new WP_Error( 'skope_changeset_post_save_failure', '', $response );
-            }
-
-            return $response;
-        }//_publish_skope_changeset_metas
-
-
-        //hook : 'wp_ajax_czr_clean_skope_changeset_metas_after_publish'
-        function ha_ajax_clean_skope_changeset_metas_after_publish() {
-            global $wp_customize;
-            if ( ! is_user_logged_in() ) {
-                wp_send_json_error( 'unauthenticated' );
-            }
-            if ( ! current_user_can( 'edit_theme_options' ) ) {
-              wp_send_json_error('user_cant_edit_theme_options');
-            }
-            if ( ! $wp_customize->is_preview() ) {
-                wp_send_json_error( 'not_preview' );
-            } else if ( ! current_user_can( 'customize' ) ) {
-                status_header( 403 );
-                wp_send_json_error( 'customize_not_allowed' );
-            } else if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
-                status_header( 405 );
-                wp_send_json_error( 'bad_method' );
-            }
-            $action = 'save-customize_' . $wp_customize->get_stylesheet();
-            if ( ! check_ajax_referer( $action, 'nonce', false ) ) {
-                wp_send_json_error( 'invalid_nonce' );
-            }
-
-            // ha_error_log('////////////////WHAT IS THE CURRENT CHANGESET POST ?');
-            // ha_error_log( print_R( $_POST, true ) );
-            // ha_error_log( $wp_customize->changeset_post_id() );
-            $changeset_post_id = $wp_customize->changeset_post_id();
-
-            if ( ! $changeset_post_id )
-              wp_send_json_error( 'no_changeset_post_id_in_ha_ajax_clean_skope_changeset_metas_after_publish' );
-
-            $all_skope_changeset_metas = get_post_meta( $changeset_post_id );
-            $all_skope_changeset_metas = is_array( $all_skope_changeset_metas ) ? $all_skope_changeset_metas : array();
-
-            // ha_error_log( print_R( $all_skope_changeset_metas, true ) );
-
-            foreach ( $all_skope_changeset_metas as $meta_key => $val ) {
-                $r = delete_post_meta( $changeset_post_id, $meta_key );
-                if ( is_wp_error( $r ) ) {
-                    wp_send_json_error( $r->get_error_message() );
-                    break;
-                }
-            }
-            wp_send_json_success();
-        }
-    }//class
-endif;
-
-?><?php
 /* ------------------------------------------------------------------------- *
  *  SAVE SKOPE CHANGESET
  *  => as a meta of the _temp changeset post if status != "publish"
@@ -1816,7 +1485,7 @@ endif;
 // 3) Sanitize and Validate
 // 4) make sure theme_mods type are well prefixed nav_menu_locations[topbar] should become hueman::nav_menu_locations[topbar]
 if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
-    class HA_Skop_Chset_Save extends HA_Skop_Chset_Publish {
+    class HA_Skop_Chset_Save extends HA_Skop_Chset_Base  {
 
         function __construct() {
           parent::__construct();
@@ -1847,11 +1516,16 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
             );
 
             // We are customizing
-            $changeset_post_id = $wp_customize->changeset_post_id();
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = ha_get_real_wp_changeset_post_id();
+
             $existing_changeset_data = array();
 
             if ( ! $changeset_post_id )
                 wp_send_json_error( 'No changet post id yet' );
+
+
 
             //Default response
             $response = array(
@@ -1860,7 +1534,11 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
 
             $existing_changeset_data = array();
             if ( $changeset_post_id ) {
-                $existing_changeset_data = ha_get_skope_db_data( array( 'post_id' => $changeset_post_id, 'skope_meta_key' => $skope_meta_key, 'is_option_post' => false ) );
+                $existing_changeset_data = ha_get_skope_db_data( array(
+                    'post_id' => $changeset_post_id,
+                    'skope_meta_key' => $skope_meta_key,
+                    'is_option_post' => false )
+                );
             }
 
             if ( is_wp_error( $existing_changeset_data ) ) {
@@ -2048,6 +1726,15 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
 
             // ha_error_log('////////////////// DATA BEING SAVED FOR SKOPE : ' . $skope_id );
             // ha_error_log( print_R( $data, true) );
+            //////////////////////////////////////
+            /// ADD / UPDATE SKOPE INFOS IF NEEDED
+            $data['skope_infos'] = array(
+                'skope_id'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id'),
+                'level_id'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'level_id'),
+                'skope'     => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope'),
+                'obj_id'    => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'obj_id'),
+                'meta_key'  => HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'opt_name')
+            );
 
             //////////////////////////////////////
             /// SAVE
@@ -2143,7 +1830,9 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
 
             // We are customizing
-            $changeset_post_id = $wp_customize->changeset_post_id();
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = ha_get_real_wp_changeset_post_id();
 
             if ( ! $changeset_post_id ) {
               wp_send_json_success( 'No changet post id' );
@@ -2235,7 +1924,9 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
             }
 
             // We are customizing
-            $changeset_post_id = $wp_customize->changeset_post_id();
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = ha_get_real_wp_changeset_post_id();
 
             if ( ! $changeset_post_id ) {
               wp_send_json_success( 'No changet post id' );
@@ -2502,7 +2193,10 @@ if ( ! class_exists( 'HA_Skop_Chset_Reset' ) ) :
               ha_error_log( 'no meta key found in get_unsanitized_skope_changeset() for skope : ' . $skope_id );
               return array();
             }
-            $changeset_post_id = $wp_customize -> changeset_post_id();
+            // We are customizing
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = ha_get_real_wp_changeset_post_id();
             $changeset_data = ha_get_skope_db_data(
                 array(
                     'post_id' => $changeset_post_id,
@@ -2623,16 +2317,28 @@ endif;
 
 if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
     final class HA_Skop_Cust_Prev {
+        public $changeset_post_id;//<= ha_get_real_wp_changeset_post_id();
+
         function __construct() {
             /* ------------------------------------------------------------------------- *
              *  CUSTOMIZE PREVIEW : export skope data
             /* ------------------------------------------------------------------------- */
             add_action( 'wp_footer', array( $this, 'ha_print_server_skope_data' ), 30 );
+
+            $this->changeset_post_id = ha_get_real_wp_changeset_post_id();
         }
 
 
 
         //hook : 'wp_footer'
+        //// => will be send to control panel by /addons/assets/czr/fmk/js/czr-preview-base.js with
+        // api.preview.bind( 'sync', function( events ) {
+        //       api.preview.send( 'czr-skopes-synced', {
+        //             czr_skopes : _wpCustomizeSettings.czr_skopes || [],
+        //             isChangesetDirty : _wpCustomizeSettings.isChangesetDirty || false,
+        //             skopeGlobalDBOpt : _wpCustomizeSettings.skopeGlobalDBOpt || [],
+        //       } );
+        // });
         function ha_print_server_skope_data() {
             if ( ! HU_AD() -> ha_is_customize_preview_frame() )
               return;
@@ -2679,15 +2385,19 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
               return false;
 
             global $wp_customize;
+            // We are customizing
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = $this->changeset_post_id;
+            //was $changeset_post_id = $wp_customize->changeset_post_id();
 
-            $skope_post_id = $wp_customize->changeset_post_id();
-            if ( false == $skope_post_id || empty( $skope_post_id ) )
+            if ( false == $changeset_post_id || empty( $changeset_post_id ) )
               return;
 
             $_level_list = array( 'global', 'group', 'special_group', 'local' );
             $is_dirty = false;
             foreach ( $_level_list as $level ) {
-              $_changeset_data = ha_get_skope_db_data( array( 'post_id' => $skope_post_id, 'skope_meta_key' => null, 'level' => $level ) );
+              $_changeset_data = ha_get_skope_db_data( array( 'post_id' => $changeset_post_id, 'skope_meta_key' => null, 'level' => $level ) );
               if ( 'global' == $level ) {
                 if ( count($_changeset_data) > 1 )
                   $is_dirty = true;
@@ -2855,9 +2565,13 @@ if ( ! class_exists( 'HA_Skop_Cust_Prev' ) ) :
             //   - post content for global options
             //   - post metas for not global skope options
 
-            $skope_post_id = $wp_customize->changeset_post_id();
-            if ( false != $skope_post_id && ! empty( $skope_post_id ) ) {
-              $skope_changeset_val = ha_get_skope_db_data( array( 'post_id' => $skope_post_id, 'skope_meta_key' => $skope_meta_key, 'level' => $level ) );
+            // We are customizing
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = $this->changeset_post_id;
+
+            if ( false != $changeset_post_id && ! empty( $changeset_post_id ) ) {
+              $skope_changeset_val = ha_get_skope_db_data( array( 'post_id' => $changeset_post_id, 'skope_meta_key' => $skope_meta_key, 'level' => $level ) );
             } else {
               ha_error_log('NO CHANGESET POST AVAILABLE in _ha_get_api_ready_skope_changeset when getting changset for skope : ' . $level );
               return array();
@@ -3279,205 +2993,6 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
 
               ));
         }//hu_add_skp_translated_strings
-
-
-        //hook : customize_register
-        // function ha_prepare_skopify_customizer_save() {
-        //   //Which options are we targeting there?
-        //   // 1) the theme options
-        //   // 2) the WP built in options
-        //   $_options_to_skope = HU_customize::$instance -> hu_get_wp_builtin_settings();
-        //   $_options_to_skope[] = HU_THEME_OPTIONS;
-
-        //   if ( apply_filters( 'ha_skope_sidebars_widgets', false ) ) {
-        //       $_options_to_skope[] = 'sidebars_widgets';
-        //       $_options_to_skope  = array_merge( $_options_to_skope, hu_get_registered_widgets_option_names() );
-        //   }
-
-        //   //loop on the targeted option to dynamically set the type on save
-        //   foreach ( $_options_to_skope as $_opt_name ) {
-        //     add_action( "customize_save_{$_opt_name}"  , 'ha_set_setting_type' );
-        //   }
-
-        //   // add_action( 'customize_update_trans' , 'ha_customizer_set_trans', 10, 2 );
-        //   // add_action( 'customize_update_post_meta' , 'ha_customizer_set_post_meta', 10, 2 );
-        //   // add_action( 'customize_update_term_meta' , 'ha_customizer_set_term_meta', 10, 2 );
-        //   // add_action( 'customize_update_user_meta' , 'ha_customizer_set_user_meta', 10, 2 );
-        //   add_action( 'customize_update_skope_meta' , 'ha_customizer_save_skope_meta', 10, 2 );
-
-
-        //   //CHANGESET
-        //   //add_filter( 'customize_changeset_save_data', 'ha_customizer_set_changet_data', 10, 2 );
-        //   //'wp_insert_post_data' is declared in wp-includes/post
-        //   //add_filter( 'wp_insert_post_data', 'ha_customizer_set_changet_post_data', 100, 2 );
-
-        //   //EXPERIMENT
-        //   $theme_name = ha_get_skope_theme_name();//is always the parent theme name
-        //   //add_action( "customize_save_{$theme_name}_global_skope"  , 'ha_set_setting_type' );
-        //   //add_action( 'customize_update_global_option' , 'ha_customizer_set_global_option', 10, 2 );
-        // }
-
-
-        /* ------------------------------------------------------------------------- *
-         *  Set Changeset Data for skope
-        /* ------------------------------------------------------------------------- */
-        // function ha_customizer_set_changet_data( $data, $filter_context ) {
-        //   return $data;
-        // }
-
-        // //hook : 'wp_insert_post_data'
-        // function ha_customizer_set_changet_post_data( $data, $postarr ) {
-        //   if ( $data['post_type'] != 'customize_changeset' )
-        //     return $data;
-        //   if ( isset( $_POST['skope']) && 'global' == $_POST['skope'] )
-        //     return $data;
-
-        //   if ( ! isset( $_POST['opt_name']) || ! isset( $_POST['skope_id'] ) || ! isset( $_POST['skopeCustomized'] ) )
-        //     return $data;
-        //   $opt_name = $_POST['opt_name'];
-        //   $skope_id = $_POST['skope_id'];
-        //   $skope_customized = json_decode( wp_unslash($_POST['skopeCustomized'] ), true );
-
-        //   if ( ! isset( $skope_customized[$skope_id] ) )
-        //     return $data;
-
-        //   $skope_settings = $skope_customized[$skope_id];
-        //   $data['meta_input'] = ! isset( $data['meta_input'] ) ? array(): $data['meta_input'];
-        //   $data['meta_input'][$opt_name] = 'JOIE';//$skope_settings;
-
-        //   return $data;
-        // }
-
-
-        /* ------------------------------------------------------------------------- *
-         *  Set the dynamic type sent by $_POST
-        /* ------------------------------------------------------------------------- */
-        //hook : customize_save_hu_theme_options
-        //hook fired in WP_Customize_Setting
-        //at this point, the nonce has already been checked by the customizer manager
-        //if 'wp_default_type' is specified, then always falls back to wp type
-        //=> 'wp_default_type' is typically used when saving a skope excluded setting. It should not be parsed by this action because it's option name based but this is a paranoid, irrational security.
-        // function ha_set_setting_type( $setting ) {
-        //     //don't fire when saving the global skope
-        //     if ( 'global' == HA_SKOP_OPT() -> ha_get_current_customized_skope() )
-        //       return;
-
-        //     if ( ! $setting->check_capabilities() )
-        //       return new WP_Error( 'user_not_allowed' );
-
-        //     $skope_id     = HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id' );
-        //     $global_value = $setting -> post_value();
-
-        //     //$global_value is used as a fallback
-        //     //HA_SKOP_OPT() -> ha_get_customized_value returns a validated and sanitized value
-        //     $skope_value  = HA_SKOP_OPT() -> ha_get_customized_value( $setting->id, $global_value);//inheritance set to false by default
-
-        //     if (  ! isset( $skope_value ) )
-        //       return; //new WP_Error( 'no_value_for_setting_id' . $setting->id );
-
-        //     if ( 'theme_mod' != $setting -> type )
-        //       $setting -> type = ( ! isset($_POST['dyn_type']) || 'wp_default_type' == $_POST['dyn_type'] ) ? $setting -> type : $_POST['dyn_type'];
-        //     else if ( isset($_POST['skope']) && 'global' == $_POST['skope'] ) {
-        //       $setting -> type = 'theme_mod';
-        //     }
-        //     else {
-        //       $setting -> type = ( ! isset($_POST['dyn_type']) || 'wp_default_type' == $_POST['dyn_type'] ) ? $setting -> type : $_POST['dyn_type'];
-        //     }
-        // }
-
-
-
-
-
-        /* ------------------------------------------------------------------------- *
-         *  Write the skope options in DB
-        /* ------------------------------------------------------------------------- */
-        //hook : customize_update_global_option
-        //at this point, the nonce has already been checked by the customizer manager
-        //This callback is fired in WP_Customize_Setting::update()
-        //@param $value has been sanitized in WP_Customize_Setting::save() at this point, by WP_Customize_Manager::post_value()
-        // function ha_customizer_set_global_option( $value, $setting ) {
-        //     if ( ! $_POST['opt_name'] || $_POST['opt_name'] != HA_SKOP_OPT() -> global_skope_optname || ! $setting->check_capabilities() || ! isset( $value ) )
-        //       return;
-        //     $db_opt_val = hu_get_raw_option( HA_SKOP_OPT() -> global_skope_optname );
-        //     $new_value = _ha_customizer_preprocess_save_value( $value, $setting, $db_opt_val );
-        //     update_option( $_POST['opt_name'], $new_value );
-        // }
-
-
-
-
-
-        //hook : customize_update_skope_meta
-        //at this point, the nonce has already been checked by the customizer manager
-        //This callback is fired in WP_Customize_Setting::update()
-        //@param $value has been sanitized in WP_Customize_Setting::save() at this point, by WP_Customize_Manager::post_value()
-        //At this stage, the setting validity has been checked by the WP_Customize_Manager::save() method
-        // function ha_customizer_save_skope_meta( $value, $setting ) {
-        //     if ( ! $_POST['opt_name'] )
-        //       return new WP_Error( 'missing_skope_meta_key' );
-
-        //     if ( ! $setting->check_capabilities() )
-        //       return new WP_Error( 'missing_skope_meta_key' );
-
-        //     $skope_id     = HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'skope_id' );
-        //     $global_value = $value;
-        //     // HA_SKOP_OPT() -> ha_get_customized_value() returns a validated and sanitized customized value
-        //     $skope_value  = HA_SKOP_OPT() -> ha_get_customized_value( $setting->id, $global_value ); //$global_value is used as a fallback
-
-        //     if ( ! isset( $skope_value ) )
-        //       return;
-
-        //     $skope_meta_key = HA_SKOP_OPT() -> ha_get_sanitized_post_value( 'opt_name' );
-        //     $skope_post_id  = get_option('skope-post-id');
-        //     if ( false === $skope_post_id || empty($skope_post_id) )
-        //       return new WP_Error( 'missing_skope_post_id' );
-
-        //     global $wp_customize;
-        //     $setting_validities = array();
-
-        //     //setting validation has been implemented in WP 4.6
-        //     //=> check if the feature exists in the user WP version
-        //     if ( method_exists($wp_customize, 'validate_setting_values') ) {
-        //         // Validate setting value.
-        //         // This is normally done by the manager before the setting->save() call.
-        //         // But for skope we need to do it now, for each setting id.
-        //         $setting_validities = $wp_customize->validate_setting_values( array( $setting->id => $skope_value ), array(
-        //           'validate_capability' => true,
-        //           'validate_existence' => true,
-        //         ) );
-        //         $invalid_setting_count = count( array_filter( $setting_validities, 'is_wp_error' ) );
-
-        //         if ( $invalid_setting_count > 0 ) {
-        //           $response = array(
-        //             'setting_validities' => $setting_validities,
-        //             'message' => sprintf( _n( 'There is %s invalid setting.', 'There are %s invalid settings.', $invalid_setting_count ), number_format_i18n( $invalid_setting_count ) ),
-        //           );
-        //           return new WP_Error( 'transaction_fail', '', $response );
-        //         }
-        //     }
-
-        //     $response = array(
-        //       'setting_validities' => $setting_validities,
-        //     );
-
-
-        //     // Obtain/merge data for skope meta
-        //     $existing_changeset_data = ha_get_skope_db_data( array( 'post_id' => $skope_post_id, 'skope_meta_key' => $skope_meta_key ) );
-        //     $data = $existing_changeset_data;
-        //     if ( is_wp_error( $data ) ) {
-        //       $data = array();
-        //     }
-
-        //     $data[ $setting->id ] = $skope_value;
-
-        //     $r = HA_SKOP_OPT() -> ha_set_skope_option_val( $setting->id, $skope_value, $skope_meta_key );
-
-        //     if ( is_wp_error( $r ) ) {
-        //       $response['skope_post_save_failure'] = $r->get_error_code();
-        //       return new WP_Error( 'skope_post_save_failure', '', $response );
-        //     }
-        // }
     }//class
 endif;
 
@@ -3496,6 +3011,7 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
         public static $_local_opt;
         public static $_skope_excluded_settings;
         public $global_skope_optname;
+        public $changeset_post_id;//<= ha_get_real_wp_changeset_post_id();
 
         function __construct() {
             //SIDEBAR WIDGETS
@@ -3546,8 +3062,7 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
             //It is updated each time the global skope get saved or reset in the customizer
             //It is used to send the list of currently modified global settings in db
             $theme_name = ha_get_skope_theme_name();
-            $this -> global_skope_optname = "{$theme_name}_global_skope";
-
+            $this->global_skope_optname = "{$theme_name}_global_skope";
         }//construct
 
 
@@ -3705,6 +3220,11 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
         /* ------------------------------------------------------------------------- */
         //hook : wp
         function ha_setup_skope_option_filters() {
+            // When Customizing cache the changeset_post_id now
+            if ( isset( $GLOBALS['wp_customize'] ) ) {
+              $this->changeset_post_id = ha_get_real_wp_changeset_post_id();
+            }
+
             //FILTER THEME OPTIONS
             add_filter( 'hu_opt', array( $this, 'ha_filter_hu_opt_for_skope' ), 1000, 4 );
 
@@ -4078,7 +3598,11 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
         /* ------------------------------------------------------------------------- */
 
         function _get_sanitized_preview_val( $_opt_val , $opt_name ) {
+
             $rev_index        = $this -> ha_get_sanitized_post_value( 'revisionIndex' );
+            /////////////////////////////////////////////////
+            //error_log('revisionIndex', $rev_index );
+            /////////////////////////////////////////////////
             $rev_index        = '__not_posted__' == $rev_index ? 'initial' : $rev_index;
             $cache_customized = $this -> _skope_preview_values;
             $preview_val      = '';
@@ -4147,7 +3671,7 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
         //6) Falls back on the default setting val
         function _get_simple_sanitized_preview_val( $_original_val , $opt_name, $skope_id = null, $child_value = null ) {
             $val_candidate            = is_null( $child_value ) ? '_not_customized_' : $child_value;
-            $skope_id                 =  is_null( $skope_id ) ? $this -> ha_get_sanitized_post_value( 'skope_id' ) : $skope_id;
+            $skope_id                 = is_null( $skope_id ) ? $this -> ha_get_sanitized_post_value( 'skope_id' ) : $skope_id;
             $skope_level              = $this -> ha_get_skope_level( $skope_id );
             $_skope_customized_val    = $this -> _ha_get_simple_sanitized_customized_value( $opt_name, $skope_id, $_original_val );
             $_skope_db_meta_val       = $this -> _get_front_end_val( $_original_val, $opt_name, $skope_level );
@@ -4429,7 +3953,10 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
               ha_error_log( 'no meta key found in _get_unsanitized_skope_changeset_values() for skope : ' . $skope_id );
               return array();
             }
-            $changeset_post_id = $wp_customize -> changeset_post_id();
+            // @4.9compat
+            // the changeset_post_id might be the one of the autosave, which is not $wp_customize->changeset_post_id();
+            $changeset_post_id = $this->changeset_post_id;
+
             $changeset_data = ha_get_skope_db_data(
                 array(
                     'post_id' => $changeset_post_id,
@@ -4444,9 +3971,17 @@ if ( ! class_exists( 'HA_Skop_Option_Preview' ) ) :
                 $changeset_data = array();
             }
 
+            // the skope infos is included in each skope changeset post meta data
+            // we skip it
             foreach ( $changeset_data as $raw_setting_id => $setting_data ) {
+                if ( 'skope_infos' == $raw_setting_id  )
+                  continue;
                 if ( ! is_array( $setting_data ) || ! array_key_exists( 'value', $setting_data ) ) {
                   ha_error_log( 'Problem in _get_unsanitized_skope_changeset_values, the setting_data of the changeset are not well formed for skope : ' . $skope_id );
+                  ha_error_log( 'setting id ' . $raw_setting_id );
+                  ha_error_log( '<SETTING DATA>' );
+                  ha_error_log( print_r( $setting_data, true ) );
+                  ha_error_log( '</SETTING DATA>' );
                   continue;
                 }
 
@@ -4991,10 +4526,42 @@ function HA_SKOP_OPT() {
     return HA_Skop_Option::ha_skop_opt_instance();
 }
 
+
+// skop-0-init-base.php
+//  - registers the czr_skope_opt post type and creates a skope post if not yet created => this skope post will be used to store our skope data as post meta
+//  - declares option excluded, protected from skoping
+//  - declares helpers to
+//      x prepare skope changeset for front end
+//      x get skope post id
+//      x get skope db data
+//      x get skope data
+//      x get skope default model
+//      x handle the "skopification" of previous Hueman layout options
+//
 if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-0-init-base.php' );
 }
 
+
+// "hu_hueman_loaded" is triggered in hueman/functions/init-core.php when all setup classes have been loaded and actions hooks scheduled
+// this hook fires after 'plugins_loaded' at 'setup_theme', before 'after_setup_theme' ( and therefore 'init' )
+// skop-options-base.php
+//  - handles the skope option caching
+//  - helpers :
+//    x get skope option
+//  - setup filters to get options : for preview, for frontend
+//
+// skop-options-front-end-value.php :
+// - apply the skope inheritance to return the relevant value
+//
+// skop-options-preview-value.php :
+// - get the sanitized preview val => for each level recursively take the customized, then db val, and fallback on default.
+//
+// skop-options-x-final.php :
+// - compute the multidimensional preview val
+//
+// skop-options-x-final.php
+// - register skope specific customizer setting-controls : show-skop-infos
 add_action('hu_hueman_loaded', 'ha_load_skop_options');
 function ha_load_skop_options() {
     if ( defined('CZR_DEV') && true === CZR_DEV ) {
@@ -5006,41 +4573,42 @@ function ha_load_skop_options() {
     HA_SKOP_OPT();
 }
 
-
+// skop-customize-register.php
+//  - re-instantiate the 'header_image_data' and 'header_image' with a custom setting Class
+//  - filter hu_js_customizer_control_params with additional localized params
 if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-register.php' );
 }
+// Loads the various tmpl used by skope
 require_once( HA_BASE_PATH . 'addons/skop/tmpl/skope-tmpls.php' );
 
 new HA_Skop_Cust_Register();
 
-//Customizer Ajax : we must for Hueman to be loaded (some Hueman constants are used)
+
+
+// Customizer Ajax : we must for Hueman to be loaded (some Hueman constants are used)
 add_action('hu_hueman_loaded', 'ha_load_skop_ajax');
-
-add_action('init', 'ha_load_skop_customizer_preview' );
-function ha_load_skop_customizer_preview() {
-    //CUSTOMIZE PREVIEW : export skope data
-    if ( HU_AD() -> ha_is_customize_preview_frame() ) {
-        if ( defined('CZR_DEV') && true === CZR_DEV ) {
-            require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-preview.php' );
-        }
-        new HA_Skop_Cust_Prev();
-    }
-}
-
-
-//hook : 'hu_hueman_loaded'
+// hook : 'hu_hueman_loaded'
+// skop-ajax-changeset-base.php + publish + save :
+//   - determine if it's a publish case or a "save for later" changeset ( draft or schedule )
+//      x if published => save as a post meta of the skope post => update_post_meta( $skope_post_id, $skope_meta_key, $data );
+//      x if saved => save as post meta of the current changeset post => update_post_meta( $changeset_post_id, $skope_meta_key, $data );
+// skop-ajax-reset.php :
+//  - reset published and drafted options
 function ha_load_skop_ajax() {
     if ( defined('CZR_DEV') && true === CZR_DEV ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-base.php' );
-        require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-publish.php' );
+        //<@4.9compat>
+        // Now handled in skop-x-fire when the wp customize_changeset post is transitionning to "publish"
+        //require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-publish.php' );
+        //</@4.9compat>
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-changeset-save.php' );
         require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-ajax-reset.php' );
     }
     new HA_Skop_Chset_Reset();
 }
 if ( defined('CZR_DEV') && true === CZR_DEV ) {
-    if ( apply_filters('ha_print_skope_logs' , true ) ) {
+    if ( apply_filters('ha_print_skope_logs' , false ) ) {
         require_once( HA_BASE_PATH . 'addons/skop/_dev/_dev_skop-logs.php' );
         function ha_instantiate_dev_logs() {
             if ( class_exists( 'HA_skop_dev_logs') ) {
@@ -5054,8 +4622,439 @@ if ( defined('CZR_DEV') && true === CZR_DEV ) {
                 );
             }
         }
-        //add_action('hu_hueman_loaded', 'ha_instantiate_dev_logs', 100 );
+        add_action('hu_hueman_loaded', 'ha_instantiate_dev_logs', 100 );
     }
 }
 
+
+// - print server skope data
+// => will be send to control panel by /addons/assets/czr/fmk/js/czr-preview-base.js with
+// api.preview.bind( 'sync', function( events ) {
+//       api.preview.send( 'czr-skopes-synced', {
+//             czr_skopes : _wpCustomizeSettings.czr_skopes || [],
+//             isChangesetDirty : _wpCustomizeSettings.isChangesetDirty || false,
+//             skopeGlobalDBOpt : _wpCustomizeSettings.skopeGlobalDBOpt || [],
+//       } );
+// });
+add_action('init', 'ha_load_skop_customizer_preview' );
+function ha_load_skop_customizer_preview() {
+    //CUSTOMIZE PREVIEW : export skope data
+    if ( HU_AD() -> ha_is_customize_preview_frame() ) {
+        if ( defined('CZR_DEV') && true === CZR_DEV ) {
+            require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-preview.php' );
+        }
+        new HA_Skop_Cust_Prev();
+    }
+}
+
+
+
+// WP publishes changeset when the customize_changeset post type transitions to "publish"
+// This is done with add_action( 'transition_post_status', '_wp_customize_publish_changeset', 10, 3 );
+// in wp-includes/default-filters.php
+// Let's use the same logic to publish our skope metas
+add_action( 'transition_post_status', 'ha_publish_skope_changeset_metas_on_post_status_transition', 0, 3 );
+add_action( 'transition_post_status', 'ha_trash_skope_changeset_metas_on_post_status_transition', 0, 3 );
+
+/**
+ * hook : 'transition_post_status'
+ * Inspired of _wp_customize_publish_changeset in wp-includes/theme.php
+ * Publishes a snapshot's changes.
+ *
+ *
+ * @global wpdb                 $wpdb         WordPress database abstraction object.
+ * @global WP_Customize_Manager $wp_customize Customizer instance.
+ *
+ * @param string  $new_status     New post status.
+ * @param string  $old_status     Old post status.
+ * @param WP_Post $changeset_post Changeset post object.
+ */
+function ha_publish_skope_changeset_metas_on_post_status_transition( $new_status, $old_status, $changeset_post ) {
+    global $wp_customize, $wpdb;
+
+    $is_publishing_changeset = (
+      'customize_changeset' === $changeset_post->post_type
+      &&
+      'publish' === $new_status
+      &&
+      'publish' !== $old_status
+    );
+
+    // ha_error_log('<TRANSITION POST STATUS CB>');
+    // ha_error_log( 'Old Status ' . $old_status );
+    // ha_error_log( 'New Status ' . $new_status );
+    // ha_error_log('</TRANSITION POST STATUS CB>');
+
+    if ( ! $is_publishing_changeset ) {
+      return;
+    }
+
+    if ( empty( $wp_customize ) ) {
+      require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+      $wp_customize = new WP_Customize_Manager( array(
+        'changeset_uuid' => $changeset_post->post_name,
+        'settings_previewed' => false,
+      ) );
+    }
+
+    // The theme name is used to prefix the kope meta_key. Ex : hueman_czr_post_page_home
+    $theme_name = ha_get_skope_theme_name();
+
+    // DECLARE THE ARRAY THAT WILL COLLECT ERRORS
+    $response = array();
+
+    // GET THE TRANSITIONNING CHANGESET POST ID
+    $changeset_post_id = $changeset_post->ID;
+
+    // PREPARE THE CHANGESET DATA FOR PUBLICATION
+    // [hueman_czr_all_page] => Array
+    //     (
+    //         [blogdescription] => Array
+    //             (
+    //                 [value] => Just another WordPress site
+    //                 [type] => option
+    //                 [user_id] => 1
+    //             )
+
+    //         [skope_infos] => Array
+    //             (
+    //                 [skope_id] => group_all_page
+    //                 [level_id] => all_page
+    //                 [skope] => group
+    //                 [obj_id] =>
+    //                 [meta_key] => hueman_czr_all_page
+    //             )
+
+    //     )
+
+    // [hueman_czr_post_page_home] => Array
+    //     (
+    //         [blogdescription] => Array
+    //             (
+    //                 [value] => Home tag
+    //                 [type] => option
+    //                 [user_id] => 1
+    //             )
+    //          [hueman::nav_menu_locations[topbar]] => Array
+    //             (
+    //                  [value] => 177
+              //        [type] => theme_mod
+              //        [user_id] => 1
+              //   )
+
+              // [hueman::nav_menu_locations[mobile]] => Array
+              //   (
+              //        [value] => 179
+              //         [type] => theme_mod
+    //                   [user_id] => 1
+    //             )
+    //         [skope_infos] => Array
+    //             (
+    //                 [skope_id] => local_post_page_home
+    //                 [level_id] => post_page_home
+    //                 [skope] => local
+    //                 [obj_id] => home
+    //                 [meta_key] => hueman_czr_post_page_home
+    //             )
+    //     )
+    $raw_changeset_data = get_post_meta( $changeset_post_id );
+    $raw_changeset_data = is_array( $raw_changeset_data ) ? $raw_changeset_data : array();
+
+    $unserialized_changeset_data = array();
+    foreach ( $raw_changeset_data as $meta_key => $meta_value ) {
+        // a skope meta key must start with the theme name
+        if ( ! is_string( $meta_key ) || $theme_name != substr( $meta_key, 0 , strlen( $theme_name ) ) )
+          continue;
+
+        if ( is_array( $meta_value ) && 1 == count( $meta_value ) ) {
+            $unserialized_changeset_data[ $meta_key ] = maybe_unserialize( $meta_value[0] );
+        } else {
+            $unserialized_changeset_data[ $meta_key ] = array_map( 'maybe_unserialize', $meta_value );
+        }
+    }
+
+    // error_log('<CHANGESET RAW DATA>');
+    // error_log( print_r( $unserialized_changeset_data, true ) );
+    // error_log('</CHANGESET RAW DATA>');
+
+    // PREPARE CUSTOMIZE_DATA
+    // Array
+    // (
+    //     [blogdescription] => Array
+    //         (
+    //             [value] => Site tagline
+    //         )
+
+    //     [blogname] => Array
+    //         (
+    //             [value] => Site name
+    //         )
+    //    [hueman::nav_menu_locations[topbar]] => Array
+    //        (
+    //             [value] => 177
+    //        )
+    // )
+    //
+    // Should become
+    // array(
+    //  [blogdescription] => Site tagline
+    //  [blogname] => Site name
+    //  [nav_menu_locations] => array(
+    //      [topbar] => 177
+    //  )
+    // )
+    $changeset_candidate_data = array();
+    foreach ( $unserialized_changeset_data as $skope_meta_key => $customized_data ) {
+        $changeset_candidate_data[$skope_meta_key] = array_key_exists( $skope_meta_key, $changeset_candidate_data ) ? $changeset_candidate_data[$skope_meta_key] : array();
+        foreach ( $customized_data as $raw_setting_id => $setting_data ) {
+            if ( ! is_array( $setting_data ) || ! array_key_exists( 'value', $setting_data ) ) {
+              //ha_error_log( ' sent are not well formed for skope : ' . $skope_id );
+              continue;
+            }
+
+            $setting_id = $raw_setting_id;
+            // If theme_mod type, get rid of the theme name prefix
+            if ( isset( $setting_data['type'] ) && 'theme_mod' === $setting_data['type'] ) {
+                $namespace_pattern = '/^(?P<stylesheet>.+?)::(?P<setting_id>.+)$/';
+                if ( preg_match( $namespace_pattern, $raw_setting_id, $matches ) && $wp_customize->get_stylesheet() === $matches['stylesheet'] ) {
+                  $setting_id = $matches['setting_id'];
+                }
+            }
+            $changeset_candidate_data[$skope_meta_key][$setting_id] = $setting_data;
+        }
+    }
+
+
+
+    // error_log('<CHANGESET CANDIDATE DATA>');
+    // error_log( print_r( $changeset_candidate_data, true ) );
+    // error_log('</CHANGESET CANDIDATE DATA>');
+
+
+    // GET THE ALREADY PUBLISHED DATA
+    $skope_post_id  = get_option('skope-post-id');
+    if ( false === $skope_post_id || empty( $skope_post_id ) ) {
+        wp_send_json_error( 'missing skope_post_id when attempting to publish the meta changeset' );
+    }
+
+    if ( ! $skope_post_id ) {
+        wp_send_json_error( 'NO SKOPE CHANGESET POST ID' );
+        return;
+    }
+
+
+    //GET AND PREPROCESS ALL PUBLISHED SKOPE METAS
+    $raw_published_data = get_post_meta( $skope_post_id );
+    $raw_published_data = is_array( $raw_published_data ) ? $raw_published_data : array();
+    $unserialized_published_data = array();
+    foreach ( $raw_published_data as $meta_key => $meta_value ) {
+        if ( is_array( $meta_value ) && 1 == count( $meta_value ) ) {
+            $unserialized_published_data[ $meta_key ] = maybe_unserialize( $meta_value[0] );
+        } else {
+            $unserialized_published_data[ $meta_key ] = array_map( 'maybe_unserialize', $meta_value );
+        }
+    }
+
+
+    // error_log('<PUBLISHED RAW DATA>');
+    // error_log( print_r( $unserialized_published_data, true ) );
+    // error_log('</PUBLISHED RAW DATA>');
+
+    if ( is_wp_error( $unserialized_published_data ) ) {
+        $response['publish_skope_changeset_failure'] = $unserialized_published_data -> get_error_code();
+        return new WP_Error( 'publish_skope_changeset_failure', '', $response );
+    }
+
+    //in publish context, the saved data looks like
+    // [hu_theme_options[copyright]] => copyright SAMPLE 7
+    //
+    // in changeset update context, the saved data looks like
+    // [hu_theme_options[copyright]] => Array
+    // (
+    //     [value] => copyright SAMPLE
+    //     [type] => option
+    //     [user_id] => 1
+    // )
+    $changesetified_published_data = array();
+    // An option like nav_menu_locations is saved as :
+    //  [nav_menu_locations] => Array
+    // (
+    //     [footer] => 2
+    //     [topbar] => 4
+    //     [header] => 3
+    // )
+    // => it must be turned into changeset compatible settings looking like :
+    // nav_menu_locations[footer] = array( 'value' => 2 )
+    // nav_menu_locations[topbar] = array( 'value' => 4 )
+    // nav_menu_locations[header] = array( 'value' => 3 )
+    foreach ( $unserialized_published_data as $skope_meta_key => $options_data ) {
+        // a skope meta key must start with the theme name
+        if ( ! is_string( $skope_meta_key ) || $theme_name != substr( $skope_meta_key, 0 , strlen( $theme_name ) ) )
+          continue;
+
+        $changesetified_published_data[ $skope_meta_key ] = array();
+        foreach ( $options_data as $_setid => $_value ) {
+            //Keep the skope infos as is
+            if ( 'skope_infos' == $_setid ) {
+                $changesetified_published_data[ $skope_meta_key ][$_setid] = $_value;
+            } else if ( _ha_is_wp_setting_multidimensional( $_setid ) ) {
+                $to_merge = _ha_build_multidimensional_db_option( $_setid, $_value );
+                foreach ( $to_merge as $_id => $val ) {
+                    $changesetified_published_data[ $skope_meta_key ][$_id] = array( 'value' => $val );
+                }
+            } else {
+                $changesetified_published_data[ $skope_meta_key ][$_setid] = array( 'value' => $_value );
+            }
+        }
+    }
+
+    // error_log('<CHANSETIFIED PUBLISHED DATA>');
+    // error_log( print_r( $changesetified_published_data, true ) );
+    // error_log('</CHANSETIFIED PUBLISHED DATA>');
+
+    // Obtain/merge data for changeset.
+    $publication_candidate_data = $changesetified_published_data;
+    if ( is_wp_error( $publication_candidate_data ) ) {
+      $publication_candidate_data = array();
+    }
+
+
+    ///////////////////////////////////
+    /// Ensure that all changeset values are included in the published data.
+    foreach ( $changeset_candidate_data as $skope_meta_key => $skope_values ) {
+        // a skope meta key must start with the theme name
+        if ( ! is_string( $skope_meta_key ) || $theme_name != substr( $skope_meta_key, 0 , strlen( $theme_name ) ) )
+          continue;
+
+        if ( ! array_key_exists( $skope_meta_key, $publication_candidate_data ) ) {
+            $publication_candidate_data[$skope_meta_key] = array();
+        }
+        foreach ( $skope_values as $setting_id => $set_value ) {
+            if ( ! array_key_exists( $setting_id, $publication_candidate_data[$skope_meta_key] ) ) {
+                $publication_candidate_data[$skope_meta_key][ $setting_id ] = array();
+            }
+            if ( ! array_key_exists( 'value', $set_value ) ) {
+                continue;
+                ha_error_log( 'A setting value is not well formed for setting : ' . $setting_id );
+            }
+
+            $publication_candidate_data[$skope_meta_key][ $setting_id ]['value'] = $set_value['value'];
+        }//foreach()
+    }
+
+
+
+    // error_log('<$publication_candidate_data BEFORE PREPARATION>');
+    // error_log( print_r( $publication_candidate_data, true ) );
+    // error_log('</$publication_candidate_data BEFORE PREPARATION>');
+
+
+    ///////////////////////////////////
+    /// BUILD DATA TO BE SAVED
+    foreach ( $publication_candidate_data as $skope_meta_key => $options_data ) {
+        foreach ( $options_data as $setting_id => $setting_params ) {
+            if ( 'skope_infos' == $setting_id )
+              continue;
+            $setting = $wp_customize->get_setting( $setting_id );
+            if ( ! $setting || ! $setting->check_capabilities() ) {
+                ha_error_log( 'In _publish_skope_changeset_metas, ' . $setting_id . ' is not registered in $wp_customize.' );
+                continue;
+            }
+        }//foreach()
+
+        //////////////////////////////////////
+        /// PREPARE DATA FOR FRONT END :
+        /// 1) Keep only the value
+        /// 2) Handle multidim theme_mod type
+        $publication_candidate_data[$skope_meta_key] = ha_prepare_skope_changeset_for_front_end( $publication_candidate_data[$skope_meta_key] );
+
+        if ( is_wp_error( $publication_candidate_data[$skope_meta_key] ) || ! is_array( $publication_candidate_data[$skope_meta_key] ) ) {
+            $response[$skope_meta_key] = 'skope data not valid';
+            return new WP_Error( 'publish_skope_changeset_failure', '', $response );
+        }
+
+    }//foreach()
+
+    // error_log('<$publication_candidate_data AFTER PREPARATION>');
+    // error_log( print_r( $publication_candidate_data, true ) );
+    // error_log('</$publication_candidate_data AFTER PREPARATION>');
+
+    //////////////////////////////////////
+    /// PUBLISH
+    foreach ( $publication_candidate_data as $skope_meta_key => $skope_option_values ) {
+        $r = update_post_meta( $skope_post_id, $skope_meta_key, $skope_option_values );
+        if ( is_wp_error( $r ) ) {
+            $response['changeset_post_save_failure'] = $r->get_error_code();
+            return new WP_Error( 'skope_changeset_post_save_failure', '', $response );
+        } else {
+            ha_clean_skope_changeset_metas_after_publish( $changeset_post_id );
+        }
+    }
+
+    return $response;
+}//_publish_skope_changeset_metas
+
+
+/**
+ * hook : 'transition_post_status'
+ * Inspired of _wp_customize_publish_changeset in wp-includes/theme.php
+ * Publishes a snapshot's changes.
+ *
+ *
+ * @global wpdb                 $wpdb         WordPress database abstraction object.
+ * @global WP_Customize_Manager $wp_customize Customizer instance.
+ *
+ * @param string  $new_status     New post status.
+ * @param string  $old_status     Old post status.
+ * @param WP_Post $changeset_post Changeset post object.
+ */
+function ha_trash_skope_changeset_metas_on_post_status_transition( $new_status, $old_status, $changeset_post ) {
+    $is_trashing_changeset = (
+      'customize_changeset' === $changeset_post->post_type
+      &&
+      'trash' === $new_status
+      &&
+      'publish' !== $old_status
+    );
+
+    // error_log('<TRANSITION POST STATUS CB>');
+    // error_log( 'Old Status ' . $old_status );
+    // error_log( 'New Status ' . $new_status );
+    // error_log('</TRANSITION POST STATUS CB>');
+
+    if ( ! $is_trashing_changeset ) {
+      return;
+    }
+
+    // GET THE TRANSITIONNING CHANGESET POST ID
+    ha_clean_skope_changeset_metas_after_publish( $changeset_post->ID );
+}
+
+
+//add_action( 'wp_ajax_czr_clean_skope_changeset_metas_after_publish',  'ha_ajax_clean_skope_changeset_metas_after_publish' );
+// hook : 'wp_ajax_czr_clean_skope_changeset_metas_after_publish'
+// This is fired when the skope metas have been published => a save action with changesetStatus = 'publish'
+// The goal is to remove the temporary post_metas used for skope and attached to the $wp_customize->changeset_post_id();
+
+// @see czr fmk => api.czr_skopeSave.cleanSkopeChangesetMetas
+// Warning : we don't want to send any json success or error here.
+// => because on save it will be caught by the save wp $.ajax request as the server response and generate problem in customizer-control.js
+function ha_clean_skope_changeset_metas_after_publish( $changeset_post_id ) {
+    if ( ! $changeset_post_id )
+      return;
+
+    $all_skope_changeset_metas = get_post_meta( $changeset_post_id );
+    $all_skope_changeset_metas = is_array( $all_skope_changeset_metas ) ? $all_skope_changeset_metas : array();
+
+    //ha_error_log( print_R( $all_skope_changeset_metas, true ) );
+
+    foreach ( $all_skope_changeset_metas as $meta_key => $val ) {
+        $r = delete_post_meta( $changeset_post_id, $meta_key );
+        if ( is_wp_error( $r ) ) {
+            //wp_send_json_error( $r->get_error_message() );
+            break;
+        }
+    }
+    //wp_send_json_success();
+}
 ?>
