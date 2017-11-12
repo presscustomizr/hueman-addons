@@ -5,7 +5,7 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
 Tested up to: 4.9.0
-Stable tag: 2.0.13
+Stable tag: 2.0.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.14 November 12 2017 =
+* Fix : error when previewing theme in the customizer. Fixes #42.
+
 = 2.0.13 November 11th 2017 =
 * Fix : admin bar style printed when user not logged in
 * Fix : polylang compat => exclude nav_menu_locations, blogname and blogdescription from "by page customization" when polylang is active. Fixes #34. Fix presscustomizr/hueman#377
