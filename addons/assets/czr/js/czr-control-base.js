@@ -122,13 +122,32 @@ if(this.$element.prop("multiple"))this.current(function(d){var e=[];a=[a],a.push
       * A "CONTEXT AWARE" SET METHD
       *****************************************************************************/
       /**
-      * OVERRIDES BASE api.Value method
+      * OVERRIDES BASE api.Value set method
       * => adds the o {} param, allowing to pass additional contextual informations.
       *
       * Set the value and trigger all bound callbacks.
       *
       * @param {object} to New value.
       */
+
+      // set: function( to ) {
+      //   var from = this._value;
+
+      //   to = this._setter.apply( this, arguments );
+      //   to = this.validate( to );
+
+      //   // Bail if the sanitized value is null or unchanged.
+      //   if ( null === to || _.isEqual( from, to ) ) {
+      //     return this;
+      //   }
+
+      //   this._value = to;
+      //   this._dirty = true;
+
+      //   this.callbacks.fireWith( this, [ to, from ] );
+
+      //   return this;
+      // },
       api.Value.prototype.set = function( to, o ) {
             var from = this._value, dfd = $.Deferred(), self = this, _promises = [];
 
@@ -232,23 +251,23 @@ if(this.$element.prop("multiple"))this.current(function(d){var e=[];a=[a],a.push
       //Changed the core to specify that the setting preview is actually a deferred callback
       //=> allows us to use syntax like :
       //api( setId ).set( new_value ).done( function() { execute actions when all the setting callbacks have been done })
-      api.Setting.prototype.initialize = function( id, value, options ) {
-            var setting = this;
-            api.Value.prototype.initialize.call( setting, value, options );
+      // api.Setting.prototype.initialize = function( id, value, options ) {
+      //       var setting = this;
+      //       api.Value.prototype.initialize.call( setting, value, options );
 
-            setting.id = id;
-            setting.transport = setting.transport || 'refresh';
-            setting._dirty = options.dirty || false;
-            setting.notifications = new api.Values({ defaultConstructor: api.Notification });
+      //       setting.id = id;
+      //       setting.transport = setting.transport || 'refresh';
+      //       setting._dirty = options.dirty || false;
+      //       setting.notifications = new api.Values({ defaultConstructor: api.Notification });
 
-            // Whenever the setting's value changes, refresh the preview.
-            setting.bind( setting.preview );
+      //       // Whenever the setting's value changes, refresh the preview.
+      //       setting.bind( setting.preview );
 
-            // the deferred can be used in moduleCollectionReact to execute actions after the module has been set.
-            // setting.bind( function( to, from , data ) {
-            //       return setting.preview( to, from , data );
-            // }, { deferred : true } );
-      };
+      //       // the deferred can be used in moduleCollectionReact to execute actions after the module has been set.
+      //       // setting.bind( function( to, from , data ) {
+      //       //       return setting.preview( to, from , data );
+      //       // }, { deferred : true } );
+      // };
 
 
       //var _old_preview = api.Setting.prototype.preview;
@@ -774,7 +793,7 @@ api.CZR_Helpers = $.extend( api.CZR_Helpers, {
 
               args = _.extend( _defaultArgs, args );
               // => we need an existing dom element
-              if ( ! args.dom_el instanceof jQuery || 1 != args.dom_el.length ) {
+              if ( ! args.dom_el instanceof jQuery || 1 > args.dom_el.length ) {
                     api.errorLog( 'setupDomListeners : dom element should be an existing dom element', args );
                     return;
               }
@@ -798,6 +817,32 @@ api.CZR_Helpers = $.extend( api.CZR_Helpers, {
                           api.errorLog( 'setupDOMListeners : selector must be a string not empty. Aborting setup of action(s) : ' + _event.actions.join(',') );
                           return;
                     }
+
+                    // if ( ! _event.name && ! _.isEmpty( _event.name ) ) {
+                    //     api.errorLog('in setupDOMListeners : missing name', _event );
+                    // }
+
+                    // DON'T CREATE THE SAME LISTENERS MULTIPLE TIMES
+                    //Make sure that we add this listener only once to a particular dom element
+                    //A listener id is a combination of event name + selector
+                    //if not set, the name is a concatenation of trigger + selector
+                    var _name = ( _event.name && ! _.isEmpty( _event.name ) ) ? _event.name : [ _event.trigger, _event.selector ].join('');
+
+                    var _currentListenerCollection = args.dom_el.data( 'czr-listener-collection' );
+                    if ( ! _currentListenerCollection || ! _.isArray( _currentListenerCollection ) ) {
+                          _currentListenerCollection = [ _name ];
+                    } else {
+                          _currentListenerCollection = _.isArray( _currentListenerCollection ) ? _currentListenerCollection : [];
+                          if ( ! _.contains( _currentListenerCollection, _name ) ) {
+                                _currentListenerCollection.push( _name );
+                          } else {
+                                // api.errorLog('Dom listener already created for event : ', _name );
+                                return;
+                          }
+
+                    }
+                    // add this listener to the collection
+                    args.dom_el.data( 'czr-listener-collection' , _currentListenerCollection );
 
                     //LISTEN TO THE DOM => USES EVENT DELEGATION
                     args.dom_el.on( _event.trigger , _event.selector, function( e, event_params ) {
@@ -5918,7 +5963,7 @@ $.extend( CZRMultiModuleControlMths, {
             // This "publish" case is handled by add_action( 'transition_post_status', 'ha_publish_skope_changeset_metas', 0, 3 );
             api.previewer.save = function( args ) {
                   //return api.czr_skopeSave.save( args );
-                  return api.requestChangesetUpdate()
+                  return api.requestChangesetUpdate( {}, { autosave: true } )
                               .always( function( _response_ ) {
                                     response = _response_.response;
                                     _original_save.apply( api.previewer,  args ).done( function() {
@@ -5946,7 +5991,20 @@ $.extend( CZRMultiModuleControlMths, {
                                   response = _response_.response;
                                   api.consoleLog( 'apiRequestChangesetUpdate failed => ', response );
                               })
-                              .done( function( _response_ ) {});
+                              .done( function( _response_ ) {
+                                  var _dirtyness_ = {};
+
+                                  _.each( api.czr_currentSkopesCollection(), function( _skp ) {
+                                        _.each( api.czr_skope( _skp.id ).dirtyValues(), function( _val, _setId ) {
+                                            _dirtyness_[_setId] = _val;
+                                        });
+                                  } );
+
+                                  if ( _.isEmpty( _dirtyness_ ) ) {
+                                        api.state( 'changesetStatus' ).set( 'auto-draft' == api.state( 'changesetStatus' )() ? '' : api.state( 'changesetStatus' )() );
+                                        api.state( 'saved' )(true);
+                                  }
+                              });
             };
 
             //Fired when all submissions are done and the preview has been refreshed
@@ -6016,7 +6074,6 @@ $.extend( CZRMultiModuleControlMths, {
 
                   if ( ! _.isEmpty( _notSyncedSettings ) ) {
                         api.consoleLog('SOME SETTINGS HAVE NOT BEEN PROPERLY SAVED : ', _notSyncedSettings );
-                        console.log('_notSyncedSettings', _notSyncedSettings );
                   } else {
                         api.consoleLog('ALL RIGHT, SERVER AND API ARE SYNCHRONIZED AFTER SAVE' );
                   }
@@ -6431,10 +6488,10 @@ $.extend( CZRMultiModuleControlMths, {
        * @param {string}  [_args_.date] - Date to update in the changeset. Optional.
        * @returns {jQuery.Promise} Promise resolving with the response data.
        */
-      //@4.9compat : added _args_
+      //@4.9compat : added _args_ => example : { autosave: true }
       api.requestChangesetUpdate = function( changes, _args_ ) {
             var self = this,
-                dfd = $.Deferred(),
+                _main_deferred_ = $.Deferred(),
                 data,
                 _skopesToUpdate = [],
                 _promises = [],
@@ -6444,7 +6501,7 @@ $.extend( CZRMultiModuleControlMths, {
                 _recursiveCallDeferred = $.Deferred();
                 // _original = function( changes ) {
                 //     _original_requestChangesetUpdate(changes).then( function( data ) {
-                //         dfd.resolve( data );
+                //         _main_deferred_.resolve( data );
                 //     });
                 // };
             //<@4.9compat>
@@ -6542,6 +6599,7 @@ $.extend( CZRMultiModuleControlMths, {
             //=> This can happen typically for a setting dirty both in global and other skope(s)
             var _lastSavedRevisionBefore = api._lastSavedRevision;
             //@4.9 compat : added _args_ param
+
             _original_requestChangesetUpdate( _global_skope_changes, _args_ )
                   .fail( function( r ) {
                         api.consoleLog( 'WP requestChangesetUpdateFail', r, api.czr_skopeBase.buildServerResponse(r) );
@@ -6552,7 +6610,7 @@ $.extend( CZRMultiModuleControlMths, {
                         // Make sure that publishing a changeset waits for all changeset update requests to complete.
                         api.state( 'processing' ).set( 0 );
 
-                        dfd.reject( r );
+                        _main_deferred_.reject( r );
                         r = api.czr_skopeBase.buildServerResponse(r);
 
                         //<@4.9compat>
@@ -6585,13 +6643,13 @@ $.extend( CZRMultiModuleControlMths, {
                   })
                   .done( function( wp_original_response ) {
                         // $.when.apply( null, _promises ).then( function() {
-                        //       dfd.resolve( wp_original_response );
+                        //       _main_deferred_.resolve( wp_original_response );
                         // });
                         //Restore the _lastSavedRevision index to its previous state to not miss any setting that could have been updated by WP for global.
 
                         //Bail if attempting to update the skope changesets before the initial collection has been populated
                         if ( 'pending' == api.czr_initialSkopeCollectionPopulated.state() )
-                          dfd.resolve( wp_original_response );
+                          _main_deferred_.resolve( wp_original_response );
 
                         api._lastSavedRevision = _lastSavedRevisionBefore;
                         recursiveCall()
@@ -6599,22 +6657,36 @@ $.extend( CZRMultiModuleControlMths, {
                                     // Ensure that all settings updated subsequently will be included in the next changeset update request.
                                     api._lastSavedRevision = Math.max( api._latestRevision, api._lastSavedRevision );
 
-                                    //api.state( 'changesetStatus' ).set( _data_.changeset_status );
+                                    //<@4.9compat>
+                                    var _dirtyness_ = {};
+
+                                    _.each( api.czr_currentSkopesCollection(), function( _skp ) {
+                                          _.each( api.czr_skope( _skp.id ).dirtyValues(), function( _val, _setId ) {
+                                              _dirtyness_[_setId] = _val;
+                                          });
+                                    } );
+
+                                    if ( _.isEmpty( _dirtyness_ ) && _.isEqual( _global_skope_changes, { blogname : { dummy_change : 'dummy_change' } } ) ) {
+                                          api.state( 'changesetStatus' ).set( 'auto-draft' == api.state( 'changesetStatus' )() ? '' : api.state( 'changesetStatus' )() );
+                                          api.state( 'saved' )(true);
+                                    }
+                                    //</@4.9compat>
+
                                     // Make sure that publishing a changeset waits for all changeset update requests to complete.
                                     api.state( 'processing' ).set( 0 );
                               })
                               .fail( function( r ) {
-                                    dfd.reject( r );
+                                    _main_deferred_.reject( r );
                                     api.consoleLog( 'CHANGESET UPDATE RECURSIVE PUSH FAIL', r , _all_skopes_data_ );
                                     api.trigger( 'changeset-error', r );
                                     api.czr_serverNotification( { message: r, status : 'error' } );
                               } )
                               .done( function() {
-                                    dfd.resolve( wp_original_response );
+                                    _main_deferred_.resolve( wp_original_response );
                               });
                   });
 
-            return dfd.promise();
+            return _main_deferred_.promise();
       };
 
 
@@ -6668,6 +6740,7 @@ $.extend( CZRMultiModuleControlMths, {
                         );
                   }
             } );
+
 
             //  _.each( api.czr_skope( skope_id ).dirtyValues(), function( dirtyValue, settingId ) {
             //       submittedChanges[ settingId ] = _.extend(

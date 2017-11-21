@@ -25,6 +25,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
       public $pro_infinite;//Will store the pro infinite scroll instance
       public $pro_skins;
       public $pro_related_posts;
+      public $pro_custom_scripts;
 
       public static function ha_get_instance() {
           if ( ! isset( self::$instance ) && ! ( self::$instance instanceof HU_AD ) )
