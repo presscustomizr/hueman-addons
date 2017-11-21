@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.9.0
-* Stable tag: 2.0.14
+* Stable tag: 2.0.15
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.0.15 November 21st 2017 =
+* Fix : WP 4.9 Code Editor issue could impact the custom css customizer option when checking errors in the code
+
 = 2.0.14 November 12 2017 =
 * Fix : error when previewing theme in the customizer. Fixes #42.
 
