@@ -192,7 +192,7 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
                  $_excluded[] = $_id;
              }
 
-            //WFC COMPAT
+            //WFC COMPAT : exclude font customizer option
             if ( class_exists( 'TC_utils_wfc' ) ) {
                 $wfc_setting_map = TC_utils_wfc::$instance -> tc_customizer_map();
                 if ( array_key_exists( 'add_setting_control', $wfc_setting_map ) ) {
@@ -339,6 +339,16 @@ if ( ! class_exists( 'HA_Skop_Option_Base' ) ) :
         //
         //HOOK : hu_opt
         function ha_filter_hu_opt_for_skope( $_opt_val , $opt_name , $opt_group = HU_THEME_OPTIONS , $_default_val = null ) {
+            /*
+            * Take care of the excluded options in front
+            * needed for:
+            * multisite blogname issue https://github.com/presscustomizr/hueman-addons/issues/43
+            * polylang blogname and blogdescription issue https://github.com/presscustomizr/hueman/issues/628
+            */
+            $excluded_options = ha_get_skope_excluded_options();
+            if ( $opt_name && is_array( $excluded_options ) && in_array( $opt_name, $excluded_options ) ) {
+                return $_opt_val;
+            }
             //if the opt group not null, we are retrieving a theme option
             $_new_val = $_opt_val;
 

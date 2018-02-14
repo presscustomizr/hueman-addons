@@ -1,12 +1,12 @@
 <?php
 /**
 * Plugin Name: Hueman Addons
-* Plugin URI: http://presscustomizr.com
+* Plugin URI: https://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 2.0.15
+* Version: 2.0.16
 * Text Domain: hueman-addons
 * Author: Press Customizr
-* Author URI: http://presscustomizr.com
+* Author URI: https://presscustomizr.com
 * License: GPLv2 or later
 */
 

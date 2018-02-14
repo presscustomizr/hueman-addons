@@ -3,15 +3,43 @@
 
 //@return an array of unfiltered options
 //=> all options or a single option val
-function ha_get_raw_option( $opt_name = null, $opt_group = null ) {
+//@param $report_error is used only when invoking HU_utils::set_option() to avoid a potential theme option reset
+//=> prevent issue https://github.com/presscustomizr/hueman/issues/571
+function ha_get_raw_option( $opt_name = null, $opt_group = null, $from_cache = true, $report_error = false ) {
     $alloptions = wp_cache_get( 'alloptions', 'options' );
-    $alloptions = maybe_unserialize($alloptions);
-    if ( ! is_null( $opt_group ) && isset($alloptions[$opt_group]) ) {
-      $alloptions = maybe_unserialize($alloptions[$opt_group]);
+    $alloptions = maybe_unserialize( $alloptions );
+
+    //prevent issue https://github.com/presscustomizr/hueman/issues/492
+    //prevent issue https://github.com/presscustomizr/hueman/issues/571
+    if ( $report_error ) {
+        if ( ! is_array( $alloptions ) || empty( $alloptions ) ) {
+            return new WP_Error( 'wp_options_not_cached', '' );
+        }
     }
-    if ( is_null( $opt_name ) )
-      return $alloptions;
-    return isset( $alloptions[$opt_name] ) ? maybe_unserialize($alloptions[$opt_name]) : false;
+
+    $alloptions = ! is_array( $alloptions ) ? array() : $alloptions;//prevent issue https://github.com/presscustomizr/hueman/issues/492
+
+    //is there any option group requested ?
+    if ( ! is_null( $opt_group ) && array_key_exists( $opt_group, $alloptions ) ) {
+      $alloptions = maybe_unserialize( $alloptions[ $opt_group ] );
+    }
+    //shall we return a specific option ?
+    if ( is_null( $opt_name ) ) {
+        return $alloptions;
+    } else {
+        $opt_value = array_key_exists( $opt_name, $alloptions ) ? maybe_unserialize( $alloptions[ $opt_name ] ) : false;//fallback on cache option val
+        //do we need to get the db value instead of the cached one ? <= might be safer with some user installs not properly handling the wp cache
+        //=> typically used to checked the template name for czr_fn_isprevdem()
+        if ( ! $from_cache ) {
+            global $wpdb;
+            //@see wp-includes/option.php : get_option()
+            $row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $opt_name ) );
+            if ( is_object( $row ) ) {
+                $opt_value = $row->option_value;
+            }
+        }
+        return maybe_unserialize( $opt_value );
+    }
 }
 
 

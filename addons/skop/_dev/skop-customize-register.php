@@ -93,11 +93,11 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
                   //serverControlParams.isLocalSkope is used in api.czr_skopeBase.getActiveSkopeId()
                   //Old check was based on isset( $_GET['url'] ), but setting the local skope on init makes the preview too long to load
                   'isLocalSkope'          => apply_filters( 'skope_is_local', isset( $_GET['url'] ) ),
-                  'isTopNoteOn'           => apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('CZR_DEV') && true === CZR_DEV ) ),
+                  'isTopNoteOn'           => true || apply_filters( 'ha_czr_top_note_status', 'dismissed' != get_option( 'ha_czr_top_note_status' ) ||  ( defined('CZR_DEV') && true === CZR_DEV ) ),
                   'topNoteParams'         => array(
                       'title'   => __( 'Welcome in the new customizer interface !', 'hueman-addons' ),
                       'message' => sprintf ( __( 'Discover a new way to customize your pages on %1$s.', 'hueman-addons' ),
-                            sprintf('<a href="%1$s" title="%2$s" target="_blank">%3$s <span class="fa fa-external-link"></span></a>',
+                            sprintf('<a href="%1$s" title="%2$s" target="_blank">%3$s <span class="fas fa-external-link-alt"></span></a>',
                                 esc_url('docs.presscustomizr.com/search?query=customize-hueman'),
                                 __('Visit the documentation', 'hueman-addons'),
                                 __('this page')

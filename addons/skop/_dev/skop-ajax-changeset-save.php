@@ -199,7 +199,7 @@ if ( ! class_exists( 'HA_Skop_Chset_Save' ) ) :
             if ( $update_transactionally && $invalid_setting_count > 0 ) {
                 $response = array(
                   'setting_validities' => $setting_validities,
-                  'message' => sprintf( _n( 'There is %s invalid setting.', 'There are %s invalid settings.', $invalid_setting_count ), number_format_i18n( $invalid_setting_count ) ),
+                  'message' => sprintf( _n( 'There is %s invalid setting.', 'There are %s invalid settings.', $invalid_setting_count, 'hueman-addons' ), number_format_i18n( $invalid_setting_count ) ),
                 );
                 return new WP_Error( 'transaction_fail', '', $response );
             }

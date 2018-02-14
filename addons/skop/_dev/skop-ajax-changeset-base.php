@@ -176,12 +176,12 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
               $setting = $wp_customize->get_setting( $setting_id );
               if ( ! $setting ) {
                 if ( $options['validate_existence'] ) {
-                  $validities[ $setting_id ] = new WP_Error( 'unrecognized', __( 'Setting does not exist or is unrecognized.' ) );
+                  $validities[ $setting_id ] = new WP_Error( 'unrecognized', __( 'Setting does not exist or is unrecognized.', 'hueman-addons' ) );
                 }
                 continue;
               }
               if ( $options['validate_capability'] && ! current_user_can( $setting->capability ) ) {
-                $validity = new WP_Error( 'unauthorized', __( 'Unauthorized to modify setting due to capability.' ) );
+                $validity = new WP_Error( 'unauthorized', __( 'Unauthorized to modify setting due to capability.', 'hueman-addons' ) );
               } else {
                 if ( is_null( $unsanitized_value ) ) {
                   continue;
@@ -204,7 +204,7 @@ if ( ! class_exists( 'HA_Skop_Chset_Base' ) ) :
                 }
               }
               if ( false === $validity ) {
-                $validity = new WP_Error( 'invalid_value', __( 'Invalid value.' ) );
+                $validity = new WP_Error( 'invalid_value', __( 'Invalid value.', 'hueman-addons' ) );
               }
               $validities[ $setting_id ] = $validity;
             }

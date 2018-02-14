@@ -97,8 +97,16 @@ class HA_Sharrre {
             'notice'    => __('Display social sharing buttons in each single articles.', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 40,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 40
+      ),
+      'sharrre-counter' => array(
+            'default'   => 1,
+            'control'   => 'HU_controls',
+            'label'     => __('Display a counter on top', 'hueman-addons'),
+            //'notice'    => __('The counter', 'hueman-addons'),
+            'section'   => 'content_single_sec',
+            'type'      => 'checkbox',
+            'priority'  => 40
       ),
       'sharrre-scrollable' => array(
             'default'   => 1,
@@ -107,8 +115,7 @@ class HA_Sharrre {
             'notice'    => __('Make the social share bar stick to the browser window when scrolling down a post.', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 50,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 50
       ),
       'sharrre-twitter-on' => array(
             'default'   => 1,
@@ -117,8 +124,7 @@ class HA_Sharrre {
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
             'notice'    => __('Since Nov. 2015, Twitter disabled the share counts from its API. If you want to get the display count anyway, you can create an account for free (as of Feb. 2016) on [https://opensharecount.com/]. The Hueman Addons plugin is configured to use opensharecount.', 'hueman-addons'),
-            'priority'  => 60,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 60
       ),
       'twitter-username' => array(
             'default'   => '',
@@ -128,8 +134,7 @@ class HA_Sharrre {
             'section'   => 'content_single_sec',
             'type'      => 'text',
             'transport' => 'postMessage',
-            'priority'  => 70,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 70
       ),
       'sharrre-facebook-on' => array(
             'default'   => 1,
@@ -137,8 +142,7 @@ class HA_Sharrre {
             'label'     => __('Enable Facebook Button', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 80,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 80
       ),
       'sharrre-google-on' => array(
             'default'   => 1,
@@ -146,8 +150,7 @@ class HA_Sharrre {
             'label'     => __('Enable Google Plus Button', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 90,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 90
       ),
       'sharrre-pinterest-on' => array(
             'default'   => 0,
@@ -155,8 +158,7 @@ class HA_Sharrre {
             'label'     => __('Enable Pinterest Button', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 100,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 100
       ),
       'sharrre-linkedin-on' => array(
             'default'   => 0,
@@ -164,8 +166,7 @@ class HA_Sharrre {
             'label'     => __('Enable LinkedIn Button', 'hueman-addons'),
             'section'   => 'content_single_sec',
             'type'      => 'checkbox',
-            'priority'  => 100,
-            'active_callback' => array( $this, 'ha_is_single')
+            'priority'  => 100
       )
     );
 

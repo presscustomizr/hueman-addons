@@ -45,8 +45,12 @@ if ( ! class_exists( 'HU_AD' ) ) :
 
           //did_action('plugins_loaded') ?
 
-
           if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
+
+          /* ------------------------------------------------------------------------- *
+           *  Loads Functions
+          /* ------------------------------------------------------------------------- */
+          require_once( HA_BASE_PATH . 'addons/ha-functions.php' );
 
           //are we in pro theme?
           if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
@@ -56,7 +60,7 @@ if ( ! class_exists( 'HU_AD' ) ) :
           }
           //'enable-skope' option can take two string values : "yes" and "no".
           //If the option is not set yet, which is the most common case, it means that it is enabled ( @see default value == "yes" when registering the setting )
-          $_skope_enable_val = $this -> ha_get_raw_option( 'enable-skope' , 'hu_theme_options');
+          $_skope_enable_val = ha_get_raw_option( 'enable-skope' , 'hu_theme_options');
           if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , ! is_string( $_skope_enable_val ) || 'yes' == $_skope_enable_val );
 
           //PRO THEME / PRO ADDON ?
@@ -162,11 +166,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
       *  I am a man in constant sorrow
       /* ------------------------------------------------------------------------- */
       function ha_load() {
-        /* ------------------------------------------------------------------------- *
-         *  Loads Functions
-        /* ------------------------------------------------------------------------- */
-        require_once( HA_BASE_PATH . 'addons/ha-functions.php' );
-
         /* ------------------------------------------------------------------------- *
          *  Loads Features
         /* ------------------------------------------------------------------------- */
@@ -357,42 +356,21 @@ if ( ! class_exists( 'HU_AD' ) ) :
         return $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid');
       }
 
-      //@return an array of unfiltered options
-      //=> all options or a single option val
-      function ha_get_raw_option( $opt_name = null, $opt_group = null, $from_cache = true ) {
-          $alloptions = wp_cache_get( 'alloptions', 'options' );
-          $alloptions = maybe_unserialize( $alloptions );
-          //is there any option group requested ?
-          if ( ! is_null( $opt_group ) && array_key_exists( $opt_group, $alloptions ) ) {
-            $alloptions = maybe_unserialize( $alloptions[ $opt_group ] );
-          }
-          //shall we return a specific option ?
-          if ( is_null( $opt_name ) ) {
-              return $alloptions;
-          } else {
-              $opt_value = array_key_exists( $opt_name, $alloptions ) ? maybe_unserialize( $alloptions[ $opt_name ] ) : false;//fallback on cache option val
-              //do we need to get the db value instead of the cached one ? <= might be safer with some user installs not properly handling the wp cache
-              //=> typically used to checked the template name for czr_fn_isprevdem()
-              if ( ! $from_cache ) {
-                  global $wpdb;
-                  //@see wp-includes/option.php : get_option()
-                  $row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $opt_name ) );
-                  if ( is_object( $row ) ) {
-                      $opt_value = $row->option_value;
-                  }
-              }
-              return $opt_value;
-          }
-      }
 
       //@return bool
       function ha_isprevdem() {
-          $_active_theme  = $this -> ha_get_raw_option( 'template' );
-          $hu_theme       = wp_get_theme();
-          $hu_theme       = $hu_theme -> parent() ? $hu_theme -> parent() : $hu_theme;
-          $hu_theme       = strtolower( $hu_theme -> name );
-          $hu_theme       = str_replace(' ', '-', $hu_theme );
-          return apply_filters( 'hu_isprevdem', ( $_active_theme != $hu_theme && ! is_child_theme() ) );
+          global $wp_customize;
+          $is_dirty = false;
+
+          if ( is_object( $wp_customize ) && method_exists( $wp_customize, 'unsanitized_post_values' ) ) {
+              $real_cust            = $wp_customize -> unsanitized_post_values( array( 'exclude_changeset' => true ) );
+              $_preview_index       = array_key_exists( 'customize_messenger_channel' , $_POST ) ? $_POST['customize_messenger_channel'] : '';
+              $_is_first_preview    = false !== strpos( $_preview_index ,'-0' );
+              $_doing_ajax_partial  = array_key_exists( 'wp_customize_render_partials', $_POST );
+              //There might be cases when the unsanitized post values contains old widgets infos on initial preview load, giving a wrong dirtyness information
+              $is_dirty             = ( ! empty( $real_cust ) && ! $_is_first_preview ) || $_doing_ajax_partial;
+          }
+          return apply_filters( 'hu_isprevdem', ! $is_dirty && ha_get_raw_option( 'template', null, false ) != get_stylesheet() && ! is_child_theme() && ! ( defined('HU_IS_PRO') && HU_IS_PRO ) );
       }
 
       //hook : wp_head

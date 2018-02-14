@@ -4,8 +4,8 @@ Author URI: https://presscustomizr.com
 Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman
 Requires at least: 3.4
-Tested up to: 4.9.0
-Stable tag: 2.0.15
+Tested up to: 4.9.4
+Stable tag: 2.0.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Installation ==
-1. Install the plugin right from your WordPress admin in plugins > Add New. 
+1. Install the plugin right from your WordPress admin in plugins > Add New.
 1-bis. Download the plugin, unzip the package and upload it to your /wp-content/plugins/ directory
 2. Activate the plugin
 
@@ -37,6 +37,11 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.0.16 February 14th 2018 =
+* Fix : Multisite compatibility problem
+* Fix : Title/Subtitle polylang plugin translation doesn't appear
+* Added : new option to control the visibility of the sharre counters
+
 = 2.0.15 November 21st 2017 =
 * Fix : WP 4.9 Code Editor issue could impact the custom css customizer option when checking errors in the code
 

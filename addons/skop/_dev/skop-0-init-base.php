@@ -37,19 +37,19 @@ function ha_get_skope_theme_name() {
 if ( ! post_type_exists( 'czr_skope_opt') ) {
     register_post_type( 'czr_skope_opt', array(
       'labels' => array(
-        'name'               => _x( 'Hueman scopes', 'post type general name' ),
-        'singular_name'      => _x( 'Hueman scope', 'post type singular name' ),
-        'menu_name'          => _x( 'Hueman scopes', 'admin menu' ),
-        'name_admin_bar'     => _x( 'Hueman scope', 'add new on admin bar' ),
-        'add_new'            => _x( 'Add New', 'Customize Hueman scope' ),
-        'add_new_item'       => __( 'Add New Hueman scope' ),
-        'new_item'           => __( 'New Hueman scope' ),
-        'edit_item'          => __( 'Edit Hueman scope' ),
-        'view_item'          => __( 'View Hueman scope' ),
-        'all_items'          => __( 'All Hueman scopes' ),
-        'search_items'       => __( 'Search Hueman scopes' ),
-        'not_found'          => __( 'No Hueman scopes found.' ),
-        'not_found_in_trash' => __( 'No Hueman scopes found in Trash.' ),
+        'name'               => _x( 'Hueman scopes', 'post type general name', 'hueman-addons' ),
+        'singular_name'      => _x( 'Hueman scope', 'post type singular name', 'hueman-addons' ),
+        'menu_name'          => _x( 'Hueman scopes', 'admin menu', 'hueman-addons' ),
+        'name_admin_bar'     => _x( 'Hueman scope', 'add new on admin bar', 'hueman-addons' ),
+        'add_new'            => _x( 'Add New', 'Customize Hueman scope', 'hueman-addons' ),
+        'add_new_item'       => __( 'Add New Hueman scope', 'hueman-addons' ),
+        'new_item'           => __( 'New Hueman scope', 'hueman-addons' ),
+        'edit_item'          => __( 'Edit Hueman scope', 'hueman-addons' ),
+        'view_item'          => __( 'View Hueman scope', 'hueman-addons' ),
+        'all_items'          => __( 'All Hueman scopes', 'hueman-addons' ),
+        'search_items'       => __( 'Search Hueman scopes', 'hueman-addons' ),
+        'not_found'          => __( 'No Hueman scopes found.', 'hueman-addons' ),
+        'not_found_in_trash' => __( 'No Hueman scopes found in Trash.', 'hueman-addons' ),
       ),
       'public' => false,
       '_builtin' => false,
@@ -115,18 +115,35 @@ function ha_create_skope_post( $reset = false ) {
 /* ------------------------------------------------------------------------- *
  *  PLUGINS COMPAT
 /* ------------------------------------------------------------------------- */
-if ( ha_is_plugin_active('polylang/polylang.php') ) {
+if ( ha_is_plugin_active('polylang/polylang.php') || ha_is_plugin_active('polylang-pro/polylang.php') ) {
   add_filter( 'ha_skope_navmenu', '__return_false' );
   add_filter( 'ha_get_skope_excluded_options', 'ha_exclude_skoped_settings_with_polylang' );
   function ha_exclude_skoped_settings_with_polylang( $excluded_list ) {
-      if ( ! is_array( $excluded_list ) )
+      if ( ! is_array( $excluded_list ) ) {
         return array();
+      }
       $excluded_list[] = 'blogname';
       $excluded_list[] = 'blogdescription';
       return $excluded_list;
   }
 }
 
+/* ------------------------------------------------------------------------- *
+ *  MULTISITE COMPAT
+/* ------------------------------------------------------------------------- */
+/*
+* Exclude blog name from skope for multisite subsites
+* https://github.com/presscustomizr/hueman-addons/issues/43
+*/
+if ( is_multisite() && ! is_main_site() ) {
+  add_filter( 'ha_get_skope_excluded_options', 'ha_exclude_skoped_settings_with_multisite' );
+  function ha_exclude_skoped_settings_with_multisite ( $excluded_list ) {
+      if ( ! is_array( $excluded_list ) ) {
+        return array();
+      }
+      return array_merge( $excluded_list, array( 'blogname' ) );
+  }
+}
 
 
 /* ------------------------------------------------------------------------- *

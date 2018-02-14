@@ -35,17 +35,19 @@ class HA_Czr {
    * @since Hueman 3.3.0
    */
   function hu_customize_controls_js_css() {
+
+    $hu_theme = wp_get_theme();
+
     //Hueman Addons Specifics
     wp_enqueue_style(
         'ha-czr-addons-controls-style',
         sprintf( '%1$saddons/assets/czr/css/czr-control-footer.css', HU_AD() -> ha_get_base_url() ),
         array( 'customize-controls' ),
-        time(),
+        ( defined('CZR_DEV') && true === CZR_DEV ) ? $hu_theme -> version . time() : $hu_theme -> version,
         $media = 'all'
     );
 
-    //Enqueue most recent fmk for js and css
-    $hu_theme = wp_get_theme();
+    //Enqueue most recent fmk for js and css;
     $is_pro = HU_AD() -> ha_is_pro_addons() || HU_AD() -> ha_is_pro_theme();
     if ( $is_pro || true == version_compare( $hu_theme -> version, LAST_THEME_VERSION_FMK_SYNC , '<' ) ) {
         $wp_styles = wp_styles();
@@ -57,7 +59,7 @@ class HA_Czr {
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
             $ver_css = $wp_styles->registered['hu-customizer-controls-style'] -> ver;
-            $wp_styles->registered['hu-customizer-controls-style'] -> ver = ( defined('CZR_DEV') && true === CZR_DEV ) ? $ver_css . time() : $ver_css;
+            $wp_styles->registered['hu-customizer-controls-style'] -> ver = ( defined('WP_DEBUG') && true === WP_DEBUG ) ? $ver_css . time() : $ver_css;
         }
         if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
             $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
@@ -67,7 +69,7 @@ class HA_Czr {
                 ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
             );
             $ver = $wp_scripts->registered['hu-customizer-controls'] -> ver;
-            $wp_scripts->registered['hu-customizer-controls'] -> ver = ( defined('CZR_DEV') && true === CZR_DEV ) ? $ver . time() : $ver;
+            $wp_scripts->registered['hu-customizer-controls'] -> ver = ( defined('WP_DEBUG') && true === WP_DEBUG ) ? $ver . time() : $ver;
         }
     }
   }
