@@ -16,7 +16,7 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
             /* ------------------------------------------------------------------------- *
              *  CUSTOMIZE PANE : Add skope server params to the Hueman theme control server params ( serverControlParams global var)
             /* ------------------------------------------------------------------------- */
-            add_filter( 'hu_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
+            add_filter( 'czr_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
             //'controls_translated_strings' is declared in hueman theme, czr-resources
             //add_filter( 'controls_translated_strings', array( $this, 'hu_add_skp_translated_strings') );
             /* ------------------------------------------------------------------------- *
@@ -74,7 +74,7 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
         /* ------------------------------------------------------------------------- *
          *  CUSTOMIZE PANEL : ADD LOCALIZED PARAMS
         /* ------------------------------------------------------------------------- */
-        //filter 'hu_js_customizer_control_params' is declared in hueman/functions/czr/czr-resources.php
+        //filter 'czr_js_customizer_control_params' is declared in hueman/functions/czr/czr-resources.php
         function ha_add_skope_control_params( $_params ) {
             return array_merge(
               $_params,

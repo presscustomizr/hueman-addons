@@ -2134,7 +2134,7 @@ if ( ! class_exists( 'HA_Skop_Cust_Register' ) ) :
             /* ------------------------------------------------------------------------- *
              *  CUSTOMIZE PANE : Add skope server params to the Hueman theme control server params ( serverControlParams global var)
             /* ------------------------------------------------------------------------- */
-            add_filter( 'hu_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
+            add_filter( 'czr_js_customizer_control_params', array( $this, 'ha_add_skope_control_params' ) );
             /* ------------------------------------------------------------------------- *
              *  Skopify the save DEPRECATED
              *  1) Dynamically set the type in WP_Customize_Setting::save()

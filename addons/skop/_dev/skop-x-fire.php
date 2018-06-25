@@ -56,7 +56,7 @@ function ha_load_skop_options() {
 
 // skop-customize-register.php
 //  - re-instantiate the 'header_image_data' and 'header_image' with a custom setting Class
-//  - filter hu_js_customizer_control_params with additional localized params
+//  - filter czr_js_customizer_control_params with additional localized params
 if ( defined('CZR_DEV') && true === CZR_DEV ) {
     require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-customize-register.php' );
 }
