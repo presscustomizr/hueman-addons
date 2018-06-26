@@ -24,8 +24,6 @@ module.exports = {
 			'!**/*.db',
       '!patches/**',
 
-      '!addons/skop/_dev/**',
-
       '!addons/_dev_print_customizer_data.php'
 		],
 		dest: 'build/<%= pkg.name %>/'
