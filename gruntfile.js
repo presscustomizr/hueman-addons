@@ -23,7 +23,6 @@ module.exports = function(grunt) {
 				'build':  [
           'jshint:front_js',
           'uglify:front_js',
-          //'comments:czr_base_control_js',
           'replace',
           'clean',
           'copy',
