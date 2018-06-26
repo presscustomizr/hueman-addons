@@ -26,7 +26,7 @@ function ha_backward_compatibility_setup_june_2018() {
         //sek_error_log( 'GET_THEME_MODS', get_theme_mods() );
     }
 
-    update_option( 'hu_contx_update_june_2018', $status );
+    update_option( 'hu_contx_update_june_2018_status', $status );
 }
 
 

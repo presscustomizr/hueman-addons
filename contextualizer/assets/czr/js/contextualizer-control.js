@@ -1880,6 +1880,11 @@ var CZRSkopeReactMths = CZRSkopeReactMths || {};
                               control_priority += 10;
                               var _do_ = function() {
                                     _.each( _candidates_, function( params ) {
+                                          // If this is a 'czr_module' => make sure that the module type is registered
+                                          // Prevents error in Hueman Addons, "czr_slide_module" not found.
+                                          if ( 'czr_module' == params.control_type && ! _.has( api.czrModuleMap, params.module_type ) )
+                                            return;
+
                                           // set the skopeID and skopeLevel to the candidate
                                           params.skopeId = _skopeID_;
                                           params.skopeLevel = _skopeLevel_;
