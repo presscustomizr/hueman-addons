@@ -18,9 +18,9 @@ class HA_Czr {
 
   //hook : customize_register
   function ha_augment_customizer_setting() {
-      if ( ! HU_AD() -> ha_is_skop_on() )
+      if ( ! ha_is_skop_on() )
         return;
-      require_once( HA_BASE_PATH . 'addons/czr/skop-customizer-augment-setting.php' );
+      //require_once( HA_BASE_PATH . 'addons/czr/skop-customizer-augment-setting.php' );
   }
 
 
@@ -41,37 +41,11 @@ class HA_Czr {
     //Hueman Addons Specifics
     wp_enqueue_style(
         'ha-czr-addons-controls-style',
-        sprintf( '%1$saddons/assets/czr/css/czr-control-footer.css', HU_AD() -> ha_get_base_url() ),
+        sprintf( '%1$saddons/assets/czr/css/czr-hu-addons-control-footer.css', HU_AD() -> ha_get_base_url() ),
         array( 'customize-controls' ),
-        ( defined('CZR_DEV') && true === CZR_DEV ) ? $hu_theme -> version . time() : $hu_theme -> version,
+        ( defined('CZR_DEV') && true === CZR_DEV ) ? time() : $hu_theme -> version,
         $media = 'all'
     );
-
-    //Enqueue most recent fmk for js and css;
-    $is_pro = HU_AD() -> ha_is_pro_addons() || HU_AD() -> ha_is_pro_theme();
-    if ( $is_pro || true == version_compare( $hu_theme -> version, LAST_THEME_VERSION_FMK_SYNC , '<' ) ) {
-        $wp_styles = wp_styles();
-        $wp_scripts = wp_scripts();
-        if ( isset( $wp_styles->registered['hu-customizer-controls-style'] ) ) {
-            $wp_styles->registered['hu-customizer-controls-style'] -> src = sprintf(
-                '%1$saddons/assets/czr/css/czr-control-base%2$s.css',
-                HU_AD() -> ha_get_base_url(),
-                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
-            );
-            $ver_css = $wp_styles->registered['hu-customizer-controls-style'] -> ver;
-            $wp_styles->registered['hu-customizer-controls-style'] -> ver = ( defined('WP_DEBUG') && true === WP_DEBUG ) ? $ver_css . time() : $ver_css;
-        }
-        if ( isset( $wp_scripts->registered['hu-customizer-controls'] ) ) {
-            $wp_scripts->registered['hu-customizer-controls'] -> src = sprintf(
-                '%1$saddons/assets/czr/js/%2$s%3$s.js',
-                HU_AD() -> ha_get_base_url(),
-                $is_pro ? 'czr-control-full' : 'czr-control-base',
-                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? '' : '.min'
-            );
-            $ver = $wp_scripts->registered['hu-customizer-controls'] -> ver;
-            $wp_scripts->registered['hu-customizer-controls'] -> ver = ( defined('WP_DEBUG') && true === WP_DEBUG ) ? $ver . time() : $ver;
-        }
-    }
   }
 
 
@@ -157,28 +131,28 @@ class HA_Czr {
                               return _is_checked(to);
                           }
                       },
-                      {
-                          dominus : 'pro_header_type',
-                          servi : [
-                            'use-header-image',
-                            'logo-title-on-header-image',
-                            'header_image',
-                            'color-topbar',
-                            'color-header',
-                            'color-header-menu',
-                            pro_header_slider_short_opt_name//pro_header_bg
-                          ],
-                          visibility : function ( to, servusShortId ) {
-                              if ( pro_header_slider_short_opt_name == servusShortId ) {
-                                  return 'classical' != to;
-                              } else if ( 'header_image' == servusShortId || 'logo-title-on-header-image' == servusShortId ) {
-                                  var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );
-                                  return 'classical' == to && _is_checked( api( wpServusId )() );
-                              } else {
-                                  return 'classical' == to;
-                              }
-                          }
-                      },
+                      // {
+                      //     dominus : 'pro_header_type',
+                      //     servi : [
+                      //       'use-header-image',
+                      //       'logo-title-on-header-image',
+                      //       'header_image',
+                      //       'color-topbar',
+                      //       'color-header',
+                      //       'color-header-menu',
+                      //       pro_header_slider_short_opt_name//pro_header_bg
+                      //     ],
+                      //     visibility : function ( to, servusShortId ) {
+                      //         if ( pro_header_slider_short_opt_name == servusShortId ) {
+                      //             return 'classical' != to;
+                      //         } else if ( 'header_image' == servusShortId || 'logo-title-on-header-image' == servusShortId ) {
+                      //             var wpServusId = api.CZR_Helpers.build_setId( 'use-header-image' );
+                      //             return 'classical' == to && _is_checked( api( wpServusId )() );
+                      //         } else {
+                      //             return 'classical' == to;
+                      //         }
+                      //     }
+                      // },
                   ]
             );
         }) ( wp.customize, jQuery, _);

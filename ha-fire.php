@@ -50,5 +50,14 @@ if ( ha_is_hueman_pro() ) {
     if( ! defined( 'MINIMAL_AUTHORIZED_THEME_VERSION' ) ) define( 'MINIMAL_AUTHORIZED_THEME_VERSION' , '3.3.0' );
     if( ! defined( 'IS_HUEMAN_ADDONS' ) ) define( 'IS_HUEMAN_ADDONS' , true );
     if( ! defined( 'HU_IS_PRO_ADDONS' ) ) define( 'HU_IS_PRO_ADDONS' , false );
+
+    /* ------------------------------------------------------------------------- *
+     *  Loads Functions
+    /* ------------------------------------------------------------------------- */
+    require_once( plugin_dir_path( __FILE__ ) . 'addons/ha-functions.php' );
+
+    /* ------------------------------------------------------------------------- *
+     *  Loads Base plugin class
+    /* ------------------------------------------------------------------------- */
     require_once( plugin_dir_path( __FILE__ ) . 'addons/ha-init.php' );
 }

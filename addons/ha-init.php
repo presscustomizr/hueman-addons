@@ -1,5 +1,13 @@
 <?php
 if( ! defined( 'IS_PRESSCUSTOMIZR' ) ) define( 'IS_PRESSCUSTOMIZR' , false );
+if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
+
+//are we in pro theme?
+if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
+    if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , HU_BASE_URL );
+} else {
+    if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
+}
 
 /**
 * Fires the plugin or the theme addon
@@ -44,25 +52,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
           self::$theme_name     = $this -> ha_get_theme_name();
 
           //did_action('plugins_loaded') ?
-
-          if( ! defined( 'HA_BASE_PATH' ) ) define( 'HA_BASE_PATH' , trailingslashit( dirname( dirname( __FILE__ ) ) ) );
-
-          /* ------------------------------------------------------------------------- *
-           *  Loads Functions
-          /* ------------------------------------------------------------------------- */
-          require_once( HA_BASE_PATH . 'addons/ha-functions.php' );
-
-          //are we in pro theme?
-          if ( defined( 'HU_IS_PRO' ) && HU_IS_PRO ) {
-              if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , HU_BASE_URL );
-          } else {
-              if( ! defined( 'HA_BASE_URL' ) ) define( 'HA_BASE_URL' , trailingslashit( plugins_url( basename( dirname( __DIR__ ) ) ) ) );
-          }
-          //'enable-skope' option can take two string values : "yes" and "no".
-          //If the option is not set yet, which is the most common case, it means that it is enabled ( @see default value == "yes" when registering the setting )
-          $_skope_enable_val = ha_get_raw_option( 'enable-skope' , 'hu_theme_options');
-          if( ! defined( 'HA_SKOP_ON' ) ) define( 'HA_SKOP_ON' , ! is_string( $_skope_enable_val ) || 'yes' == $_skope_enable_val );
-
           //PRO THEME / PRO ADDON ?
           $this->is_pro_theme   = ( ! defined( 'HU_IS_PRO_ADDONS' ) || ( defined( 'HU_IS_PRO_ADDONS' ) && false == HU_IS_PRO_ADDONS ) ) && ! defined( 'IS_HUEMAN_ADDONS' );
           $this->is_pro_addons  = ( defined( 'HU_IS_PRO_ADDONS' ) && false != HU_IS_PRO_ADDONS ) || ( ! did_action('plugins_loaded') && file_exists( HA_BASE_PATH . 'addons/ha-init-pro.php' ) );
@@ -165,66 +154,44 @@ if ( ! class_exists( 'HU_AD' ) ) :
       /* ------------------------------------------------------------------------- *
       *  I am a man in constant sorrow
       /* ------------------------------------------------------------------------- */
+      // fired @__construct()
       function ha_load() {
-        /* ------------------------------------------------------------------------- *
-         *  Loads Features
-        /* ------------------------------------------------------------------------- */
-        require_once( HA_BASE_PATH . 'addons/sharrre/ha-sharrre.php' );
-        new HA_Sharrre();
-        require_once( HA_BASE_PATH . 'addons/shortcodes/ha-shortcodes.php' );
-        new HA_Shortcodes();
-        if ( is_admin() && ! $this -> ha_is_customizing() ) {
-          require_once( HA_BASE_PATH . 'addons/admin/ha-hs-doc.php' );
-        }
-
-        /* ------------------------------------------------------------------------- *
-         *  Loads Customizer
-        /* ------------------------------------------------------------------------- */
-        require_once( HA_BASE_PATH . 'addons/czr/ha-czr.php' );
-        new HA_Czr();
-
-        /* ------------------------------------------------------------------------- *
-         *  Loads SKOP
-        /* ------------------------------------------------------------------------- */
-        if ( $this -> ha_is_skop_on() ) {
-          if ( defined('CZR_DEV') && true === CZR_DEV ) {
-              if ( file_exists( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' ) ) {
-                  require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' );
-              }
-          } else {
-              require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
+          /* ------------------------------------------------------------------------- *
+           *  Loads Features
+          /* ------------------------------------------------------------------------- */
+          require_once( HA_BASE_PATH . 'addons/sharrre/ha-sharrre.php' );
+          new HA_Sharrre();
+          require_once( HA_BASE_PATH . 'addons/shortcodes/ha-shortcodes.php' );
+          new HA_Shortcodes();
+          if ( is_admin() && ! $this -> ha_is_customizing() ) {
+            require_once( HA_BASE_PATH . 'addons/admin/ha-hs-doc.php' );
           }
-        }
-        /* ------------------------------------------------------------------------- *
-         *  Loads PRO
-        /* ------------------------------------------------------------------------- */
-        if ( $this -> ha_is_pro_addons() || $this -> ha_is_pro_theme() ) {
-          require_once( HA_BASE_PATH . 'addons/ha-init-pro.php' );
-        }
-        /* ------------------------------------------------------------------------- *
-         *  Print customizer infos
-        /* ------------------------------------------------------------------------- */
-        if ( ! $this -> ha_is_skop_on() ) {
-            if ( defined( 'CZR_PRINT_CUSTOMIZER_DATA_WHEN_SKOPE_DISABLED') && CZR_PRINT_CUSTOMIZER_DATA_WHEN_SKOPE_DISABLED ) {
-                if ( file_exists( HA_BASE_PATH . 'addons/_dev_print_customizer_data.php' ) ) {
-                    require_once( HA_BASE_PATH . 'addons/_dev_print_customizer_data.php' );
-                    function ha_instantiate_customizer_logs() {
-                        if ( class_exists( 'HA_dev_customizer_data') ) {
-                            new HA_dev_customizer_data(
-                                array(
-                                    'hook' => '__header_after_container_inner',
-                                    'display_header' => true,
-                                    //'tested_option' => 'header_image'
-                                )
 
-                            );
-                        }
-                    }
-                    add_action('hu_hueman_loaded', 'ha_instantiate_customizer_logs', 100 );
-                }
-            }
-        }
-      }
+          /* ------------------------------------------------------------------------- *
+           *  Loads Customizer
+          /* ------------------------------------------------------------------------- */
+          require_once( HA_BASE_PATH . 'addons/czr/ha-czr.php' );
+          new HA_Czr();
+
+          /* ------------------------------------------------------------------------- *
+           *  Loads OLD SKOP
+          /* ------------------------------------------------------------------------- */
+          // if ( ha_is_skop_on() ) {
+          //   if ( defined('CZR_DEV') && true === CZR_DEV ) {
+          //       if ( file_exists( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' ) ) {
+          //           require_once( HA_BASE_PATH . 'addons/skop/_dev/skop-x-fire.php' );
+          //       }
+          //   } else {
+          //       require_once( HA_BASE_PATH . 'addons/skop/czr-skop.php' );
+          //   }
+          // }
+          /* ------------------------------------------------------------------------- *
+           *  Loads PRO
+          /* ------------------------------------------------------------------------- */
+          if ( $this -> ha_is_pro_addons() || $this -> ha_is_pro_theme() ) {
+              require_once( HA_BASE_PATH . 'addons/ha-init-pro.php' );
+          }
+      }//ha_load()
 
 
       function ha_plugin_lang() {
@@ -338,14 +305,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
         ) );
       }
 
-      //@return bool
-      //skop shall not be activated when previewing the theme from the customizer
-      function ha_is_skop_on() {
-        global $wp_version;
-        if ( $this -> ha_isprevdem() )
-          return;
-        return apply_filters( 'ha_is_skop_on', HA_SKOP_ON && version_compare( $wp_version, '4.7', '>=' ) );
-      }
 
 
       //Check the existence of the 'changeset_uuid' method in the WP_Customize_Manager to state if the changeset feature is
@@ -356,22 +315,6 @@ if ( ! class_exists( 'HU_AD' ) ) :
         return $this -> ha_is_customizing() && method_exists( $wp_customize, 'changeset_uuid');
       }
 
-
-      //@return bool
-      function ha_isprevdem() {
-          global $wp_customize;
-          $is_dirty = false;
-
-          if ( is_object( $wp_customize ) && method_exists( $wp_customize, 'unsanitized_post_values' ) ) {
-              $real_cust            = $wp_customize -> unsanitized_post_values( array( 'exclude_changeset' => true ) );
-              $_preview_index       = array_key_exists( 'customize_messenger_channel' , $_POST ) ? $_POST['customize_messenger_channel'] : '';
-              $_is_first_preview    = false !== strpos( $_preview_index ,'-0' );
-              $_doing_ajax_partial  = array_key_exists( 'wp_customize_render_partials', $_POST );
-              //There might be cases when the unsanitized post values contains old widgets infos on initial preview load, giving a wrong dirtyness information
-              $is_dirty             = ( ! empty( $real_cust ) && ! $_is_first_preview ) || $_doing_ajax_partial;
-          }
-          return apply_filters( 'hu_isprevdem', ! $is_dirty && ha_get_raw_option( 'template', null, false ) != get_stylesheet() && ! is_child_theme() && ! ( defined('HU_IS_PRO') && HU_IS_PRO ) );
-      }
 
       //hook : wp_head
       //only on front end and if user is logged-in
@@ -419,6 +362,183 @@ function ha_error_log( $data ) {
     return;
   error_log( $data );
 }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  LOADS CZR BASE FMK
+/* ------------------------------------------------------------------------- */
+// czr base fmk is loaded @after_setup_theme:10 in Nimble
+add_action( 'after_setup_theme', 'hu_load_czr_base_fmk', 15 );
+function hu_load_czr_base_fmk() {
+    if ( did_action( 'nimble_base_fmk_loaded' ) ) {
+        error_log('Hueman Pro Addons => The czr_base_fmk has already been loaded');
+        return;
+    }
+    require_once(  HA_BASE_PATH . '/inc/czr-base-fmk/czr-base-fmk.php' );
+    \hu_czr_fmk\CZR_Fmk_Base( array(
+       'base_url' => HA_BASE_URL . 'inc/czr-base-fmk',
+       'version' => HUEMAN_VER
+    ));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  LOADS SKOPE DEPENDANT COMPONENTS
+/* ------------------------------------------------------------------------- */
+// FUNCTION ha_is_skop_on() is declared in /addons/ha-functions.php
+// function ha_is_skop_on() {
+//     global $wp_version;
+//     if( ! defined( 'HA_SKOP_ON' ) ) {
+//         //'enable-skope' option can take two string values : "yes" and "no".
+//         //If the option is not set yet, which is the most common case, it means that it is enabled ( @see default value == "yes" when registering the setting )
+//         $_skope_enable_val = ha_get_raw_option( 'enable-skope' , 'hu_theme_options');
+//         define( 'HA_SKOP_ON' , ! is_string( $_skope_enable_val ) || 'yes' == $_skope_enable_val );
+//     }
+//     return apply_filters( 'ha_is_skop_on', HA_SKOP_ON && ! ha_isprevdem() && version_compare( $wp_version, '4.7', '>=' ) );
+// }
+
+
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  BODY BG + HEADER SLIDER => DYNAMICALLY REGISTER settings prefixed with '_contextualizer_ui_'
+/* ------------------------------------------------------------------------- */
+add_filter( 'customize_dynamic_setting_args', 'hu_ad_set_contextualized_modules_setting_args', 10, 2 );
+function hu_ad_set_contextualized_modules_setting_args( $setting_args, $setting_id ) {
+    //error_log( 'hu_ad_set_contextualized_modules_setting_args => DYN REGISTRATION => ' . $setting_id );
+    // _contextualizer_ui_ => @see in ::registerBodyBGmoduleSettingControl()
+    if ( 0 === strpos( $setting_id, '_contextualizer_ui_' ) ) {
+        //sek_error_log( 'DYNAMICALLY REGISTERING SEK SETTING => ' . $setting_id );
+        return array(
+            'transport' => 'refresh',
+            'type' => '_contextualizer_ui_',//won't be saved as is,
+            'default' => array()
+        );
+    }
+    return $setting_args;
+}
+
+
+
+
+/* ------------------------------------------------------------------------- *
+ *  Add filters for tc_theme_options when using the contextualizer
+ *  action "ctx_set_filters_for_opt_group_{$opt_group}" is declared in the contextualizer module => Contx_Options::ctx_setup_option_filters()
+/* ------------------------------------------------------------------------- */
+add_action( "ctx_set_filters_for_opt_group___hu_theme_options"  , 'hu_add_support_for_contextualizer');
+// hook ctx_set_filters_for_opt_group___tc_theme_options
+// @param $opt_names = array() of Customizr options short name
+function hu_add_support_for_contextualizer( $opt_names = array() ) {
+    //sek_error_log( '$opt_names ? ', $opt_names );
+    if ( ! is_array( $opt_names ) || ! function_exists( 'ctx_get_opt_val' ) )
+      return;
+
+    foreach ( $opt_names as $opt_name ) {
+        // filter declared in /wp-content/themes/hueman/functions/class-utils.php
+        // apply_filters( "hu_opt_{$option_name}" , $_single_opt , $option_name , $option_group, $_default_val );
+        add_filter( "hu_opt_{$opt_name}", function( $opt_value, $opt_name ) {
+            return ctx_get_opt_val( $opt_value, $opt_name, 'hu_theme_options'  );
+        }, 100, 2 );
+    }
+}
+
+
+if ( ha_is_skop_on() ) {
+    /* ------------------------------------------------------------------------- *
+     *  RUN BACKWARD COMPATIBILITY
+    /* ------------------------------------------------------------------------- */
+    $contx_update_status = get_option('hu_contx_update_june_2018');
+    // If the backward compat has been done properly, the $contx_update_status should take the following values :
+    // 1) '_nothing_to_map_' => when the user started using the theme after the contx update (june 2018), or if the previous skoping had not been used
+    // 2) '_mapping_done_' => each new skope posts have been written and their corresponding theme mod set. @see ctx_update_skope_post() function
+    // 3) '_error_when_mapping_' => if a problem occured when creating one of the new skope post
+    if ( '_error_when_mapping_' === $contx_update_status || ( '_nothing_to_map_' !== $contx_update_status && '_mapping_done_' !== $contx_update_status ) ) {
+          require_once( HA_BASE_PATH . 'addons/ha-backward-compatibility-after-setup-theme-40.php' );
+    }
+
+    /* ------------------------------------------------------------------------- *
+     *  LOADS SKOPE
+    /* ------------------------------------------------------------------------- */
+    // skope is loaded @after_setup_theme:10 in Nimble
+    add_action( 'after_setup_theme', 'hu_load_skope', 20 );
+    function hu_load_skope() {
+        if ( did_action( 'nimble_skope_loaded' ) ) {
+            error_log('Hueman Pro Addons => The skope has already been loaded');
+            return;
+        }
+        require_once( HA_BASE_PATH . 'inc/czr-skope/index.php' );
+        \hueman_skp\Flat_Skop_Base( array(
+            'base_url_path' => HA_BASE_URL . '/inc/czr-skope'
+        ) );
+    }
+
+
+    /* ------------------------------------------------------------------------- *
+     *  LOADS CONTEXTUALIZER
+    /* ------------------------------------------------------------------------- */
+    require_once( HA_BASE_PATH . 'contextualizer/ccat-contextualizer.php' );
+    // If in hueman-pro-addons or in hueman-pro theme
+    // add_action('hu_hueman_loaded', function() {
+    //     Flat_Skop_Base();
+    // });
+    // Note : skope dependant. skope is loaded @after_setup_theme:30
+    add_action('after_setup_theme', 'hu_load_contextualizer', 30 );
+    function hu_load_contextualizer() {
+        Contx( array(
+            'base_url_path' => HA_BASE_URL . '/contextualizer'
+        ) );
+    }
+
+
+
+
+    /* ------------------------------------------------------------------------- *
+     *   add the body-background to the collection of filtrable candidates
+    /* ------------------------------------------------------------------------- */
+    add_filter( 'ctx_filtrable_candidates_before_setting_up_option_filters', 'hu_ad_add_body_bg_to_filtrable_candidates' );
+    function hu_ad_add_body_bg_to_filtrable_candidates( $filtrable_candidates) {
+        if ( ! ctx_we_can_contextualize_not_wp_core_options() )
+          return $filtrable_candidates;
+
+        if ( !empty( $filtrable_candidates[ 'multidim_options' ] ) ) {
+            if ( !empty( $filtrable_candidates[ 'multidim_options' ][ 'hu_theme_options'] ) ) {
+                $filtrable_candidates[ 'multidim_options' ][ 'hu_theme_options'][] = 'body-background';
+            }
+        }
+
+        return $filtrable_candidates;
+    }
+}//if ( ha_is_skop_on() )
+
+
+
+
+
+
+
+
+
 
 
 //Creates a new instance
