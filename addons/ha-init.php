@@ -495,7 +495,7 @@ if ( ha_is_skop_on() ) {
                     set_theme_mod( $mod_id, $mod_value );
                 }
             }
-            update_option('theme_mods_hueman', 'synced');
+            update_option('hu_theme_mods_sync_status', 'synced');
         }
     }
 

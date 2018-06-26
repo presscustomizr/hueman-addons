@@ -10,17 +10,19 @@ function ha_backward_compatibility_setup_june_2018() {
     $_old_raw_skoped_options = get_post_meta( $old_skope_post_id );
     $_old_raw_skoped_options = is_array( $_old_raw_skoped_options ) ? $_old_raw_skoped_options : array();
 
+
+    $_old_skoped_options = array();
     foreach ( $_old_raw_skoped_options as $meta_key => $value ) {
         if ( is_array($value) && 1 == count($value) ) {
             $_old_skoped_options[$meta_key] = maybe_unserialize( $value[0] );
         }
         else {
-            $_old_skoped_options[$meta_key] = array_map('maybe_unserialize', $value);
+            $_old_skoped_options[$meta_key] = array_map( 'maybe_unserialize', $value );
         }
     }
 
     $status = '_nothing_to_map_';
-    if ( is_array( $_old_skoped_options ) ) {
+    if ( ! empty( $_old_skoped_options ) ) {
         $status = ha_generate_and_save_new_contx_options( $_old_skoped_options, $status );
         //sek_error_log( 'SKOPE MAPPING ATTEMPT', $final_new_skoped_options );
         //sek_error_log( 'GET_THEME_MODS', get_theme_mods() );
