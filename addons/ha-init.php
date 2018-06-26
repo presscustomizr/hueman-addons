@@ -468,14 +468,37 @@ if ( ha_is_skop_on() ) {
     /* ------------------------------------------------------------------------- *
      *  RUN BACKWARD COMPATIBILITY
     /* ------------------------------------------------------------------------- */
-    $contx_update_status = get_option('hu_contx_update_june_2018');
+    $contx_update_status = get_option('hu_contx_update_june_2018_status');
     // If the backward compat has been done properly, the $contx_update_status should take the following values :
     // 1) '_nothing_to_map_' => when the user started using the theme after the contx update (june 2018), or if the previous skoping had not been used
     // 2) '_mapping_done_' => each new skope posts have been written and their corresponding theme mod set. @see ctx_update_skope_post() function
     // 3) '_error_when_mapping_' => if a problem occured when creating one of the new skope post
-    if ( '_error_when_mapping_' === $contx_update_status || ( '_nothing_to_map_' !== $contx_update_status && '_mapping_done_' !== $contx_update_status ) ) {
+    if ( '_error_when_mapping_' === $contx_update_status || ( '_nothing_to_map_' !== $contx_update_status && '_mapping_done_' !== $contx_update_status ) || isset($_GET['rewrite_new_contx_options'] ) ) {
           require_once( HA_BASE_PATH . 'addons/ha-backward-compatibility-after-setup-theme-40.php' );
     }
+
+
+    /* ------------------------------------------------------------------------- *
+     *  SYNCHRONIZES THEME MODS IF UPDATING FROM HUEMAN TO HUEMAN PRO
+    /* ------------------------------------------------------------------------- */
+    //sek_error_log('theme_mods_hueman-pro', get_option('theme_mods_hueman-pro') );
+    if ( defined('HU_IS_PRO') && HU_IS_PRO ) {
+        $contx_theme_mods_sync_status = get_option('hu_theme_mods_sync_status');
+        if ( 'synced' != $contx_theme_mods_sync_status ) {
+            $hueman_theme_mods = get_option('theme_mods_hueman');
+            if ( is_array( $hueman_theme_mods ) ) {
+                foreach ( $hueman_theme_mods as $mod_id => $mod_value ) {
+                    // the contx theme mods starts with 'skp__*'
+                    if ( false === strpos( $mod_id, 'skp__') )
+                      continue;
+                    // write the contx hueman theme mod in the hueman pro theme mods
+                    set_theme_mod( $mod_id, $mod_value );
+                }
+            }
+            update_option('theme_mods_hueman', 'synced');
+        }
+    }
+
 
     /* ------------------------------------------------------------------------- *
      *  LOADS SKOPE
