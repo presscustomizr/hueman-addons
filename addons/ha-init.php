@@ -477,26 +477,30 @@ if ( ha_is_skop_on() ) {
           require_once( HA_BASE_PATH . 'addons/ha-backward-compatibility-after-setup-theme-40.php' );
     }
 
-
     /* ------------------------------------------------------------------------- *
-     *  SYNCHRONIZES THEME MODS IF UPDATING FROM HUEMAN TO HUEMAN PRO
+     *  SYNCHRONIZES THEME MODS IF SWITCHING FROM A HUEMAN THEME TO ANOTHER ( hueman free to hueman pro, hueman to hueman child, ... )
     /* ------------------------------------------------------------------------- */
     //sek_error_log('theme_mods_hueman-pro', get_option('theme_mods_hueman-pro') );
-    if ( defined('HU_IS_PRO') && HU_IS_PRO ) {
-        $contx_theme_mods_sync_status = get_option('hu_theme_mods_sync_status');
-        if ( 'synced' != $contx_theme_mods_sync_status ) {
-            $hueman_theme_mods = get_option('theme_mods_hueman');
-            if ( is_array( $hueman_theme_mods ) ) {
-                foreach ( $hueman_theme_mods as $mod_id => $mod_value ) {
-                    // the contx theme mods starts with 'skp__*'
-                    if ( false === strpos( $mod_id, 'skp__') )
-                      continue;
-                    // write the contx hueman theme mod in the hueman pro theme mods
-                    set_theme_mod( $mod_id, $mod_value );
-                }
-            }
-            update_option('hu_theme_mods_sync_status', 'synced');
-        }
+    $current_stylesheet = get_stylesheet();
+    // this $_GET params allows us to force a re-sync with a given stylesheet slug.
+    $stylesheet_synced = isset( $_GET['sync_contx_with_stylesheet'] ) ? $_GET['sync_contx_with_stylesheet'] : get_option( 'hu_contx_theme_mods_synced_for_stylesheet' );
+    if ( $current_stylesheet != $stylesheet_synced ) {
+          // May be copy the contx theme mods from the previous stylesheet
+          if ( false != $stylesheet_synced && ! empty( $stylesheet_synced ) ) {
+              $previous_theme_mods = get_option( "theme_mods_{$stylesheet_synced}");
+
+              if ( is_array( $previous_theme_mods ) ) {
+                  foreach ( $previous_theme_mods as $mod_id => $mod_value ) {
+                      // the contx theme mods id starts with 'skp__*'
+                      if ( false === strpos( $mod_id, 'skp__') )
+                        continue;
+                      // write the contx hueman theme mod in the hueman pro theme mods
+                      set_theme_mod( $mod_id, $mod_value );// the $mod_value is a post id for each skope
+                  }
+              }
+          }
+          // And set the option with the current stylesheet
+          update_option( 'hu_contx_theme_mods_synced_for_stylesheet', $current_stylesheet );
     }
 
 
