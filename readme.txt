@@ -37,6 +37,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.1.0 June 27th 2018 =
+* added : the contextualizer feature to the live customizer
+
 = 2.0.16 February 14th 2018 =
 * Fix : Multisite compatibility problem
 * Fix : Title/Subtitle polylang plugin translation doesn't appear
