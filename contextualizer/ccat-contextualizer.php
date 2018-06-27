@@ -100,7 +100,8 @@ function ctx_get_excluded_wp_core_settings() {
         'site_icon',
         //wp theme mods
         //'custom_css',
-        'custom_css_post_id'
+        'custom_css_post_id',
+        'header_image_data',//<= used when customizing the header_image
     );
 }
 
@@ -855,6 +856,9 @@ if ( ! class_exists( 'Contx_Options' ) ) :
               return;
 
             $theme_mods = get_theme_mods();
+
+            //sek_error_log( '$theme_mods', $theme_mods );
+
             $ctx_get_wp_core_eligible_settings = ctx_get_wp_core_eligible_settings();
 
             foreach ( $filtrable_candidates as $group_type => $candidates ) {
@@ -916,8 +920,15 @@ if ( ! class_exists( 'Contx_Options' ) ) :
                             if ( ! ctx_we_can_contextualize_not_wp_core_options() && ! in_array( $opt_name, $ctx_get_wp_core_eligible_settings ) )
                               continue;
 
-                            if ( ! array_key_exists( $opt_name, $theme_mods ) ) {
-                                add_filter( "theme_mod_{$opt_name}", array( $this, 'ctx_filter_for_single_theme_mod' ), PHP_INT_MAX, 1 );
+                                                        // When customizing, the "pre_option{}" filter is used by non multidimensional options, like blogname, blogdescription.
+                            // @see wp-includes/class-wp-customize-setting.php
+                            // Fixes https://github.com/presscustomizr/hueman-pro-addons/issues/154
+                            $skope_namespace = isset( $GLOBALS['czr_skope_namespace'] ) ? $GLOBALS['czr_skope_namespace'] : '';
+                            $skp_is_customizing_fn = $skope_namespace . 'skp_is_customizing';
+                            if ( function_exists( $skp_is_customizing_fn ) && $skp_is_customizing_fn() ) {
+                                if ( array_key_exists( $opt_name, $theme_mods ) ) {
+                                    add_filter( "theme_mod_{$opt_name}", array( $this, 'ctx_filter_for_single_theme_mod' ), PHP_INT_MAX, 1 );
+                                }
                             }
                         }
                     break;
@@ -1016,7 +1027,7 @@ if ( ! class_exists( 'Contx_Options' ) ) :
 
 
         //hook : theme_mod_{$_opt_name}
-        function ctx_filter_for_single_theme_mod( $original_opt_val) {
+        function ctx_filter_for_single_theme_mod( $original_opt_val ) {
           //extract theme_mod name
           $_filter = current_filter();
           $_ptrn = 'theme_mod_';
@@ -1403,8 +1414,11 @@ if ( ! class_exists( 'Contx' ) ) :
 
                         'This setting is already contextualized locally. The local customization will be applied in priority in this context.' => __( 'This setting is already contextualized locally. The local customization will be applied in priority in this context.', 'text_domain_to_be_replaced' ),
                         'When the setting is already customized specifically for' => __( 'When the setting is already customized specifically for', 'text_domain_to_be_replaced'),
-                        'this local value will be applied in priority.' => __('this local value will be applied in priority.', 'text_domain_to_be_replaced'),
                         'Reset' => __('Reset', 'text_domain_to_be_replaced'),
+
+
+                        'this local value will be applied in priority.' => __('this local value will be applied in priority.', 'text_domain_to_be_replaced'),
+                        'When the setting is contextualized, the contextual value applies in priority.' => __('When the setting is contextualized, the contextual value applies in priority.', 'text_domain_to_be_replaced'),
 
                         'in context' => __('in context', 'text_domain_to_be_replaced'),
 

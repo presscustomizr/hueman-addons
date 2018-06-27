@@ -1166,6 +1166,53 @@ var CZRSkopeReactMths = CZRSkopeReactMths || {};
                         }
                   });
 
+
+                  // Display a notification when user customizes a setting already contextualized in local or group level
+                  api.initialeSkopableSettingsCollectionReady = api.initialeSkopableSettingsCollectionReady || $.Deferred();
+                  api.initialeSkopableSettingsCollectionReady.done( function( skopableSettings ) {
+                        // {
+                        //     'setting-id' : setId,
+                        //     'apiCtrlId' : ctrlId,
+                        //     'apiSetId' : setId,
+                        //     'type' : apiCtrlType
+                        // }
+                        _.each( skopableSettings, function( settingData ) {
+                              api( settingData.apiSetId, function( _set_ ) {
+                                    _set_.bind( function() {
+                                          // Do we have a "local" or "group" contextualization ?
+                                          var _isContextualized = false;
+                                          _.each( self.currentDynamicSkopeSettingIds, function( contxSettingId, skopeLevel ) {
+                                                if ( _isContextualized || _.isEmpty( contxSettingId ) )
+                                                  return;
+                                                if ( ! api.has( contxSettingId ) )
+                                                  return;
+                                                _contextualizedValues = api( contxSettingId )();
+                                                if ( ! _.isEmpty( _contextualizedValues ) && ! _.isUndefined( _.findWhere( _contextualizedValues, { 'setting-id' : _set_.id } ) ) ) {
+                                                      _isContextualized = true;
+                                                }
+
+                                          });
+
+                                          if ( _isContextualized ) {
+                                               _.each( _set_.findControls(), function( ctrlData ) {
+                                                      api.control( ctrlData.id, function( _ctrl_ ) {
+                                                            _ctrl_.notifications.add( new api.Notification( 'locally-contextualized', {
+                                                                  type: 'info',
+                                                                  message : contxLocalizedParams.i18n['When the setting is contextualized, the contextual value applies in priority.'],
+                                                                  dismissible: true
+                                                            }));
+
+                                                            // Removed if not dismissed after 5 seconds
+                                                            _.delay( function() {
+                                                                  _ctrl_.notifications.remove( 'locally-contextualized' );
+                                                            }, 10000 );
+                                                      });
+                                               });//_each
+                                          }
+                                    });
+                              } );
+                        });
+                  });
             }//initialize
       });//$.extend()
 })( wp.customize , jQuery, _);
@@ -1261,6 +1308,12 @@ $.extend( CZRSkopeReactMths, {
           // }
           // update the collection
           api.skopableSettingsCollection( _candidates_ );
+
+          // Say it when done the first time
+          api.initialeSkopableSettingsCollectionReady = api.initialeSkopableSettingsCollectionReady || $.Deferred();
+          if ( 'pending' === api.initialeSkopableSettingsCollectionReady.state() ) {
+                api.initialeSkopableSettingsCollectionReady.resolve( _candidates_ );
+          }
     },//updateSkopableSettingCollection
 
 
