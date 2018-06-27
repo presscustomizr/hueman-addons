@@ -872,8 +872,17 @@ if ( ! class_exists( 'Contx_Options' ) ) :
                             if ( ! ctx_we_can_contextualize_not_wp_core_options() && ! in_array( $opt_name, $ctx_get_wp_core_eligible_settings ) )
                               continue;
 
-                            // filter documented in wp-includes/option.php
-                            add_filter( "option_{$opt_name}", array( $this, 'ctx_filter_for_simple_options' ), PHP_INT_MAX, 4 );
+                            // filters documented in wp-includes/option.php
+                            add_filter( "option_{$opt_name}", array( $this, 'ctx_filter_for_simple_options' ), PHP_INT_MAX, 2 );
+
+                            // When customizing, the "pre_option{}" filter is used by non multidimensional options, like blogname, blogdescription.
+                            // @see wp-includes/class-wp-customize-setting.php
+                            // Fixes https://github.com/presscustomizr/hueman-pro-addons/issues/154
+                            $skope_namespace = isset( $GLOBALS['czr_skope_namespace'] ) ? $GLOBALS['czr_skope_namespace'] : '';
+                            $skp_is_customizing_fn = $skope_namespace . 'skp_is_customizing';
+                            if ( function_exists( $skp_is_customizing_fn ) && $skp_is_customizing_fn() ) {
+                                add_filter( "pre_option_{$opt_name}", array( $this, 'ctx_filter_for_simple_options' ), PHP_INT_MAX, 2 );
+                            }
                         }
                     break;
                     // there are no wp core multidimensional options
@@ -1055,7 +1064,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
             //     //@param = value, option name, skope, inherits
             //     $_new_val = $this -> _get_front_end_val( $_opt_val, $opt_name, 'local', true );
             // }
-
             return ctx_get_opt_val( $original_opt_val, $opt_name );
         }
 

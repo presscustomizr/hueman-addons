@@ -381,7 +381,7 @@ function hu_load_czr_base_fmk() {
     require_once(  HA_BASE_PATH . '/inc/czr-base-fmk/czr-base-fmk.php' );
     \hu_czr_fmk\CZR_Fmk_Base( array(
        'base_url' => HA_BASE_URL . 'inc/czr-base-fmk',
-       'version' => HUEMAN_VER
+       'version' => defined( 'HUEMAN_VER' ) ? HUEMAN_VER : time()
     ));
 }
 
