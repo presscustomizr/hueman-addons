@@ -704,7 +704,7 @@ if ( ! class_exists( 'CZR_Contx_Construct' ) ) :
         // Is used when the theme_mod "ctx_filtrable_candidates" is not set yet
         // invoked in ctx_cache_filtrable_candidates()
         private function _get_default_filtrable_candidate_json() {
-            return '{"options":["blogname","blogdescription"],"multidim_options":{"hu_theme_options":["display-header-title","display-header-logo","logo-max-height","font","body-font-size","container-width","boxed","sidebar-padding","color-1","color-2","image-border-radius","ext_link_style","ext_link_target","post-comments","page-comments","smoothscroll","responsive","fittext","sharrre","sharrre-counter","sharrre-scrollable","sharrre-twitter-on","twitter-username","sharrre-facebook-on","sharrre-google-on","sharrre-pinterest-on","sharrre-linkedin-on","minified-css","structured-data","smart_load_img","js-mobile-detect","site-description","color-topbar","color-header","color-header-menu","color-mobile-menu","transparent-fixed-topnav","use-header-image","logo-title-on-header-image","header-ads","header-ads-desktop","header-ads-mobile","default-menu-header","header-desktop-sticky","desktop-search","header_mobile_menu_layout","header-mobile-sticky","header_mobile_btn","mobile-search","infinite-scroll","load_on_scroll_desktop","load_on_scroll_mobile","pro_post_list_design","pro_grid_columns","blog-heading-enabled","blog-heading","blog-subheading","excerpt-length","featured-posts-enabled","featured-category","featured-posts-count","featured-posts-full-content","featured-slideshow","featured-slideshow-speed","author-bio","related-posts","post-nav","placeholder","comment-count","sidebar-top","desktop-sticky-sb","mobile-sticky-sb","mobile-sidebar-hide","footer-ads","default-menu-footer","color-footer","copyright","credit"]},"multidim_theme_mods":{"nav_menu_locations":["topbar","mobile","header","footer"]},"simple_theme_mods":["header_text","custom_logo","header_textcolor","background_color","header_image","background_preset","background_size","background_repeat","background_attachment"]}';
+            return '{"options":["blogname","blogdescription"],"multidim_options":{"hu_theme_options":["display-header-title","display-header-logo","logo-max-height","font","body-font-size","container-width","boxed","sidebar-padding","color-1","color-2","image-border-radius","ext_link_style","ext_link_target","post-comments","page-comments","smoothscroll","responsive","fittext","sharrre","sharrre-counter","sharrre-scrollable","sharrre-twitter-on","twitter-username","sharrre-facebook-on","sharrre-google-on","sharrre-pinterest-on","sharrre-linkedin-on","minified-css","structured-data","smart_load_img","js-mobile-detect","site-description","color-topbar","color-header","color-header-menu","color-mobile-menu","transparent-fixed-topnav","use-header-image","logo-title-on-header-image","header-ads","header-ads-desktop","header-ads-mobile","default-menu-header","header-desktop-sticky","desktop-search","header_mobile_menu_layout","header-mobile-sticky","header_mobile_btn","mobile-search","infinite-scroll","load_on_scroll_desktop","load_on_scroll_mobile","pro_post_list_design","pro_grid_columns","blog-heading-enabled","blog-heading","blog-subheading","excerpt-length","featured-posts-enabled","featured-category","featured-posts-count","featured-posts-full-content","featured-slideshow","featured-slideshow-speed","author-bio","related-posts","post-nav","placeholder","comment-count","sidebar-top","desktop-sticky-sb","mobile-sticky-sb","mobile-sidebar-hide","footer-ads","default-menu-footer","color-footer","copyright","credit"]},"multidim_theme_mods":[],"simple_theme_mods":["header_text","custom_logo","header_textcolor","background_color","header_image","background_preset","background_size","background_repeat","background_attachment","nav_menu_locations"]}';
         }
     }//class
 endif;
@@ -727,9 +727,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
 
         // hook : wp
         function ctx_cache_ctx_options() {
-            // error_log( '<CTX OPTIONS in OPTIONS>' );
-            // error_log( print_r( get_option( CONTX_OPTION_PREFIX ), true ) );
-            // error_log( '</CTX OPTIONS>' );
             // if we can contextualize (user has not uncheck everyt) let's setup the filtrable candidates and the option filters
             if ( ! ctx_we_can_contextualize_wp_core_options() && ! ctx_we_can_contextualize_not_wp_core_options() )
               return;
@@ -785,9 +782,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
             $this -> cached_ctx_opt = $cache_candidate;
 
             do_action( 'contextualizer_options_cached');
-            // error_log( '<CACHE CANDIDATES>' );
-            // error_log( print_r( $cache_candidate, true) );
-            // error_log( '</CACHE CANDIDATES>' );
         }
 
 
@@ -844,10 +838,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
         // )
         function ctx_setup_option_filters() {
             $filtrable_candidates = apply_filters( 'ctx_filtrable_candidates_before_setting_up_option_filters', ctx_get_filtrable_candidates() );
-            // error_log( '<FILTRABLE CANDIDATES>' );
-            // error_log( print_r( $filtrable_candidates , true ) );
-            // error_log( '</FILTRABLE CANDIDATES>' );
-            //sek_error_log( __CLASS__ . '::' . __FUNCTION__ . ' => FILTRABLE CANDIDATES', ctx_get_filtrable_candidates() );
 
             if ( empty( $filtrable_candidates ) || ! is_array( $filtrable_candidates ) )
               return;
@@ -855,9 +845,18 @@ if ( ! class_exists( 'Contx_Options' ) ) :
             if ( ! ctx_we_can_contextualize_wp_core_options() && ! ctx_we_can_contextualize_not_wp_core_options() )
               return;
 
-            $theme_mods = get_theme_mods();
+            $raw_theme_mods = get_theme_mods();
 
-            //sek_error_log( '$theme_mods', $theme_mods );
+            $theme_mods = $raw_theme_mods;
+            $filtrable_candidates_for_simple_theme_mods = $filtrable_candidates['simple_theme_mods'];
+            // Make sure that all filtrable candidates are present in the theme_mod_list, so we can filter them.
+            // Solves the problem of for example a header_image contextualized locally, but not set yet globally, and for which the key has not been written in the wp theme_mod options
+            // In this case, without adding the header_image key to the db theme mod array, we would not be able to set the contextualized value when looping on the db theme mod values.
+            foreach ( $filtrable_candidates_for_simple_theme_mods as $theme_mod_id ) {
+                if ( ! array_key_exists( $theme_mod_id, $theme_mods ) ) {
+                    $theme_mods[ $theme_mod_id ] = null;
+                }
+            }
 
             $ctx_get_wp_core_eligible_settings = ctx_get_wp_core_eligible_settings();
 
@@ -920,19 +919,26 @@ if ( ! class_exists( 'Contx_Options' ) ) :
                             if ( ! ctx_we_can_contextualize_not_wp_core_options() && ! in_array( $opt_name, $ctx_get_wp_core_eligible_settings ) )
                               continue;
 
-                                                        // When customizing, the "pre_option{}" filter is used by non multidimensional options, like blogname, blogdescription.
+                            // When customizing, the "theme_mod_{}" filter is used by non multidimensional options, like header_image.
                             // @see wp-includes/class-wp-customize-setting.php
                             // Fixes https://github.com/presscustomizr/hueman-pro-addons/issues/154
-                            $skope_namespace = isset( $GLOBALS['czr_skope_namespace'] ) ? $GLOBALS['czr_skope_namespace'] : '';
-                            $skp_is_customizing_fn = $skope_namespace . 'skp_is_customizing';
-                            if ( function_exists( $skp_is_customizing_fn ) && $skp_is_customizing_fn() ) {
-                                if ( array_key_exists( $opt_name, $theme_mods ) ) {
-                                    add_filter( "theme_mod_{$opt_name}", array( $this, 'ctx_filter_for_single_theme_mod' ), PHP_INT_MAX, 1 );
-                                }
+                            // On front it is also used.
+                            // $skope_namespace = isset( $GLOBALS['czr_skope_namespace'] ) ? $GLOBALS['czr_skope_namespace'] : '';
+                            // $skp_is_customizing_fn = $skope_namespace . 'skp_is_customizing';
+                            // if ( function_exists( $skp_is_customizing_fn ) && $skp_is_customizing_fn() ) {
+                            //     if ( array_key_exists( $opt_name, $theme_mods ) ) {
+                            //         add_filter( "theme_mod_{$opt_name}", array( $this, 'ctx_filter_for_single_theme_mod' ), PHP_INT_MAX, 1 );
+                            //     }
+                            // }
+                            if ( array_key_exists( $opt_name, $theme_mods ) ) {
+                                add_filter( "theme_mod_{$opt_name}", array( $this, 'ctx_filter_for_single_theme_mod' ), PHP_INT_MAX, 1 );
                             }
                         }
                     break;
                     case 'multidim_theme_mods':
+                        // if ( ctx_we_can_contextualize_wp_core_options() ) {
+
+                        // }
                     break;
                  }//switch
             }//foreach
@@ -968,15 +974,22 @@ if ( ! class_exists( 'Contx_Options' ) ) :
             $new_theme_mods = $original_theme_mods;
 
             $all_filtrable_candidates = ctx_get_filtrable_candidates();
+
             $filtrable_candidates_for_simple_theme_mods = $all_filtrable_candidates['simple_theme_mods'];
             $ctx_get_wp_core_eligible_settings = ctx_get_wp_core_eligible_settings();
-            // error_log( '<ORIGINAL THEMEMODS>' );
-            // error_log( print_r( $original_theme_mods, true ) );
-            // error_log( '</ORIGINAL THEMEMODS>' );
+
+            // Make sure that all filtrable candidates are present in the theme_mod_list, so we can filter them.
+            // Solves the problem of for example a header_image contextualized locally, but not set yet globally, and for which the key has not been written in the wp theme_mod options
+            // In this case, without adding the header_image key to the db theme mod array, we would not be able to set the contextualized value when looping on the db theme mod values.
+            foreach ( $filtrable_candidates_for_simple_theme_mods as $theme_mod_id ) {
+                if ( ! array_key_exists( $theme_mod_id, $original_theme_mods ) ) {
+                     $original_theme_mods[ $theme_mod_id ] = null;
+                }
+            }
+
 
             foreach ( $original_theme_mods as $opt_name => $original_opt_val ) {
-                if ( 'nav_menu_locations' == $opt_name && ctx_we_can_contextualize_wp_core_options() ) {
-                    //sek_error_log( 'ctx_get_skopified_nav_menu_locations' );
+                if ( 'nav_menu_locations' === $opt_name && ctx_we_can_contextualize_wp_core_options() ) {
                     $new_theme_mods[ $opt_name ] = $this -> ctx_get_skopified_nav_menu_locations( $original_opt_val );
                 } else {
                     // the option has to be part of the filtrable candidates
@@ -992,7 +1005,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
                     $new_theme_mods[ $opt_name ] = ctx_get_opt_val( $original_opt_val, $opt_name );
                 }
             }
-            //sek_error_log('SKOPIFIED THEME MODS', $new_theme_mods );
 
             // Cache them now
             $this -> cached_skopified_theme_mods = $new_theme_mods;
@@ -1010,17 +1022,6 @@ if ( ! class_exists( 'Contx_Options' ) ) :
                 $sitewide_value = array_key_exists( $menu_location, $nav_menu_locations ) ? $nav_menu_locations[ $menu_location ] : 0;//<= 0 is the value assigned to an empty location by WordPress
                 $new_nav_menu_locations[$menu_location] = ctx_get_opt_val( $sitewide_value, "nav_menu_locations[{$menu_location}]" );
             }
-            // error_log( '<REGISTERED NAV MENUS>' );
-            // error_log( print_r( $registered_nav_menus, true ) );
-            // error_log( '</REGISTERED NAV MENUS>' );
-
-            // error_log( '<IN NAV MENU LOCATION FILTER>' );
-            // error_log( print_r( $original_opt_val, true ) );
-            // error_log( '</IN NAV MENU LOCATION FILTER>' );
-
-            // error_log( '<FILTRABLE CANDIDATES>' );
-            // error_log( print_r( ctx_get_filtrable_candidates() , true ) );
-            // error_log( '</FILTRABLE CANDIDATES>' );
             return $new_nav_menu_locations;
         }
 
@@ -1043,7 +1044,9 @@ if ( ! class_exists( 'Contx_Options' ) ) :
           if ( ! in_array( $_mod_name, $filtrable_candidates_for_simple_theme_mods ) ) {
             return $original_opt_val;
           }
-
+          if ( 'nav_menu_locations' === $_mod_name && ctx_we_can_contextualize_wp_core_options() ) {
+              return $this -> ctx_get_skopified_nav_menu_locations( $original_opt_val );
+          }
           //the option group is null
           return ctx_get_opt_val( $original_opt_val, $_mod_name );
         }
@@ -1092,9 +1095,8 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
         function ctx_schedule_customize_register_actions() {
             add_action( 'customize_register', array( $this, 'ctx_customizer_load_setting_class' ) );
             add_action( 'customize_register', array( $this, 'ctx_register_contextualizer_settings_controls_section' ) );
-
             // Refresh the filtrable candidates every 24 Hours
-            if ( ! get_transient( 'ctx_updated_filtrable_candidates') ) {
+            if ( ! get_transient( 'ctx_updated_filtrable_candidates_collection') || isset( $_GET['refresh_filtrable_candidates'] ) ) {
                 // when all settings have been registered, let's loop through them and record the filtrable candidate in an option
                 add_action( 'customize_register', array( $this, 'ctx_set_filtrable_candidates' ), PHP_INT_MAX );
             }
@@ -1121,10 +1123,6 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
         // - starting with sidebars_*
         // - starts with nav_menu* but not nav_menu_location
         function ctx_set_filtrable_candidates( $wp_customize ) {
-            // error_log( '<EXCLUDED SETTINGS>' );
-            // error_log( print_r( ctx_get_excluded_settings(), true ) );
-            // error_log( '</EXCLUDED SETTINGS>' );
-
 
             // $filtrable_candidates are formed this way :
             // array(
@@ -1158,10 +1156,6 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
                 if ( ! is_object( $wp_customize -> get_control( $set -> id ) ) || ! in_array( $wp_customize -> get_control( $set -> id ) -> type, ctx_get_authorized_setting_types() ) )
                   continue;
 
-                // error_log( '<FILTRABLE CANDIDATES>' );
-                // error_log( print_r( $set -> id . ' | ' . $wp_customize -> get_control( $set -> id ) -> type , true ) );
-                // error_log( '</FILTRABLE CANDIDATES>' );
-
                 $setting_keys = preg_split( '/\[/', str_replace( ']', '', $set->id ) );
                 $setting_base = array_shift( $setting_keys );
 
@@ -1181,29 +1175,25 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
                     }
                 }
                 // is it a multidimensional theme mod ? Ex : nav_menu_location[...]
-                else if ( 'theme_mod' == $set -> type && ! empty( $setting_keys ) ) {
-                    $multidim_option_name = implode( $setting_keys );
-                    if ( array_key_exists( $setting_base, $filtrable_candidates['multidim_theme_mods'] ) ) {
-                        $filtrable_candidates['multidim_theme_mods'][ $setting_base ][] = $multidim_option_name;
-                    } else {
-                        $filtrable_candidates['multidim_theme_mods'][ $setting_base ] = array( $multidim_option_name );
-                    }
-                }
+                // else if ( 'theme_mod' == $set -> type && ! empty( $setting_keys ) ) {
+                //     $multidim_option_name = implode( $setting_keys );
+                //     if ( array_key_exists( $setting_base, $filtrable_candidates['multidim_theme_mods'] ) ) {
+                //         $filtrable_candidates['multidim_theme_mods'][ $setting_base ][] = $multidim_option_name;
+                //     } else {
+                //         $filtrable_candidates['multidim_theme_mods'][ $setting_base ] = array( $multidim_option_name );
+                //     }
+                // }
                 // is it a simple theme mod ? Ex : header_image
-                else if ( 'theme_mod' == $set -> type ) {
+                else if ( 'theme_mod' == $set -> type && empty( $setting_keys ) ) {
                     $filtrable_candidates['simple_theme_mods'][] = $set -> id;
                 }
-
-                // error_log( $set -> id . ' | ' . $set -> type );
-                // error_log( "IS MULTIDIMENSIONAL ? => " . ! empty( $setting_keys ) );
             }
-            // error_log( '<FILTRABLE CANDIDATES>' );
-            // error_log( print_r( $filtrable_candidates, true ) );
-            // error_log( '</FILTRABLE CANDIDATES>' );
+            // Add the nav_menu_location to the filtrable simple_theme_mods
+            $filtrable_candidates['simple_theme_mods'][] = 'nav_menu_locations';
 
             // write in db
             set_theme_mod( 'ctx_filtrable_candidates', $filtrable_candidates );
-            set_transient( 'ctx_updated_filtrable_candidates', true, 60*60*24 );// refreshed every 24 Hours
+            set_transient( 'ctx_updated_filtrable_candidates_collection', true, 60*60*24 );// refreshed every 24 Hours
         }
 
         /////////////////////////////////////////////////////////////////
