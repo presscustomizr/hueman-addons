@@ -2,12 +2,13 @@
 Contributors: nikeo
 Author URI: https://presscustomizr.com
 Plugin URI: https://wordpress.org/plugins/hueman-addons/
-Tags: hueman theme, hueman
-Requires at least: 3.4
-Tested up to: 4.9.4
+Tags: hueman theme, hueman, customizer, contextualizer
+Requires at least: 4.7
+Requires PHP: 5.4
+Tested up to: 4.9.6
 Stable tag: 2.1.0
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Lightweight addons plugin for the Hueman WordPress theme.
 
@@ -35,10 +36,15 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 ==  How to use the Share Bar options ==
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
+== Upgrade Notice ==
+= 2.1.0 June 27th 2018 =
+* Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
+* Added : the custom css can now be customized on each pages independently
 
 == Changelog ==
 = 2.1.0 June 27th 2018 =
-* added : the contextualizer feature to the live customizer
+* Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
+* Added : the custom css can now be customized on each pages independently
 
 = 2.0.16 February 14th 2018 =
 * Fix : Multisite compatibility problem

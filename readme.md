@@ -91,7 +91,8 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 ## Changelog ##
 = 2.1.0 June 27th 2018 =
-* added : the contextualizer feature to the live customizer
+* Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
+* Added : the custom css can now be customized on each pages independently
 
 = 2.0.16 February 14th 2018 =
 * Fix : Multisite compatibility problem
