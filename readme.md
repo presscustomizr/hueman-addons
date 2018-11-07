@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.9.4
-* Stable tag: 2.1.0
+* Stable tag: 2.1.1
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,10 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.1.1 November 7th 2018 =
+* fixed : PC_AC_VERSION constant not defined generating php warning
+* improved : compatibility with the Nimbler Builder plugin
+
 = 2.1.0 June 27th 2018 =
 * Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
 * Added : the custom css can now be customized on each pages independently

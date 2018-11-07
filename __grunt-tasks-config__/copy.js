@@ -24,7 +24,9 @@ module.exports = {
 			'!**/*.db',
       '!patches/**',
 
-      '!addons/_dev_print_customizer_data.php'
+      '!addons/_dev_print_customizer_data.php',
+
+      '!dev_logs.php'
 		],
 		dest: 'build/<%= pkg.name %>/'
 	}

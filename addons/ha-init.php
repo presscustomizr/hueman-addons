@@ -363,9 +363,34 @@ function ha_error_log( $data ) {
   error_log( $data );
 }
 
+/**
+ * Inspired to the WordPress locate_template()
+ */
+function ha_locate_template( $template_names, $load = false, $require_once = true ) {
+    $located = '';
 
+    foreach ( (array) $template_names as $template_name ) {
+        if ( !$template_name ) {
+          continue;
+        }
+        if ( file_exists( STYLESHEETPATH . '/' . $template_name ) ) {
+          $located = STYLESHEETPATH . '/' . $template_name;
+          break;
+        } elseif ( file_exists( TEMPLATEPATH . '/' . $template_name ) ) {
+          $located = TEMPLATEPATH . '/' . $template_name;
+          break;
+        } elseif ( HA_BASE_PATH !== TEMPLATEPATH && file_exists( HA_BASE_PATH . '/' . $template_name ) ) {
+          $located = HA_BASE_PATH . '/' . $template_name;
+          break;
+        }
+    }
 
+    if ( $load && '' != $located ) {
+      load_template( $located, $require_once );
+    }
 
+    return $located;
+}
 
 
 /* ------------------------------------------------------------------------- *
@@ -375,7 +400,9 @@ function ha_error_log( $data ) {
 add_action( 'after_setup_theme', 'hu_load_czr_base_fmk', 15 );
 function hu_load_czr_base_fmk() {
     if ( did_action( 'nimble_base_fmk_loaded' ) ) {
-        error_log('Hueman Pro Addons => The czr_base_fmk has already been loaded');
+        if ( ( defined( 'CZR_DEV' ) && CZR_DEV ) || ( defined( 'NIMBLE_DEV' ) && NIMBLE_DEV ) ) {
+            error_log('Hueman Pro Addons => The czr_base_fmk has already been loaded');
+        }
         return;
     }
     require_once(  HA_BASE_PATH . '/inc/czr-base-fmk/czr-base-fmk.php' );
@@ -511,7 +538,9 @@ if ( ha_is_skop_on() ) {
     add_action( 'after_setup_theme', 'hu_load_skope', 20 );
     function hu_load_skope() {
         if ( did_action( 'nimble_skope_loaded' ) ) {
-            error_log('Hueman Pro Addons => The skope has already been loaded');
+            if ( ( defined( 'CZR_DEV' ) && CZR_DEV ) || ( defined( 'NIMBLE_DEV' ) && NIMBLE_DEV ) ) {
+                error_log('Hueman Pro Addons => The skope has already been loaded');
+            }
             return;
         }
         require_once( HA_BASE_PATH . 'inc/czr-skope/index.php' );
