@@ -1,5 +1,5 @@
 <?php
-function function_prefix_to_be_replaced_register_social_links_module( $args ) {
+function czr_fn_register_social_links_module( $args ) {
     $defaults = array(
         'setting_id' => '',
 
@@ -48,8 +48,8 @@ function function_prefix_to_be_replaced_register_social_links_module( $args ) {
         'dynamic_registration' => true,
         'module_type' => 'czr_social_module',
 
-        'sanitize_callback' => 'function_prefix_to_be_replaced_sanitize_callback__czr_social_module',
-        'validate_callback' => 'function_prefix_to_be_replaced_validate_callback__czr_social_module',
+        'sanitize_callback' => 'czr_fn_sanitize_callback__czr_social_module',
+        'validate_callback' => 'czr_fn_validate_callback__czr_social_module',
 
         'customizer_assets' => array(
             'control_js' => array(
@@ -149,7 +149,7 @@ function function_prefix_to_be_replaced_register_social_links_module( $args ) {
 /***
 * Social Module sanitization/validation
 **/
-function function_prefix_to_be_replaced_sanitize_callback__czr_social_module( $socials ) {
+function czr_fn_sanitize_callback__czr_social_module( $socials ) {
   // error_log( 'IN SANITIZATION CALLBACK' );
   // error_log( print_r( $socials, true ));
   if ( empty( $socials ) )
@@ -166,7 +166,7 @@ function function_prefix_to_be_replaced_sanitize_callback__czr_social_module( $s
   return $socials;
 }
 
-function function_prefix_to_be_replaced_validate_callback__czr_social_module( $validity, $socials ) {
+function czr_fn_validate_callback__czr_social_module( $validity, $socials ) {
   // error_log( 'IN VALIDATION CALLBACK' );
   // error_log( print_r( $socials, true ));
   $ids_malformed_url = array();
