@@ -55,7 +55,9 @@ function ctx_get_authorized_setting_types() {
         'nav_menu_location',
         'cropped_image',
         'header',
-        'code_editor'//<= used for the custom_css for example
+        'code_editor',//<= used for the custom_css for example
+
+        'czr_layouts'
     );
 }
 
@@ -68,7 +70,7 @@ function ctx_get_excluded_settings() {
         'hu_theme_options[featured-posts-include]',
         // 'post-comments',
         // 'page-comments',
-        'hu_theme_options[layout-global]',
+        // 'hu_theme_options[layout-global]',
         'hu_theme_options[layout-home]',
         'hu_theme_options[layout-single]',
         'hu_theme_options[layout-archive]',

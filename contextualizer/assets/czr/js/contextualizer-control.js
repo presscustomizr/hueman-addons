@@ -1017,6 +1017,9 @@ var CZRContextualizerModuleMths = CZRContextualizerModuleMths || {};
                               case 'checkbox' :
                                     item_model_for_template_injection.type = 'gutencheck';
                               break;
+                              case 'czr_layouts' :
+                                    item_model_for_template_injection.type = 'select';
+                              break;
                         }
 
 

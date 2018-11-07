@@ -20,49 +20,49 @@
   cursor: pointer;
 }
 
-li.customize-control[data-module*="skp__"] [class*="czr-"] {
+/*li.customize-control[data-module*="skp__"] [class*="czr-"] {
   font-size: 0.9rem;
-}
-li.customize-control[data-module*="skp__"] .czr-item-title {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-item-title {
   padding: 4px;
-}
-li.customize-control[data-module*="skp__"] .czr-open-pre-add-new {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-open-pre-add-new {
   background: #fff;
   color: inherit;
 }
 li.customize-control[data-module*="skp__"] .czr-open-pre-add-new.active {
   color: black;
   opacity: 0.8;
-}
-li.customize-control[data-module*="skp__"] li {
+}*/
+/*li.customize-control[data-module*="skp__"] li {
   margin-bottom: 0;
   font-size: 0.85em;
-}
-li.customize-control[data-module*="skp__"] .czr-single-item .czr-item-content {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-single-item .czr-item-content {
   background: none;
 }
 li.customize-control[data-module*="skp__"] .czr-single-item .czr-item-header {
   background: #ededed;
-}
-li.customize-control[data-module*="skp__"] .czr-pre-add-view-content {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-pre-add-view-content {
   border: 1px solid #ccc;
   background: #fff;
-}
-li.customize-control[data-module*="skp__"] .czr-notice {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-notice {
   font-size: 12px!important;
-}
-li.customize-control[data-module*="skp__"] [class*="czr-"] .hidden {
+}*/
+/*li.customize-control[data-module*="skp__"] [class*="czr-"] .hidden {
   display: none;
-}
-li.customize-control[data-module*="skp__"] .czr-item-btns a {
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-item-btns a {
     color: #9e9e9e;
     -webkit-transition: color .25s ease-in-out;
     -moz-transition: color .25s ease-in-out;
     -ms-transition: color .25s ease-in-out;
     -o-transition: color .25s ease-in-out;
     transition: color .25s ease-in-out;
-}
-li.customize-control[data-module*="skp__"] .czr-item-btns a:hover,
+}*/
+/*li.customize-control[data-module*="skp__"] .czr-item-btns a:hover,
 li.customize-control[data-module*="skp__"] .czr-item-btns a.active {
     color: #23282d;
-}
+}*/
