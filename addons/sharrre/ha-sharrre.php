@@ -60,7 +60,7 @@ class HA_Sharrre {
     if ( ! ha_are_share_buttons_enabled() )
       return;
 
-    require_once( HA_BASE_PATH . 'addons/sharrre/sharrre-template.php' );
+    ha_locate_template( 'addons/sharrre/sharrre-template.php', $load = true, $require_once = true );
   }
 
 
