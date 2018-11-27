@@ -331,7 +331,17 @@ function skp_is_customizing() {
     $_is_ajaxing_from_customizer = isset( $_POST['customized'] ) || isset( $_POST['wp_customize'] );
 
     $is_customizing = false;
-    if ( is_admin() && isset( $pagenow ) && 'customize.php' == $pagenow ) {
+    $is_customize_php_page = ( is_admin() && 'customize.php' == basename( $_SERVER['PHP_SELF'] ) );
+    $is_customize_admin_page_one = (
+      $is_customize_php_page
+      ||
+      ( isset( $_REQUEST['wp_customize'] ) && 'on' == $_REQUEST['wp_customize'] )
+      ||
+      ( ! empty( $_GET['customize_changeset_uuid'] ) || ! empty( $_POST['customize_changeset_uuid'] ) )
+    );
+    $is_customize_admin_page_two = is_admin() && isset( $pagenow ) && 'customize.php' == $pagenow;
+
+    if ( $is_customize_admin_page_one || $is_customize_admin_page_two ) {
         $is_customizing = true;
     } else if ( is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) ) ) {
         $is_customizing = true;

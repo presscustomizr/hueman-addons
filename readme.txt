@@ -6,7 +6,7 @@ Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
 Tested up to: 5.0.0
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,15 +37,13 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.1.1 November 7th 2018 =
-* fixed : PC_AC_VERSION constant not defined generating php warning
-* improved : compatibility with the Nimbler Builder plugin
-
-= 2.1.0 June 27th 2018 =
-* Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
-* Added : the custom css can now be customized on each pages independently
+= 2.1.2 =
+* improved : customizer compatibility with network installs
 
 == Changelog ==
+= 2.1.2 November 27th, 2018 =
+* improved : customizer compatibility with network installs
+
 = 2.1.0 June 27th 2018 =
 * Improvements : Performance and UX enhancements made to the live customizer. Added the contextualizer feature.
 * Added : the custom css can now be customized on each pages independently
