@@ -102,6 +102,9 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
             else if ( false !== $obj_id ) {
                 $_return = array( "id" => "{$obj_id}" );
             }
+            else {
+                error_log( __FUNCTION__ . ' error when building the local skope, no object_id provided.');
+            }
         break;
     }
     if ( ! $_return_string ) {
@@ -141,7 +144,6 @@ function skp_get_query_skope() {
     $type         = false;
     $obj_id       = false;
 
-
     if ( is_object( $current_obj ) ) {
         if ( isset($current_obj -> post_type) ) {
             $meta_type  = 'post';
@@ -162,14 +164,25 @@ function skp_get_query_skope() {
     if ( is_post_type_archive() ) {
         $obj_id     = 'post_type_archive' . '_'. $wp_the_query ->get( 'post_type' );
     }
-    if ( is_404() )
-      $obj_id  = '404';
-    if ( is_search() )
-      $obj_id  = 'search';
-    if ( is_date() )
-      $obj_id  = 'date';
-    if ( skp_is_real_home() )
-      $obj_id  = 'home';
+    if ( is_404() ) {
+        $obj_id  = '404';
+    }
+    if ( is_search() ) {
+        $obj_id  = 'search';
+    }
+    if ( is_date() ) {
+        $obj_id  = 'date';
+    }
+    if ( skp_is_real_home() ) {
+        $obj_id  = 'home';
+        if ( ! is_home() && 'page' === get_option( 'show_on_front' ) ) {
+            $home_page_id = get_option( 'page_on_front' );
+            if ( 0 < $home_page_id ) {
+                $obj_id = $home_page_id;
+            }
+        }
+    }
+
 
     return apply_filters( 'skp_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $current_obj );
 }
@@ -190,7 +203,7 @@ function skp_get_skope_id( $level = 'local' ) {
     } else {
         $skope_id_to_return = array_key_exists( $level, $new_skope_ids ) ? $new_skope_ids[ $level ] : '_skope_not_set_';
     }
-    return $skope_id_to_return;
+    return apply_filters( 'skp_get_skope_id', $skope_id_to_return, $level );
 }
 function skp_build_skope_id( $args = array() ) {
     $skope_id = '_skope_not_set_';
