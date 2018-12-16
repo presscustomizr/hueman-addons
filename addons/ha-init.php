@@ -505,7 +505,7 @@ function hu_add_support_for_contextualizer( $opt_names = array() ) {
 
 if ( ha_is_skop_on() ) {
     /* ------------------------------------------------------------------------- *
-     *  RUN BACKWARD COMPATIBILITY
+     *  RUN BACKWARD COMPATIBILITIES
     /* ------------------------------------------------------------------------- */
     $contx_update_status = get_option('hu_contx_update_june_2018_status');
     // If the backward compat has been done properly, the $contx_update_status should take the following values :
@@ -515,6 +515,36 @@ if ( ha_is_skop_on() ) {
     if ( '_error_when_mapping_' === $contx_update_status || ( '_nothing_to_map_' !== $contx_update_status && '_mapping_done_' !== $contx_update_status ) || isset($_GET['rewrite_new_contx_options'] ) ) {
           require_once( HA_BASE_PATH . 'addons/ha-backward-compatibility-after-setup-theme-40.php' );
     }
+
+    // DECEMBER 2018 Retro Compat
+    // It's related to a modification of the skope_id when home is a static page
+    // Was skp__post_page_home
+    // Now is skp__post_page_{$static_home_page_id}
+    // This was introduced to facilitate the compatibility of the Nimble Builder with multilanguage plugins like polylang
+    // => Allows user to create a different home page for each languages
+    //
+    // If the current home page is not a static page, we don't have to do anything
+    // If not, the sections currently saved for skope skp__post_page_home, must be moved to skope skp__post_page_{$static_home_page_id}
+    // => this means that we need to update the post_id saved for theme mod : 'skp__post_page_{$static_home_page_id}';
+    // to the value of the one saved for theme mod 'skp__post_page_home';
+    $december_2018_compat_opt_name = 'hu_contx_update_decemb_2018_status';
+    if ( 'done' !== get_option( $december_2018_compat_opt_name ) ) {
+        if ( 'page' === get_option( 'show_on_front' ) ) {
+            $home_page_id = (int)get_option( 'page_on_front' );
+            if ( 0 < $home_page_id ) {
+                // get the post id storing the current sections on home
+                // @see ctx_get_skope_post()
+                $current_theme_mod = 'skp__post_page_home';
+                $post_id_storing_home_page_sections = (int)get_theme_mod( $current_theme_mod );
+                if ( $post_id_storing_home_page_sections > 0 ) {
+                    $new_theme_mod = "skp__post_page_{$home_page_id}";
+                    set_theme_mod( $new_theme_mod, $post_id_storing_home_page_sections );
+                }
+            }
+        }
+        update_option( $december_2018_compat_opt_name, 'done');
+    }
+
 
     /* ------------------------------------------------------------------------- *
      *  SYNCHRONIZES THEME MODS IF SWITCHING FROM A HUEMAN THEME TO ANOTHER ( hueman free to hueman pro, hueman to hueman child, ... )
