@@ -1366,11 +1366,12 @@ if ( ! class_exists( 'Contx' ) ) :
         /////////////////////////////////////////////////////////////////
         // hook : 'customize_controls_enqueue_scripts'
         function ctx_enqueue_controls_js_css() {
+            $theme_version = wp_get_theme() -> version;
             wp_enqueue_style(
                 'czr-contextualizer-style',
                 sprintf('%1$s/assets/czr/css/%2$s', CONTX_BASE_URL, 'contextualizer-control.css' ),
                 array( 'customize-controls' ),
-                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() : PC_AC_VERSION,
+                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() : $theme_version,
                 $media = 'all'
             );
 
@@ -1378,7 +1379,7 @@ if ( ! class_exists( 'Contx' ) ) :
                 'czr-contextualizer-control',
                 sprintf('%1$s/assets/czr/js/%2$s', CONTX_BASE_URL,'contextualizer-control.js'),
                 array( 'customize-controls', 'czr-skope-base', 'jquery', 'underscore'),
-                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() :  wp_get_theme() -> version,
+                ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() : $theme_version,
                 $in_footer = true
             );
 
