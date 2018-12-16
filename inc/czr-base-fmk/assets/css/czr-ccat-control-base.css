@@ -368,6 +368,18 @@ input:-ms-input-placeholder {
 }
 
 
+.customize-control select {
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
 .czr-customizr-title {
 	/* color: #555; */
 	text-transform: uppercase;
@@ -2292,7 +2304,7 @@ body.czr-customize-content_editor-pane-resize #customize-preview:before {
   bottom: 8px !important;
 }
 .czr-resize-handle {
-  color: #23282d;
+  color: #33b3db;
   font-size: 12px;
   position: relative;
   bottom: 2px;
