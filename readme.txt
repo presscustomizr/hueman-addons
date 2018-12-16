@@ -1,12 +1,12 @@
 === Hueman Addons ===
-Contributors: nikeo
+Contributors: nikeo, d4z_c0nf
 Author URI: https://presscustomizr.com
 Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
-Tested up to: 5.0.0
-Stable tag: 2.1.3
+Tested up to: 5.0.1
+Stable tag: 2.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,11 +37,11 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.1.3 =
+= 2.2.0 =
 Improved compatibility with multilanguage plugins. Deprecation of theme mod 'skp__post_page_home' to allow the creation of a home page by language.
 
 == Changelog ==
-= 2.1.3 December 16th, 2018 =
+= 2.2.0 December 16th, 2018 =
 * improved : compatibility with multilanguage plugins. Deprecation of theme mod 'skp__post_page_home' to allow the creation of a home page by language.
 
 = 2.1.2 November 27th, 2018 =
