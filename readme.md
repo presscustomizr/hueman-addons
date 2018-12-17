@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.9.4
-* Stable tag: 2.2.0
+* Stable tag: 2.2.1
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.2.1 December 17th, 2018 =
+* fixed : the contextualizer select is not properly initialized
+
 = 2.2.0 December 16th, 2018 =
 * improved : compatibility with multilanguage plugins. Deprecation of theme mod 'skp__post_page_home' to allow the creation of a home page by language.
 

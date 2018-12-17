@@ -747,7 +747,7 @@ CZRContextualizerModuleMths.CZRFlatSkopeItemInputCtor = CZRContextualizerModuleM
                         });
 
                         //$( 'select[data-czrtype="' + input.id + '"]', input.container ).append( _html_ ).selecter();
-                        $( 'select[data-czrtype="' + input.id + '"]', input.container ).select2( {
+                        $( 'select[data-czrtype="' + input.id + '"]', input.container ).czrSelect2( {
                               //minimumResultsForSearch: -1, //no search box needed
                               //templateResult: paintFontOptionElement,
                               //templateSelection: paintFontOptionElement,
