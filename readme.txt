@@ -6,7 +6,7 @@ Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
 Tested up to: 5.0.1
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,13 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.2.1 =
-Fixed : in the customizer, the contextualizer select was not properly initialized.
+= 2.2.2 =
+Minor fix : unwanted error log displayed in some cases.
 
 == Changelog ==
+= 2.2.2 December 19th, 2018 =
+* fixed : unwanted error log displayed. reported here https://wordpress.org/support/topic/error-in-log-10/
+
 = 2.2.1 December 17th, 2018 =
 * fixed : the contextualizer select is not properly initialized
 

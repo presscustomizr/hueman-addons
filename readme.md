@@ -5,7 +5,7 @@
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
 * Tested up to: 4.9.4
-* Stable tag: 2.2.1
+* Stable tag: 2.2.2
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 ## Changelog ##
+= 2.2.2 December 19th, 2018 =
+* fixed : unwanted error log displayed. reported here https://wordpress.org/support/topic/error-in-log-10/
+
 = 2.2.1 December 17th, 2018 =
 * fixed : the contextualizer select is not properly initialized
 

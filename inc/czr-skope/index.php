@@ -103,7 +103,10 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
                 $_return = array( "id" => "{$obj_id}" );
             }
             else {
-                error_log( __FUNCTION__ . ' error when building the local skope, no object_id provided.');
+                if ( defined( 'NIMBLE_DEV' ) && NIMBLE_DEV ) {
+                    error_log( __FUNCTION__ . ' error when building the local skope, no object_id provided.');
+                    error_log( print_r( $parts, true) );
+                }
             }
         break;
     }
