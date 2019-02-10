@@ -23,8 +23,13 @@ function ha_is_hueman_pro() {
   $hu_theme = $hu_theme -> parent() ? $hu_theme -> parent() : $hu_theme;
   return "hueman-pro" == sanitize_file_name( strtolower( $hu_theme -> name) );
 }
+// introduced to fix https://github.com/presscustomizr/hueman-addons/issues/52
+function ha_is_previewing_hueman_pro() {
+  return ( isset( $_GET['theme'] ) && "hueman-pro" == $_GET['theme'] ) || ( isset( $_GET['customize_theme'] ) && "hueman-pro" == $_GET['customize_theme'] );
+}
 
-
+if ( ha_is_previewing_hueman_pro() )
+  return;
 
 if ( ! function_exists( 'hu_is_real_home') ) {
   function hu_is_real_home() {
