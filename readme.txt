@@ -6,7 +6,7 @@ Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
 Tested up to: 5.0.1
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,13 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.2.3 =
-Minor fix : deactivate the plugin when previewing Hueman Pro
+= 2.2.4 =
+Added support for rgb alpha colors in the contextualizer.
 
 == Changelog ==
+= 2.2.4 February 13th, 2019 =
+* added : support for rgb alpha colors in the contextualizer
+
 = 2.2.3 February 10th, 2019 =
 * fixed : deactivate the plugin when previewing Hueman Pro
 

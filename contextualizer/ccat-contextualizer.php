@@ -57,7 +57,8 @@ function ctx_get_authorized_setting_types() {
         'header',
         'code_editor',//<= used for the custom_css for example
 
-        'czr_layouts'
+        'czr_layouts',
+        'wp_color_alpha'//<= introduced when fixing https://github.com/presscustomizr/hueman-pro-addons/issues/181
     );
 }
 
@@ -85,7 +86,9 @@ function ctx_get_excluded_settings() {
         'hu_theme_options[enable-skope]',
         'hu_theme_options[attachments-in-search]',
         "{$multidim_option_prefix}[contx_wp_core]",
-        "{$multidim_option_prefix}[contx_theme_and_plugins_options]"
+        "{$multidim_option_prefix}[contx_theme_and_plugins_options]",
+
+        'hu_theme_options[user-header-bg-color-important]'//added for https://github.com/presscustomizr/hueman-pro-addons/issues/181
       ),
       ctx_get_excluded_wp_core_settings()
     );
