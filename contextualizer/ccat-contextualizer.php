@@ -44,6 +44,7 @@ function ctx_get_authorized_setting_types() {
         'text',
         'select',
         'checkbox',
+        'nimblecheck',
         'number',
         'color',
         'text-area',

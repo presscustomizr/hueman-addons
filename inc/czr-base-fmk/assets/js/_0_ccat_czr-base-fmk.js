@@ -1848,19 +1848,29 @@ $.extend( CZRInputMths , {
             });
     },
 
-    setupGutenCheck : function( params ) {
+    // DEPRECATED since april 2nd 2019
+    // setupGutenCheck : function( params ) {
+    //       var input      = this;
+    //       var $input = input.container.find('input[type=checkbox]'),
+    //           $checkWrapper = $( '.czr-toggle-check', input.container );
+    //       var _do_ = function() {
+    //             $input.closest('.czr-toggle-check').toggleClass( 'is-checked', $input.is(':checked') );
+    //             $checkWrapper.find('svg').remove();
+    //             $checkWrapper.append(
+    //                   ! $input.is(':checked') ? '<svg class="czr-toggle-check__off" width="6" height="6" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6"><path d="M3 1.5c.8 0 1.5.7 1.5 1.5S3.8 4.5 3 4.5 1.5 3.8 1.5 3 2.2 1.5 3 1.5M3 0C1.3 0 0 1.3 0 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"></path></svg>' : '<svg class="czr-toggle-check__on" width="2" height="6" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 6"><path d="M0 0h2v6H0z"></path></svg>'
+    //             );
+    //       };
+    //       $input.on( 'change', _do_ );
+    //       _do_();
+    // },
+
+    setupNimbleCheck : function( params ) {
           var input      = this;
           var $input = input.container.find('input[type=checkbox]'),
               $checkWrapper = $( '.czr-toggle-check', input.container );
-          var _do_ = function() {
-                $input.closest('.czr-toggle-check').toggleClass( 'is-checked', $input.is(':checked') );
-                $checkWrapper.find('svg').remove();
-                $checkWrapper.append(
-                      ! $input.is(':checked') ? '<svg class="czr-toggle-check__off" width="6" height="6" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6"><path d="M3 1.5c.8 0 1.5.7 1.5 1.5S3.8 4.5 3 4.5 1.5 3.8 1.5 3 2.2 1.5 3 1.5M3 0C1.3 0 0 1.3 0 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"></path></svg>' : '<svg class="czr-toggle-check__on" width="2" height="6" aria-hidden="true" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 6"><path d="M0 0h2v6H0z"></path></svg>'
-                );
-          };
-          $input.on( 'change', _do_ );
-          _do_();
+          var _do_ = function() {};
+          // $input.on( 'change', _do_ );
+          // _do_();
     },
 
     setupRadio : function( obj ) {
@@ -2467,43 +2477,6 @@ $.extend( CZRInputMths , {
 
             return _model;
       }
-});//$.extend
-})( wp.customize , jQuery, _ );var CZRInputMths = CZRInputMths || {};
-( function ( api, $, _ ) {
-$.extend( CZRInputMths , {
-      setupTinyMceEditor : function() {
-            var input        = this;
-
-            //do we have an html template and a input container?
-            if ( ! input.container ) {
-                throw new Error( 'The input container is not set for WP text editor in module :' + input.module.id );
-            }
-
-            // This event is triggered from sektions::setupTinyMceEditor()
-            // @params = {
-            //    input_id : '',
-            //    html_content : '',
-            //    modified_editor_element : ''//<= can be the visual / text editor tab
-            // }
-            // Note : this event is trigger when the visual AND the text tab of the editor are modified.
-            // This means that the modified_editor_element can be different if it is the visual editor ( or the text html editor <textarea> element
-            // @see sektions::setupTinyMceEditor()
-            input.input_parent.control.bind( 'tinyMceEditorUpdated', function( params ) {
-                  //console.log('in input => tinyMceEditorUpdated ', api.sekEditorSynchronizedInput(), input.input_parent.control.id );
-                  //console.log('/// api.sekEditorSynchronizedInput', params );
-                  if ( api.sekEditorSynchronizedInput().control_id != input.input_parent.control.id || api.sekEditorSynchronizedInput().input_id != input.id )
-                    return;
-                  input( wp.editor.removep( params.html_content || api.sekTinyMceEditor.getContent() ) );
-                  if ( params.modified_editor_element && params.modified_editor_element.length > 0 ) {
-                        params.modified_editor_element.focus();
-                  } else {
-                        api.sekTinyMceEditor.focus();
-                  }
-
-            });
-
-      },//setupTextEditor
-
 });//$.extend
 })( wp.customize , jQuery, _ );//extends api.Value
 //options:
@@ -6080,7 +6053,8 @@ $.extend( CZRBaseModuleControlMths, {
             textarea  : '',
             check     : 'setupIcheck',
             checkbox     : 'setupIcheck',
-            gutencheck : 'setupGutenCheck',
+            //gutencheck : 'setupGutenCheck', // DEPRECATED since april 2nd 2019
+            nimblecheck : '',//setupNimbleCheck',
             select    : 'setupSelect',
             radio     : 'setupRadio',
             number    : 'setupStepper',
@@ -6090,7 +6064,6 @@ $.extend( CZRBaseModuleControlMths, {
             wp_color_alpha : 'setupColorPickerAlpha',
             wp_color  : 'setupWPColorPicker',//not used for the moment
             content_picker : 'setupContentPicker',
-            tiny_mce_editor : 'setupTinyMceEditor',
             password : '',
             range : 'setupSimpleRange',
             range_slider : 'setupRangeSlider',

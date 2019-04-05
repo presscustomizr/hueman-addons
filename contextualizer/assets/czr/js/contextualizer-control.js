@@ -1015,7 +1015,8 @@ var CZRContextualizerModuleMths = CZRContextualizerModuleMths || {};
                         // MAP item types before rendering
                         switch( item_model_for_template_injection.type ) {
                               case 'checkbox' :
-                                    item_model_for_template_injection.type = 'gutencheck';
+                                    item_model_for_template_injection.type = 'nimblecheck';
+                                    //item_model_for_template_injection.type = 'gutencheck';
                               break;
                               case 'czr_layouts' :
                                     item_model_for_template_injection.type = 'select';

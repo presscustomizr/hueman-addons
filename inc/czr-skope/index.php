@@ -269,7 +269,7 @@ function skp_get_skope_title( $args = array() ) {
 
     if( 'local' == $level ) {
         $type = skp_get_skope( 'type' );
-        $title = $is_prefixed ? __( 'Options for', 'text_domain_to_be_replaced') . ' ' : $title;
+        $title = $is_prefixed ? __( 'Options for', 'text_doma') . ' ' : $title;
         if ( skp_skope_has_a_group( $meta_type ) ) {
             $_id = skp_get_skope('id');
             switch ($meta_type) {
@@ -286,22 +286,22 @@ function skp_get_skope_title( $args = array() ) {
 
                 case 'user':
                   $author = get_userdata( $_id );
-                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'text_domain_to_be_replaced'), $_id, $author -> user_login );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'text_doma'), $_id, $author -> user_login );
                   break;
             }
         } else if ( ( 'trans' == $_dyn_type || skp_skope_has_no_group( $skope ) ) ) {
             if ( is_post_type_archive() ) {
                 global $wp_the_query;
-                $title .= sprintf( __( '%1$s archive page', 'text_domain_to_be_replaced'), $wp_the_query ->get( 'post_type' ) );
+                $title .= sprintf( __( '%1$s archive page', 'text_doma'), $wp_the_query ->get( 'post_type' ) );
             } else {
                 $title .= strtolower( $skope );
             }
         } else {
-            $title .= __( 'Undefined', 'text_domain_to_be_replaced');
+            $title .= __( 'Undefined', 'text_doma');
         }
     }
     if ( 'group' == $level || 'special_group' == $level ) {
-        $title = $is_prefixed ? __( 'Options for all', 'text_domain_to_be_replaced') . ' ' : __( 'All' , 'text_domain_to_be_replaced' ) . ' ';
+        $title = $is_prefixed ? __( 'Options for all', 'text_doma') . ' ' : __( 'All' , 'text_doma' ) . ' ';
         switch( $meta_type ) {
             case 'post' :
                 $type_obj = get_post_type_object( $type );
@@ -314,12 +314,12 @@ function skp_get_skope_title( $args = array() ) {
             break;
 
             case 'user' :
-                $title .= __('users', 'text_domain_to_be_replaced');
+                $title .= __('users', 'text_doma');
             break;
         }
     }
     if ( 'global' == $level ) {
-        $title = __( 'Sitewide options', 'text_domain_to_be_replaced');
+        $title = __( 'Sitewide options', 'text_doma');
     }
     $title = ucfirst( $title );
     return skp_trim_text( $title, $long ? 45 : 28, '...');

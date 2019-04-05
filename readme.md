@@ -4,8 +4,8 @@
 * Plugin URI: https://wordpress.org/plugins/hueman-addons/
 * Tags: hueman theme, hueman
 * Requires at least: 3.4
-* Tested up to: 4.9.4
-* Stable tag: 2.2.4
+* Tested up to: 5.1.1
+* Stable tag: 2.2.5
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

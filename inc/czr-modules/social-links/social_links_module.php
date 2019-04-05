@@ -130,10 +130,11 @@ function czr_fn_register_social_links_module( $args ) {
                     'transport' => 'postMessage'
                 ),
                 'social-target' => array(
-                    'input_type'  => 'check',
+                    'input_type'  => 'nimblecheck',
                     'title'       => __('Link target', 'text_domain_to_be_replaced'),
                     'notice_after'      => __('Check this option to open the link in a another tab of the browser.', 'text_domain_to_be_replaced'),
-                    'width-100'   => true
+                    'title_width' => 'width-80',
+                    'input_width' => 'width-20',
                 )
             )
         )
