@@ -3,7 +3,7 @@
 * Plugin Name: Hueman Addons
 * Plugin URI: https://presscustomizr.com
 * Description: Hueman Theme Addons
-* Version: 2.2.5
+* Version: 2.2.6
 * Text Domain: hueman-addons
 * Author: Press Customizr
 * Author URI: https://presscustomizr.com

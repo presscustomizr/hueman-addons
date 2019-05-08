@@ -6,9 +6,6 @@
   <?php if ( hu_is_checked('sharrre-facebook-on') ) : ?>
 	   <div id="facebook" data-url="<?php echo the_permalink(); ?>" data-text="<?php the_title_attribute(); ?>" data-title="<?php _e('Like', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
-  <?php if ( hu_is_checked('sharrre-google-on') ) : ?>
-	   <div id="googleplus" data-url="<?php echo the_permalink(); ?>" data-text="<?php the_title_attribute(); ?>" data-title="<?php _e('+1', 'hueman-addons'); ?>"></div>
-  <?php endif; ?>
   <?php if ( hu_is_checked('sharrre-pinterest-on') ) : ?>
 	   <div id="pinterest" data-url="<?php echo the_permalink(); ?>" data-text="<?php the_title_attribute(); ?>" data-title="<?php _e('Pin It', 'hueman-addons'); ?>"></div>
   <?php endif; ?>
@@ -28,7 +25,7 @@
         			share: {
         				twitter: true
         			},
-        			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fab fa-twitter"></i></div></a>',
+        			template: '<a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-twitter"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
         			buttons: { twitter: {via: '<?php echo esc_attr( hu_get_option("twitter-username") ); ?>'}},
@@ -43,7 +40,7 @@
         			share: {
         				facebook: true
         			},
-        			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fab fa-facebook-square"></i></div></a>',
+        			template: '<a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-facebook-square"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
               buttons:{layout: 'box_count'},
@@ -53,29 +50,12 @@
         			}
         		});
         <?php endif; ?>
-        <?php if ( hu_is_checked('sharrre-google-on') ) : ?>
-            <?php $path = HU_AD() -> ha_get_base_url(); ?>
-        		$('#googleplus').sharrre({
-        			share: {
-        				googlePlus: true
-        			},
-        			template: '<a class="box" href="#"><div class="count" href="#">{total}</div><div class="share"><i class="fab fa-google-plus-square"></i></div></a>',
-        			enableHover: false,
-        			enableTracking: true,
-              buttons:{size: 'tall'},
-        			urlCurl: '<?php echo $path . "addons/assets/front/js/sharrre.php"; ?>',
-        			click: function(api, options){
-        				api.simulateClick();
-        				api.openPopup('googlePlus');
-        			}
-        		});
-        <?php endif; ?>
         <?php if ( hu_is_checked('sharrre-pinterest-on') ) : ?>
         		$('#pinterest').sharrre({
         			share: {
         				pinterest: true
         			},
-        			template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#">{total}</div><div class="share"><i class="fab fa-pinterest"></i></div></a>',
+        			template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-pinterest"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
         			buttons: {
@@ -94,7 +74,7 @@
               share: {
                 linkedin: true
               },
-              template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#">{total}</div><div class="share"><i class="fab fa-linkedin"></i></div></a>',
+              template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-linkedin"></i></div></a>',
               enableHover: false,
               enableTracking: true,
               buttons: {

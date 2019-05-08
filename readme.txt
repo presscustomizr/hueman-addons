@@ -5,8 +5,8 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
-Tested up to: 5.1.1
-Stable tag: 2.2.5
+Tested up to: 5.2
+Stable tag: 2.2.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,14 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.2.5 =
-Added support for rgb alpha colors in the contextualizer.
+= 2.2.6 =
+Replaced broken sharre count by "+" sign. Removed Google Plus share button.
 
 == Changelog ==
+= 2.2.6 May 8th, 2019 =
+* replaced broken sharre count by "+" sign
+* removed deprecated Google Plus
+
 = 2.2.5 April 5th, 2019 =
 * added : a new checkbox style in the customizer
 

@@ -27,6 +27,8 @@ if ( ! class_exists( 'CZR_Fmk_Base_Construct' ) ) :
 
         public $czr_css_attr = array();
 
+        public $current_module_params_when_ajaxing;// store the params when ajaxing and allows us to access the currently requested module params at any point of the ajax action
+
         public static function czr_fmk_get_instance( $params ) {
             if ( ! isset( self::$instance ) && ! ( self::$instance instanceof CZR_Fmk_Base ) ) {
               self::$instance = new CZR_Fmk_Base( $params );
@@ -586,7 +588,11 @@ if ( ! class_exists( 'CZR_Fmk_Base_Tmpl_Builder' ) ) :
 
                 'scope' => 'local',// <= used when resetting the sections
                 // introduced for https://github.com/presscustomizr/nimble-builder/issues/403
-                'editor_params' => array()
+                'editor_params' => array(),
+
+                // introduced for https://github.com/presscustomizr/nimble-builder/issues/431
+                'section_collection' => array(),
+                'section_type' => 'content'
             );
             foreach( $tmpl_map as $input_id => $input_data ) {
                 if ( ! is_string( $input_id ) || empty( $input_id ) ) {
@@ -814,9 +820,17 @@ if ( ! class_exists( 'CZR_Fmk_Base_Tmpl_Builder' ) ) :
                           <#
                             var _checked = ( false != data['<?php echo $input_id; ?>'] ) ? "checked=checked" : '';
                           #>
+                          <?php
+                          // when input and label are tied by an id - for relationship
+                          // clicking on any of them changes the input
+                          // => We need a unique ID here so that input and label are tied by a unique link
+                          // @see https://www.w3.org/TR/html401/interact/forms.html#h-17.9.1
+                          // @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Input/checkbox
+                          $unique_id = sprintf('%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535));
+                          ?>
                           <div class="nimblecheck-wrap">
-                            <input id="nimblecheck-<?php echo $input_id; ?>" data-czrtype="<?php echo $input_id; ?>" type="checkbox" {{ _checked }} class="nimblecheck-input">
-                            <label for="nimblecheck-<?php echo $input_id; ?>" class="nimblecheck-label">Switch</label>
+                            <input id="nimblecheck-<?php echo $unique_id; ?>" data-czrtype="<?php echo $input_id; ?>" type="checkbox" {{ _checked }} class="nimblecheck-input">
+                            <label for="nimblecheck-<?php echo $unique_id; ?>" class="nimblecheck-label">Switch</label>
                           </div>
                         <?php
                     break;
@@ -1454,6 +1468,9 @@ if ( ! class_exists( 'CZR_Fmk_Dyn_Module_Registration' ) ) :
             }
 
             $module_params = $registered_modules[ $module_type ];
+            // Store the params now, so we can access them when rendering the input templates
+            $this->current_module_params_when_ajaxing = $module_params;
+
             $tmpl_params = $module_params[ 'tmpl' ];
             // Enqueue the list of registered scripts
             if ( empty( $tmpl_params ) ) {

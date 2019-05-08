@@ -116,7 +116,6 @@ class HA_Czr {
                             'sharrre-twitter-on',
                             'twitter-username',
                             'sharrre-facebook-on',
-                            'sharrre-google-on',
                             'sharrre-pinterest-on',
                             'sharrre-linkedin-on'
                           ],

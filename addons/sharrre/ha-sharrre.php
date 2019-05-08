@@ -6,7 +6,7 @@
 function ha_are_share_buttons_enabled() {
   if ( ! hu_is_checked('sharrre') )
     return;
-  if ( ! hu_is_checked('sharrre-twitter-on') && ! hu_is_checked('sharrre-facebook-on') && ! hu_is_checked('sharrre-google-on') && ! hu_is_checked('sharrre-pinterest-on') && ! hu_is_checked('sharrre-linkedin-on') )
+  if ( ! hu_is_checked('sharrre-twitter-on') && ! hu_is_checked('sharrre-facebook-on') && ! hu_is_checked('sharrre-pinterest-on') && ! hu_is_checked('sharrre-linkedin-on') )
     return;
   return true;
 }
@@ -143,14 +143,6 @@ class HA_Sharrre {
             'section'   => 'content_single_sec',
             'type'      => 'nimblecheck',
             'priority'  => 80
-      ),
-      'sharrre-google-on' => array(
-            'default'   => 1,
-            'control'   => 'HU_controls',
-            'label'     => __('Enable Google Plus Button', 'hueman-addons'),
-            'section'   => 'content_single_sec',
-            'type'      => 'nimblecheck',
-            'priority'  => 90
       ),
       'sharrre-pinterest-on' => array(
             'default'   => 0,
