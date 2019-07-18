@@ -72,7 +72,7 @@ class HA_Sharrre {
     if ( is_singular() ) {
       wp_enqueue_script(
         'sharrre',
-        sprintf( '%1$saddons/assets/front/js/jQuerySharrre%2$s', HU_AD() -> ha_get_base_url(), (defined('CZR_DEV') && true === CZR_DEV) ? '.js' : '.min.js' ),
+        sprintf( '%1$saddons/assets/front/js/jQuerySharrre%2$s', HU_AD() -> ha_get_base_url(), (defined('CZR_DEV') && true === CZR_DEV) ? '.js?' . time() : '.min.js' ),
         array( 'jquery' ),
         '',
         true

@@ -6,7 +6,7 @@ Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
 Tested up to: 5.2
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,13 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.2.6 =
-Replaced broken sharre count by "+" sign. Removed Google Plus share button.
+= 2.2.7 =
+Fixes LinkedIn sharre icon not displayed because of a javascript error.
 
 == Changelog ==
+= 2.2.7 July 18th, 2019 =
+* fixed : LinkedIn sharre icon was not displayed because of a javascript error
+
 = 2.2.6 May 8th, 2019 =
 * replaced broken sharre count by "+" sign
 * removed deprecated Google Plus

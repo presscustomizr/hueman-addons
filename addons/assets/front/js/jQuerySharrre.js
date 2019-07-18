@@ -45,7 +45,8 @@ var SharrrePlatform = SharrrePlatform || (function () {
         return {
             settings: defaultSettings,
             url: function (test) {
-                return "https://www.linkedin.com/countserv/count/share?format=jsonp&url={url}&callback=?";
+                return '';
+                //return "https://www.linkedin.com/countserv/count/share?format=jsonp&url={url}&callback=?";
             },
             trackingAction: {site: 'linkedin', action: 'share'},
             load: function (self) {
