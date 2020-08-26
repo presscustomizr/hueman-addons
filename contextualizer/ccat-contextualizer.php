@@ -89,7 +89,10 @@ function ctx_get_excluded_settings() {
         "{$multidim_option_prefix}[contx_wp_core]",
         "{$multidim_option_prefix}[contx_theme_and_plugins_options]",
 
-        'hu_theme_options[user-header-bg-color-important]'//added for https://github.com/presscustomizr/hueman-pro-addons/issues/181
+        'hu_theme_options[user-header-bg-color-important]',//added for https://github.com/presscustomizr/hueman-pro-addons/issues/181
+        // jan-2020 => exclude newly added options from skoping for the moment. see https://github.com/presscustomizr/hueman/issues/846
+        'hu_theme_options[singular-post-featured-image]',
+        'hu_theme_options[singular-post-cropped-feat-img]'
       ),
       ctx_get_excluded_wp_core_settings()
     );
@@ -289,6 +292,10 @@ function ctx_get_old_skope_post_id() {
 
 ?><?php
 /**
+ * When customizing, invoked in final class Contx_Customizer_Setting extends WP_Customize_Setting
+ *
+ * on front, invoked by ctx_cache_ctx_options() => ctx_get_skoped_settings( $local_skope_id )
+ *
  * Fetch the `contx_post_type` post for a given {theme_name}_{skope_id}
  *
  * @since 4.7.0
@@ -325,14 +332,17 @@ function ctx_get_skope_post( $skope_id = '', $stylesheet = '', $skope_level = 'l
     }
 
     // `-1` indicates no post exists; no query necessary.
-    if ( ! $post && -1 !== $post_id ) {
+    if ( !$post && -1 !== $post_id ) {
       $query = new WP_Query( $ctx_post_query_vars );
       $post = $query->post;
+
       /*
        * Cache the lookup. See ctx_update_skope_post().
        * @todo This should get cleared if a skope post is added/removed.
+       * update april 2020 : commented set_theme_mod because of potential breakage of options. see https://github.com/presscustomizr/hueman-pro-addons/issues/210
+       * => setting an empty theme_mod has no real value.
        */
-      set_theme_mod( $skope_id, $post ? $post->ID : -1 );
+      //set_theme_mod( $skope_id, $post ? $post->ID : -1 );
     }
   } else {
     $query = new WP_Query( $ctx_post_query_vars );
@@ -373,6 +383,8 @@ function ctx_get_skoped_settings( $skope_id = '', $stylesheet = '', $skope_level
 
 
 /**
+ * invoked on customize save action
+ * in final class Contx_Customizer_Setting extends WP_Customize_Setting
  * Update the `contx_post_type` post for a given {theme_name}_{skope_id}
  *
  * Inserts a `contx_post_type` post when one doesn't yet exist.
@@ -709,8 +721,9 @@ if ( ! class_exists( 'CZR_Contx_Construct' ) ) :
         // Default filtrable candidates as a hard coded json
         // Is used when the theme_mod "ctx_filtrable_candidates" is not set yet
         // invoked in ctx_cache_filtrable_candidates()
+        // can be refreshed with $_GET['refresh_filtrable_candidates']
         private function _get_default_filtrable_candidate_json() {
-            return '{"options":["blogname","blogdescription"],"multidim_options":{"hu_theme_options":["display-header-title","display-header-logo","logo-max-height","font","body-font-size","container-width","boxed","sidebar-padding","color-1","color-2","image-border-radius","ext_link_style","ext_link_target","post-comments","page-comments","smoothscroll","responsive","fittext","sharrre","sharrre-counter","sharrre-scrollable","sharrre-twitter-on","twitter-username","sharrre-facebook-on","sharrre-pinterest-on","sharrre-linkedin-on","minified-css","structured-data","smart_load_img","js-mobile-detect","site-description","color-topbar","color-header","color-header-menu","color-mobile-menu","transparent-fixed-topnav","use-header-image","logo-title-on-header-image","header-ads","header-ads-desktop","header-ads-mobile","default-menu-header","header-desktop-sticky","desktop-search","header_mobile_menu_layout","header-mobile-sticky","header_mobile_btn","mobile-search","infinite-scroll","load_on_scroll_desktop","load_on_scroll_mobile","pro_post_list_design","pro_grid_columns","blog-heading-enabled","blog-heading","blog-subheading","excerpt-length","featured-posts-enabled","featured-category","featured-posts-count","featured-posts-full-content","featured-slideshow","featured-slideshow-speed","author-bio","related-posts","post-nav","placeholder","comment-count","sidebar-top","desktop-sticky-sb","mobile-sticky-sb","mobile-sidebar-hide","footer-ads","default-menu-footer","color-footer","copyright","credit"]},"multidim_theme_mods":[],"simple_theme_mods":["header_text","custom_logo","header_textcolor","background_color","header_image","background_preset","background_size","background_repeat","background_attachment","nav_menu_locations"]}';
+            return '{"options":["blogname","blogdescription"],"multidim_options":{"hu_theme_options":["display-header-title","display-header-logo","logo-max-height","wrap_in_h_one","font","body-font-size","container-width","boxed","sidebar-padding","color-1","color-2","image-border-radius","ext_link_style","ext_link_target","post-comments","page-comments","smoothscroll","responsive","fittext","sharrre","sharrre-scrollable","sharrre-twitter-on","twitter-username","sharrre-facebook-on","sharrre-pinterest-on","sharrre-linkedin-on","minified-css","structured-data","smart_load_img","js-mobile-detect","site-description","color-topbar","color-header","color-header-menu","color-mobile-menu","transparent-fixed-topnav","use-header-image","logo-title-on-header-image","header-ads","header-ads-desktop","header-ads-mobile","default-menu-header","header-desktop-sticky","desktop-search","header_mobile_menu_layout","header-mobile-sticky","header_mobile_btn","mobile-search","infinite-scroll","load_on_scroll_desktop","load_on_scroll_mobile","pro_post_list_design","pro_grid_columns","blog-heading-enabled","blog-heading","blog-subheading","excerpt-length","featured-posts-enabled","featured-category","featured-posts-count","featured-posts-full-content","featured-slideshow","featured-slideshow-speed","author-bio","related-posts","post-nav","placeholder","comment-count","sidebar-top","primary-sb-text","secondary-sb-text","desktop-sticky-sb","mobile-sticky-sb","mobile-sidebar-hide","footer-ads","default-menu-footer","color-footer","copyright","credit"]},"multidim_theme_mods":[],"simple_theme_mods":["header_text","custom_logo","header_textcolor","background_color","header_image","background_preset","background_size","background_repeat","background_attachment","nav_menu_locations"]}';
         }
     }//class
 endif;
@@ -1102,7 +1115,7 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
             add_action( 'customize_register', array( $this, 'ctx_customizer_load_setting_class' ) );
             add_action( 'customize_register', array( $this, 'ctx_register_contextualizer_settings_controls_section' ) );
             // Refresh the filtrable candidates every 24 Hours
-            if ( ! get_transient( 'ctx_updated_filtrable_candidates_collection') || isset( $_GET['refresh_filtrable_candidates'] ) ) {
+            if ( ! get_transient( 'ctx_updated_filtrable_candidates_collection_apr_2020') || isset( $_GET['refresh_filtrable_candidates'] ) ) {
                 // when all settings have been registered, let's loop through them and record the filtrable candidate in an option
                 add_action( 'customize_register', array( $this, 'ctx_set_filtrable_candidates' ), PHP_INT_MAX );
             }
@@ -1199,7 +1212,7 @@ if ( ! class_exists( 'Contx_Customize_Register' ) ) :
 
             // write in db
             set_theme_mod( 'ctx_filtrable_candidates', $filtrable_candidates );
-            set_transient( 'ctx_updated_filtrable_candidates_collection', true, 60*60*24 );// refreshed every 24 Hours
+            set_transient( 'ctx_updated_filtrable_candidates_collection_apr_2020', true, 60*60*24 );// refreshed every 24 Hours
         }
 
         /////////////////////////////////////////////////////////////////
