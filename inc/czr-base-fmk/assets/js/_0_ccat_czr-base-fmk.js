@@ -5072,7 +5072,7 @@ $.extend( CZRDynModuleMths, {
       },
 
       // Intended to be overriden in a module
-      // introduced in July 2019 to allow a multi-item module to set a default pre-item
+      // introduced in July 2019 to make it simple for a multi-item module to set a default pre-item
       // typically, in the slider image, this is a way to have a default image when adding an item
       // @see https://github.com/presscustomizr/nimble-builder/issues/479
       getPreItem : function() {
@@ -5656,9 +5656,16 @@ $.extend( CZRBaseModuleControlMths, {
                     throw new Error('Module type ' + module.module_type + ' is not listed in the module map api.czrModuleMap.' );
               }
 
-              var _mthds = api.czrModuleMap[ module.module_type ].mthds,
+              var _mthds = api.czrModuleMap[ module.module_type ].mthds || {},
                   _is_crud = api.czrModuleMap[ module.module_type ].crud,
                   _base_constructor = _is_crud ? api.CZRDynModule : api.CZRModule;
+
+              // June 2020 : introduced for https://github.com/presscustomizr/nimble-builder-pro/issues/6
+              // so we can remotely extend the module constructor
+              api.trigger('czr_setup_module_contructor', {
+                    module_type : module.module_type,
+                    methods : _mthds
+              });
 
               constructor = _base_constructor.extend( _mthds );
 

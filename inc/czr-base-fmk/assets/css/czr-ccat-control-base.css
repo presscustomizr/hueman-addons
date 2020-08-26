@@ -373,7 +373,16 @@ input:-ms-input-placeholder {
   width: 99%;
 }
 
+/* Nov-dec 2019 => adapt for WP 5.3 */
+.czr-input .wp-picker-container .wp-color-result.button, .customize-control .wp-color-result.button {
+  border-color: #ccc;
+  min-height: 25px;
+}
 
+.czr-input .wp-color-result-text, .customize-control .wp-color-result-text {
+  line-height: 24px;
+  height: 24px;
+}
 
 
 
@@ -421,9 +430,12 @@ span.czr-notice {
 }
 
 .czr-html-before hr, .czr-html-after hr {
-    border-top: 1px solid #c5c5c5;
-    border-bottom: 1px solid #fafafa;
-    margin: 25px 0;
+  border-top: 1px solid #c5c5c5;
+  border-bottom: 1px solid #fafafa;
+  margin: 25px 0;
+}
+.czr-html-after {
+  float: left;
 }
 
 .czr-customizer-separator-invisible {
@@ -727,6 +739,7 @@ span.czr-panel-subtitle {
 
 /* GOPRO SECTION STYLE */
 /* for both hueman and customizr */
+
 #customize-controls .control-section-czr-customize-section-pro .accordion-section-title:hover,
 #customize-controls .control-section-czr-customize-section-pro .accordion-section-title:focus {
   background-color: #fff;
@@ -736,6 +749,11 @@ span.czr-panel-subtitle {
 }
 #accordion-section-go_pro_sec .accordion-section-title{
   margin: 0 0 15px;
+}
+.control-section-czr-customize-section-pro .accordion-section-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .control-section-czr-customize-section-pro .accordion-section-title .button {
   font-size: 15px;
@@ -1469,7 +1487,7 @@ body.czr-editing-modopt .czr-mod-opt-wrapper {
 
 
 /* OPTIONS STYLE */
-.czr-mod-opt-wrapper .czr-sub-set {
+body .czr-mod-opt-wrapper .czr-sub-set {
     /*border: 1px dotted #ccc;*/
     background: rgba(238, 238, 238, 0.13);
     padding: 3% 2%;
@@ -1618,6 +1636,7 @@ li.tab-inactive::after {
   display: none;
   margin: 0 auto;
   max-width: 1200px;
+  /*padding-top: 10px; commented for https://github.com/presscustomizr/hueman-pro-addons/issues/200 */
 }
 
 section .czr-sub-set:first-child {
@@ -2509,93 +2528,6 @@ input[type="range"]:focus + .rangeslider .rangeslider__handle {
 
 
 
-/* DEPRECATED since april 2nd 2019 */
-/* GUTENCHECK */
-/* This custom checkbox input is inspired from the one used in the Gutenberg plugin ( https://github.com/WordPress/gutenberg ), released under GNU General Public License
-credits : Gutenberg team @wordpress */
-/*.czr-toggle-check {
-  position: relative;
-      float: right;
-}
-.czr-toggle-check__input[type=checkbox] {
-    cursor: pointer;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    margin: 0;
-    padding: 0;
-    z-index: 1;
-}
-.czr-toggle-check__input[type="checkbox"]:checked:before {
-    content: "\f147";
-    margin: -3px 0 0 -4px;
-    color: #1e8cbe;
-    float: left;
-    display: inline-block;
-    vertical-align: middle;
-    width: 16px;
-    font: normal 21px/1 dashicons;
-    speak: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.czr-toggle-check .czr-toggle-check__track {
-    content: "";
-    display: inline-block;
-    vertical-align: top;
-    box-sizing: border-box;
-    background-color: #fff;
-    border: 2px solid #6c7781;
-    width: 36px;
-    height: 18px;
-    border-radius: 9px;
-    transition: background .2s ease;
-}
-.czr-toggle-check.is-checked .czr-toggle-check__track {
-    background-color: #33b3db;
-    border: 2px solid #33b3db;
-    border: 9px solid transparent;
-}
-.czr-toggle-check .czr-toggle-check__thumb {
-    display: block;
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    transition: transform .1s ease;
-    background-color: #6c7781;
-    border: 5px solid #6c7781;
-    box-sizing: border-box;
-}
-.czr-toggle-check.is-checked .czr-toggle-check__thumb {
-    background-color: #fff;
-    border-width: 0;
-    transform: translateX(18px);
-}
-.czr-toggle-check .czr-toggle-check__off {
-    color: #6c7781;
-    fill: currentColor;
-    right: 6px;
-}
-.czr-toggle-check .czr-toggle-check__on {
-    left: 8px;
-    -webkit-filter: invert(100%) contrast(500%);
-    filter: invert(100%) contrast(500%);
-    outline: 1px solid transparent;
-    outline-offset: -1px;
-}
-.czr-toggle-check .czr-toggle-check__off, .czr-toggle-check .czr-toggle-check__on {
-    position: absolute;
-    top: 6px;
-}*/
-
-
 
 /* NIMBLECHECK */
 /* ALIGNEMENT IN MODULES */
@@ -2707,3 +2639,93 @@ credits : Gutenberg team @wordpress */
 .nimblecheck-wrap .nimblecheck-input:checked + .nimblecheck-label:after {
   left: 16px
 }
+
+
+
+
+
+/* DEPRECATED since april 2nd 2019 */
+/* GUTENCHECK */
+/* This custom checkbox input is inspired from the one used in the Gutenberg plugin ( https://github.com/WordPress/gutenberg ), released under GNU General Public License
+credits : Gutenberg team @wordpress */
+/*.czr-toggle-check {
+  position: relative;
+      float: right;
+}
+.czr-toggle-check__input[type=checkbox] {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+}
+.czr-toggle-check__input[type="checkbox"]:checked:before {
+    content: "\f147";
+    margin: -3px 0 0 -4px;
+    color: #1e8cbe;
+    float: left;
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    font: normal 21px/1 dashicons;
+    speak: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.czr-toggle-check .czr-toggle-check__track {
+    content: "";
+    display: inline-block;
+    vertical-align: top;
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 2px solid #6c7781;
+    width: 36px;
+    height: 18px;
+    border-radius: 9px;
+    transition: background .2s ease;
+}
+.czr-toggle-check.is-checked .czr-toggle-check__track {
+    background-color: #33b3db;
+    border: 2px solid #33b3db;
+    border: 9px solid transparent;
+}
+.czr-toggle-check .czr-toggle-check__thumb {
+    display: block;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: transform .1s ease;
+    background-color: #6c7781;
+    border: 5px solid #6c7781;
+    box-sizing: border-box;
+}
+.czr-toggle-check.is-checked .czr-toggle-check__thumb {
+    background-color: #fff;
+    border-width: 0;
+    transform: translateX(18px);
+}
+.czr-toggle-check .czr-toggle-check__off {
+    color: #6c7781;
+    fill: currentColor;
+    right: 6px;
+}
+.czr-toggle-check .czr-toggle-check__on {
+    left: 8px;
+    -webkit-filter: invert(100%) contrast(500%);
+    filter: invert(100%) contrast(500%);
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+}
+.czr-toggle-check .czr-toggle-check__off, .czr-toggle-check .czr-toggle-check__on {
+    position: absolute;
+    top: 6px;
+}*/
