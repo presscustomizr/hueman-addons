@@ -99,15 +99,6 @@ class HA_Sharrre {
             'type'      => 'nimblecheck',
             'priority'  => 40
       ),
-      'sharrre-counter' => array(
-            'default'   => 1,
-            'control'   => 'HU_controls',
-            'label'     => __('Display a counter on top', 'hueman-addons'),
-            //'notice'    => __('The counter', 'hueman-addons'),
-            'section'   => 'content_single_sec',
-            'type'      => 'nimblecheck',
-            'priority'  => 40
-      ),
       'sharrre-scrollable' => array(
             'default'   => 1,
             'control'   => 'HU_controls',

@@ -1,4 +1,4 @@
-<div class="sharrre-container <?php echo ! hu_is_checked('sharrre-counter') ? 'no-counter' : ''; ?>">
+<div class="sharrre-container no-counter">
 	<span><?php _e('Share','hueman-addons'); ?></span>
   <?php if ( hu_is_checked('sharrre-twitter-on') ) : ?>
 	   <div id="twitter" data-url="<?php echo the_permalink(); ?>" data-text="<?php the_title_attribute(); ?>" data-title="<?php _e('Tweet', 'hueman-addons'); ?>"><a class="box" href="#"><div class="count" href="#"><i class="fas fa-plus"></i></div><div class="share"><i class="fab fa-twitter"></i></div></a></div>
@@ -25,7 +25,7 @@
         			share: {
         				twitter: true
         			},
-        			template: '<a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-twitter"></i></div></a>',
+        			template: '<a class="box" href="#"><div class="count"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-twitter"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
         			buttons: { twitter: {via: '<?php echo esc_attr( hu_get_option("twitter-username") ); ?>'}},
@@ -40,7 +40,7 @@
         			share: {
         				facebook: true
         			},
-        			template: '<a class="box" href="#"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-facebook-square"></i></div></a>',
+        			template: '<a class="box" href="#"><div class="count"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-facebook-square"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
               buttons:{layout: 'box_count'},
@@ -55,7 +55,7 @@
         			share: {
         				pinterest: true
         			},
-        			template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-pinterest"></i></div></a>',
+        			template: '<a class="box" href="#" rel="nofollow"><div class="count"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-pinterest"></i></div></a>',
         			enableHover: false,
         			enableTracking: true,
         			buttons: {
@@ -74,7 +74,7 @@
               share: {
                 linkedin: true
               },
-              template: '<a class="box" href="#" rel="nofollow"><div class="count" href="#"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-linkedin"></i></div></a>',
+              template: '<a class="box" href="#" rel="nofollow"><div class="count"><i class="fa fa-plus"></i></div><div class="share"><i class="fab fa-linkedin"></i></div></a>',
               enableHover: false,
               enableTracking: true,
               buttons: {
