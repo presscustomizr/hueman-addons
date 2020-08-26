@@ -13,6 +13,7 @@ module.exports = {
 			'!.git/**',
 			'!gruntfile.js',
 			'!package.json',
+      '!package-lock.json',
 			'!.gitignore',
 			'!.ftpauth',
 			'!.travis.yml',
