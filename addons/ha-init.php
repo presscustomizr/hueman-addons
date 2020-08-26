@@ -545,12 +545,36 @@ if ( ha_is_skop_on() ) {
         update_option( $december_2018_compat_opt_name, 'done');
     }
 
+    $current_stylesheet = get_stylesheet();
+
+    // APRIL 2020 theme mods cleaning
+    // see https://github.com/presscustomizr/hueman-pro-addons/issues/210
+    $april_2020_theme_mods_cleaning = 'hu_theme_mods_april_2020_backup';
+    if ( !get_option( $april_2020_theme_mods_cleaning ) ) {
+        $current_theme_mods = get_theme_mods();
+        $new_theme_mods = array();
+        // We want to remove all entries looking like : [skp__post_page_809] => -1
+        foreach ( $current_theme_mods as $_mod_name => $_mod_val ) {
+            // $mod_name should look like skp__post_page_809
+            if ( false === strpos( $_mod_name, 'skp__') || 0 !== strpos( $_mod_name, 'skp__') ) {
+                $new_theme_mods[$_mod_name] = $_mod_val;
+            } else {
+                if ( -1 !== $_mod_val ) {
+                    $new_theme_mods[$_mod_name] = $_mod_val;
+                }
+            }
+        }
+        update_option( "theme_mods_{$current_stylesheet}", $new_theme_mods );
+        // Backup the previous theme_mods in case we need to restore them in a future release
+        update_option( $april_2020_theme_mods_cleaning, $current_theme_mods);
+    }
+
 
     /* ------------------------------------------------------------------------- *
      *  SYNCHRONIZES THEME MODS IF SWITCHING FROM A HUEMAN THEME TO ANOTHER ( hueman free to hueman pro, hueman to hueman child, ... )
     /* ------------------------------------------------------------------------- */
     //sek_error_log('theme_mods_hueman-pro', get_option('theme_mods_hueman-pro') );
-    $current_stylesheet = get_stylesheet();
+
     // this $_GET params allows us to force a re-sync with a given stylesheet slug.
     $stylesheet_synced = isset( $_GET['sync_contx_with_stylesheet'] ) ? $_GET['sync_contx_with_stylesheet'] : get_option( 'hu_contx_theme_mods_synced_for_stylesheet' );
     if ( $current_stylesheet != $stylesheet_synced ) {
