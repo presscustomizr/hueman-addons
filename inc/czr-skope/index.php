@@ -49,12 +49,12 @@ function skp_get_no_group_skope_list() {
 // HELPERS
 
 function skp_trim_text( $text, $text_length, $more ) {
-    if ( ! $text )
+    if ( !$text )
       return '';
 
     $text       = trim( strip_tags( $text ) );
 
-    if ( ! $text_length )
+    if ( !$text_length )
       return $text;
 
     $end_substr = $_text_length = strlen( $text );
@@ -98,7 +98,7 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
     // the id : post id, term id, user id
 
     // if $parts are provided, use them.
-    $parts    = ( is_array( $requested_parts ) && ! empty( $requested_parts ) ) ? $requested_parts : skp_get_query_skope();
+    $parts    = ( is_array( $requested_parts ) && !empty( $requested_parts ) ) ? $requested_parts : skp_get_query_skope();
 
     // error_log( '<SKOPE PARTS>' );
     // error_log( print_r( $parts, true ) );
@@ -107,7 +107,7 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
     $_return  = array();
     $meta_type = $type = $obj_id = false;
 
-    if ( is_array( $parts ) && ! empty( $parts ) ) {
+    if ( is_array( $parts ) && !empty( $parts ) ) {
         $meta_type  = isset( $parts['meta_type'] ) ? $parts['meta_type'] : false;
         $type       = isset( $parts['type'] ) ? $parts['type'] : false;
         $obj_id     = isset( $parts['obj_id'] ) ? $parts['obj_id'] : false;
@@ -140,7 +140,7 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
                 $_return = array( "meta_type" => "{$meta_type}" , "type" => "{$type}", "id" => "{$obj_id}" );
             }
             //GROUP
-            else if ( false !== $meta_type && ! $obj_id ) {
+            else if ( false !== $meta_type && !$obj_id ) {
                 $_return = array( "meta_type" => "{$meta_type}", "type" => "{$type}" );
             }
             //LOCAL WITH NO GROUP : home ( when home displays "Your latests posts" ) , 404, search, date, post type archive
@@ -151,26 +151,30 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
                 // don't print the skope error log if not in dev mode
                 // fixes : https://github.com/presscustomizr/czr-skope/issues/1
                 if ( defined( 'NIMBLE_DEV' ) && NIMBLE_DEV ) {
-                    error_log( __FUNCTION__ . ' error when building the local skope, no object_id provided.');
-                    error_log( print_r( $parts, true) );
+                    // the favicon request break skope building, so skip this case
+                    // see https://github.com/presscustomizr/nimble-builder/issues/658
+                    if ( '/favicon.ico' !== $_SERVER['REQUEST_URI'] ) {
+                        error_log( __FUNCTION__ . ' error when building the local skope, no object_id provided.');
+                        error_log( print_r( $parts, true) );
+                    }
                 }
             }
         break;
     }
 
     //return the parts array if not a string requested
-    if ( ! $_return_string ) {
+    if ( !$_return_string ) {
       return $_return;
     }
 
     //don't go further if not an array or empty
-    if ( ! is_array( $_return ) || ( is_array( $_return ) && empty( $_return ) ) ) {
+    if ( !is_array( $_return ) || ( is_array( $_return ) && empty( $_return ) ) ) {
       return '';
     }
 
     //if a specific part of the ctx is requested, don't concatenate
     //return the part if exists
-    if ( ! is_null( $_requesting_wot ) ) {
+    if ( !is_null( $_requesting_wot ) ) {
       return isset( $_return[ $_requesting_wot ] ) ? $_return[ $_requesting_wot ] : '';
     }
 
@@ -189,18 +193,20 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
 
 /**
 * skope builder from the wp $query
-* !! has to be fired after 'template_redirect'
+* !!has to be fired after 'template_redirect'
 * Used on front ( not customizing preview ? => @todo make sure of this )
 * @return  array of ctx parts
 */
 function skp_get_query_skope() {
     //don't call get_queried_object if the $query is not defined yet
     global $wp_the_query;
-    if ( ! isset( $wp_the_query ) || empty( $wp_the_query ) )
+    if ( !isset( $wp_the_query ) || empty( $wp_the_query ) ) {
       return array();
+    }
     // is it cached already ?
-    if ( ! empty( Flat_Skop_Base()->query_skope ) )
+    if ( !empty( Flat_Skop_Base()->query_skope ) ) {
       return Flat_Skop_Base()->query_skope;
+    }
 
     $queried_object  = get_queried_object();
 
@@ -215,19 +221,19 @@ function skp_get_query_skope() {
     // - date archives
     // - 404 page
     // - search page
-    if ( ! is_null( $queried_object ) && is_object( $queried_object ) ) {
+    if ( !is_null( $queried_object ) && is_object( $queried_object ) ) {
         //post, custom post types, page
-        if ( isset($queried_object -> post_type) ) {
+        if ( isset($queried_object->post_type) ) {
             $meta_type  = 'post';
-            $type       = $queried_object -> post_type;
-            $obj_id     = $queried_object -> ID;
+            $type       = $queried_object->post_type;
+            $obj_id     = $queried_object->ID;
         }
 
         //taxinomies : tags, categories, custom tax type
-        if ( isset($queried_object -> taxonomy) && isset($queried_object -> term_id) ) {
+        if ( isset($queried_object->taxonomy) && isset($queried_object->term_id) ) {
             $meta_type  = 'tax';
-            $type       = $queried_object -> taxonomy;
-            $obj_id     = $queried_object -> term_id;
+            $type       = $queried_object->taxonomy;
+            $obj_id     = $queried_object->term_id;
         }
     }
 
@@ -235,13 +241,13 @@ function skp_get_query_skope() {
     if ( is_author() ) {
         $meta_type  = 'user';
         $type       = 'author';
-        $obj_id     = $wp_the_query ->get( 'author' );
+        $obj_id     = $wp_the_query->get( 'author' );
     }
 
     //SKOPES WITH NO GROUPS
     //post type archive object
     if ( is_post_type_archive() ) {
-        $obj_id     = 'post_type_archive' . '_'. $wp_the_query ->get( 'post_type' );
+        $obj_id     = 'post_type_archive' . '_'. $wp_the_query->get( 'post_type' );
     }
     if ( is_404() ) {
         $obj_id  = '404';
@@ -257,7 +263,7 @@ function skp_get_query_skope() {
         $obj_id  = 'home';
         // December 2018
         // when the home page is a page, the skope now includes the page id, instead of being generic as it was since then : skp__post_page_home
-        // This has been introduced to facilitate the compatibility of the Nimble Builder with multilanguage plugins like polylang
+        // This has been introduced to facilitate the compatibility of Nimble Builder with multilanguage plugins like polylang
         // => Allows user to create a different home page for each languages
         //
         // To summarize,
@@ -274,7 +280,7 @@ function skp_get_query_skope() {
         // those settings have to be copied in the skp__post_page_{$static_home_page_id} skope settings
 
         // If we are on the real home page, but displaying a static page then set the static page id as obj_id
-        if ( ! is_home() && 'page' === get_option( 'show_on_front' ) ) {
+        if ( !is_home() && 'page' === get_option( 'show_on_front' ) ) {
             $home_page_id = get_option( 'page_on_front' );
             if ( 0 < $home_page_id ) {
                 $obj_id = $home_page_id;
@@ -284,7 +290,7 @@ function skp_get_query_skope() {
 
     // cache now
     if ( did_action( 'wp' ) ) {
-        Flat_Skop_Base()->query_skope = apply_filters( 'skp_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ) , $queried_object );
+        Flat_Skop_Base()->query_skope = apply_filters( 'skp_get_query_skope' , array( 'meta_type' => $meta_type , 'type' => $type , 'obj_id' => $obj_id ), $queried_object );
     }
 
     return Flat_Skop_Base()->query_skope;
@@ -316,7 +322,7 @@ function skp_get_skope_id( $level = 'local' ) {
         $skope_id_to_return = array_key_exists( $level, $new_skope_ids ) ? $new_skope_ids[ $level ] : '_skope_not_set_';
     }
     // error_log('$skope_id_to_return => ' . $level . ' ' . $skope_id_to_return );
-    // error_log( print_r( Flat_Skop_Base() -> current_skope_ids , true ) );
+    // error_log( print_r( Flat_Skop_Base()->current_skope_ids , true ) );
     return apply_filters( 'skp_get_skope_id', $skope_id_to_return, $level );
 }
 
@@ -347,7 +353,7 @@ function skp_build_skope_id( $args = array() ) {
               $skope_id = strtolower( NIMBLE_SKOPE_ID_PREFIX . $args[ 'skope_string' ] );
           break;
           case 'group' :
-              if ( ! empty( $args[ 'skope_type' ] ) ) {
+              if ( !empty( $args[ 'skope_type' ] ) ) {
                   $skope_id = strtolower( NIMBLE_SKOPE_ID_PREFIX . 'all_' . $args[ 'skope_type' ] );
               }
           break;
@@ -395,24 +401,24 @@ function skp_get_skope_title( $args = array() ) {
             switch ($meta_type) {
                 case 'post':
                   $type_obj = get_post_type_object( $type );
-                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, get_the_title( $_id ) );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj->labels->singular_name ), $_id, get_the_title( $_id ) );
                   break;
 
                 case 'tax':
                   $type_obj = get_taxonomy( $type );
                   $term = get_term( $_id, $type );
-                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj -> labels -> singular_name ), $_id, $term -> name );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', strtolower( $type_obj->labels->singular_name ), $_id, $term->name );
                   break;
 
                 case 'user':
                   $author = get_userdata( $_id );
-                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'text_doma'), $_id, $author -> user_login );
+                  $title .= sprintf( '%1$s "%3$s" (id : %2$s)', __('user', 'text_doma'), $_id, $author->user_login );
                   break;
             }
         } else if ( ( 'trans' == $_dyn_type || skp_skope_has_no_group( $skope ) ) ) {
             if ( is_post_type_archive() ) {
                 global $wp_the_query;
-                $title .= sprintf( __( '%1$s archive page', 'text_doma'), $wp_the_query ->get( 'post_type' ) );
+                $title .= sprintf( __( '%1$s archive page', 'text_doma'), $wp_the_query->get( 'post_type' ) );
             } else {
                 $title .= strtolower( $skope );
             }
@@ -425,12 +431,12 @@ function skp_get_skope_title( $args = array() ) {
         switch( $meta_type ) {
             case 'post' :
                 $type_obj = get_post_type_object( $type );
-                $title .= strtolower( $type_obj -> labels -> name );
+                $title .= strtolower( $type_obj->labels->name );
             break;
 
             case 'tax' :
                 $type_obj = get_taxonomy( $type );
-                $title .= strtolower( $type_obj -> labels -> name );
+                $title .= strtolower( $type_obj->labels->name );
             break;
 
             case 'user' :
@@ -493,7 +499,7 @@ function skp_is_customizing() {
       ||
       ( isset( $_REQUEST['wp_customize'] ) && 'on' == $_REQUEST['wp_customize'] )
       ||
-      ( ! empty( $_GET['customize_changeset_uuid'] ) || ! empty( $_POST['customize_changeset_uuid'] ) )
+      ( !empty( $_GET['customize_changeset_uuid'] ) || !empty( $_POST['customize_changeset_uuid'] ) )
     );
     $is_customize_admin_page_two = is_admin() && isset( $pagenow ) && 'customize.php' == $pagenow;
 
@@ -502,7 +508,7 @@ function skp_is_customizing() {
     //hu_is_customize_preview_frame() ?
     // Note : is_customize_preview() is not able to differentiate when previewing in the customizer and when previewing a changeset draft.
     // @todo => change this
-    } else if ( is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) ) ) {
+    } else if ( is_customize_preview() || ( !is_admin() && isset($_REQUEST['customize_messenger_channel']) ) ) {
         $is_customizing = true;
     // hu_doing_customizer_ajax()
     } else if ( $_is_ajaxing_from_customizer && ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
@@ -516,27 +522,27 @@ function skp_is_customizing() {
 * @return  boolean
 */
 function skp_is_customize_preview_frame() {
-  return is_customize_preview() || ( ! is_admin() && isset($_REQUEST['customize_messenger_channel']) );
+  return is_customize_preview() || ( !is_admin() && isset($_REQUEST['customize_messenger_channel']) );
 }
 
 /**
 * @return  boolean
 */
 function skp_is_previewing_live_changeset() {
-  return ! isset( $_POST['customize_messenger_channel']) && is_customize_preview();
+  return !isset( $_POST['customize_messenger_channel']) && is_customize_preview();
 }
 ?><?php
 
 ////////////////////////////////////////////////////////////////
 // FLAT SKOPE BASE
-if ( ! class_exists( 'Flat_Skop_Base' ) ) :
+if ( !class_exists( 'Flat_Skop_Base' ) ) :
     class Flat_Skop_Base {
         static $instance;
         public $query_skope = array();//<= will cache the query skope ( otherwise called multiple times ) on the first invokation of skp_get_query_skope() IF 'wp' done
         public $current_skope_ids = array();// will cache the skope ids on the first invokation of skp_get_skope_id, if 'wp' done
 
         public static function skp_get_instance( $params ) {
-            if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Flat_Skop_Base ) )
+            if ( !isset( self::$instance ) && !( self::$instance instanceof Flat_Skop_Base ) )
               self::$instance = new Flat_Skope_Clean_Final( $params );
             return self::$instance;
         }
@@ -545,8 +551,8 @@ if ( ! class_exists( 'Flat_Skop_Base' ) ) :
                 'base_url_path' => ''//NIMBLE_BASE_URL . '/inc/czr-skope/'
             );
             $params = wp_parse_args( $params, $defaults );
-            if ( ! defined( 'NIMBLE_SKOPE_BASE_URL' ) ) { define( 'NIMBLE_SKOPE_BASE_URL' , $params['base_url_path'] ); }
-            if ( ! defined( 'NIMBLE_SKOPE_ID_PREFIX' ) ) { define( 'NIMBLE_SKOPE_ID_PREFIX' , "skp__" ); }
+            if ( !defined( 'NIMBLE_SKOPE_BASE_URL' ) ) { define( 'NIMBLE_SKOPE_BASE_URL' , $params['base_url_path'] ); }
+            if ( !defined( 'NIMBLE_SKOPE_ID_PREFIX' ) ) { define( 'NIMBLE_SKOPE_ID_PREFIX' , "skp__" ); }
 
             $this->skp_register_and_load_control_assets();
             $this->skp_export_skope_data_and_schedule_sending_to_panel();
@@ -557,7 +563,7 @@ endif;
 ?><?php
 /////////////////////////////////////////////////////////////////
 // PRINT CUSTOMIZER JAVASCRIPT + LOCALIZED DATA
-if ( ! class_exists( 'Flat_Skop_Register_And_Load_Control_Assets' ) ) :
+if ( !class_exists( 'Flat_Skop_Register_And_Load_Control_Assets' ) ) :
     class Flat_Skop_Register_And_Load_Control_Assets extends Flat_Skop_Base {
           // Fired in Flat_Skop_Base::__construct()
           public function skp_register_and_load_control_assets() {
@@ -581,7 +587,7 @@ if ( ! class_exists( 'Flat_Skop_Register_And_Load_Control_Assets' ) ) :
                   //dev / debug mode mode?
                   $_prod_script_path,
                   array('customize-controls' , 'jquery', 'underscore'),
-                  ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() :  wp_get_theme() -> version,
+                  ( defined('WP_DEBUG') && true === WP_DEBUG ) ? time() :  wp_get_theme()->version,
                   $in_footer = true
               );
 
@@ -602,7 +608,7 @@ endif;
 /* ------------------------------------------------------------------------- *
 *  CUSTOMIZE PREVIEW : export skope data and send skope to the panel
 /* ------------------------------------------------------------------------- */
-if ( ! class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
+if ( !class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
     class Flat_Export_Skope_Data_And_Send_To_Panel extends Flat_Skop_Register_And_Load_Control_Assets {
           // Fired in Flat_Skop_Base::__construct()
           public function skp_export_skope_data_and_schedule_sending_to_panel() {
@@ -612,7 +618,7 @@ if ( ! class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
 
           //hook : 'wp_footer'
           public function skp_print_server_skope_data() {
-              if ( ! skp_is_customize_preview_frame() )
+              if ( !skp_is_customize_preview_frame() )
                   return;
 
               global $wp_query, $wp_customize;
@@ -620,11 +626,14 @@ if ( ! class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
 
               // $_czr_scopes = array( );
               $_czr_skopes            = $this->_skp_get_json_export_ready_skopes();
+              $_czr_query_data        = $this->_skp_get_json_export_ready_query_data();
+
               ?>
                   <script type="text/javascript" id="czr-print-skop">
                       (function ( _export ){
                               _export.czr_new_skopes        = <?php echo wp_json_encode( $_czr_skopes ); ?>;
                               _export.czr_stylesheet    = '<?php echo get_stylesheet(); ?>';
+                              _export.czr_query_params  = <?php echo wp_json_encode($_czr_query_data); ?>;
                       })( _wpCustomizeSettings );
 
                       ( function( api, $, _ ) {
@@ -641,6 +650,16 @@ if ( ! class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
                       } )( wp.customize, jQuery, _ );
                   </script>
               <?php
+          }
+
+
+          // introduced in october 2019 for https://github.com/presscustomizr/nimble-builder/issues/401
+          private function _skp_get_json_export_ready_query_data() {
+              global $wp_query;
+              return [
+                'is_singular' => $wp_query->is_singular,
+                'post_id' => get_the_ID()
+              ];
           }
 
           /* ------------------------------------------------------------------------- *
@@ -723,7 +742,7 @@ endif;
 
 ?><?php
 
-if ( ! class_exists( 'Flat_Skope_Clean_Final' ) ) :
+if ( !class_exists( 'Flat_Skope_Clean_Final' ) ) :
     final class Flat_Skope_Clean_Final extends Flat_Export_Skope_Data_And_Send_To_Panel {
           // Fired in Flat_Skop_Base::__construct()
           public function skp_schedule_cleaning_on_object_delete() {
@@ -739,20 +758,20 @@ if ( ! class_exists( 'Flat_Skope_Clean_Final' ) ) :
           // don't have to return anything
           public function skp_clean_skopified_posts( $postid ) {
               $deletion_candidate = get_post( $postid );
-              if ( ! $deletion_candidate || ! is_object( $deletion_candidate ) )
+              if ( !$deletion_candidate || !is_object( $deletion_candidate ) )
                 return;
 
               // Stop here if the post type is not considered "viewable".
               // For built-in post types such as posts and pages, the 'public' value will be evaluated.
               // For all others, the 'publicly_queryable' value will be used.
               // For example, the 'revision' post type, which is purely internal and not skopable, won't pass this test.
-              if ( ! is_post_type_viewable( $deletion_candidate -> post_type ) )
+              if ( !is_post_type_viewable( $deletion_candidate->post_type ) )
                 return;
 
               // Force the skope parts normally retrieved with skp_get_query_skope()
               $skope_string = skp_get_skope( null, true, array(
                   'meta_type' => 'post',
-                  'type'      => $deletion_candidate -> post_type,
+                  'type'      => $deletion_candidate->post_type,
                   'obj_id'    => $postid
               ) );
 
@@ -773,7 +792,7 @@ if ( ! class_exists( 'Flat_Skope_Clean_Final' ) ) :
           // 'delete_term_taxonomy' Fires immediately before a term taxonomy ID is deleted.
           public function skp_clean_skopified_taxonomies( $term_id ) {
               $deletion_candidate = get_term( $term_id );
-              if ( ! $deletion_candidate || ! is_object( $deletion_candidate ) )
+              if ( !$deletion_candidate || !is_object( $deletion_candidate ) )
                 return;
 
               //error_log( print_r( $deletion_candidate, true ) );
@@ -781,7 +800,7 @@ if ( ! class_exists( 'Flat_Skope_Clean_Final' ) ) :
               // Force the skope parts normally retrieved with skp_get_query_skope()
               $skope_string = skp_get_skope( null, true, array(
                   'meta_type' => 'tax',
-                  'type'      => $deletion_candidate -> taxonomy,
+                  'type'      => $deletion_candidate->taxonomy,
                   'obj_id'    => $term_id
               ) );
 
