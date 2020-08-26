@@ -5,8 +5,8 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
-Tested up to: 5.2
-Stable tag: 2.2.7
+Tested up to: 5.5
+Stable tag: 2.2.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,16 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.2.7 =
-Fixes LinkedIn sharre icon not displayed because of a javascript error.
+= 2.2.9 =
+Various minor updates following WP5.5
 
 == Changelog ==
+= 2.2.9 August 26, 2020 =
+* updated : various minor updates following WP5.5
+
+= 2.2.8 August 15, 2020 =
+* fixed : [WP 5.5] javascript error in the customizer
+
 = 2.2.7 July 18th, 2019 =
 * fixed : LinkedIn sharre icon was not displayed because of a javascript error
 
