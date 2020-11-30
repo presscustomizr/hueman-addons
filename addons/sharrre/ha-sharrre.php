@@ -23,9 +23,6 @@ class HA_Sharrre {
       //front
       add_action( 'wp'                    , array($this, 'ha_sharrre_front_actions') );
 
-      //scripts
-      add_action( 'wp_enqueue_scripts'    , array( $this, 'ha_addons_scripts' ) );
-
       //customizer
       add_filter( 'hu_social_links_sec'   , array( $this, 'ha_register_sharrre_settings'));
   }
@@ -36,20 +33,22 @@ class HA_Sharrre {
   /* ------------------------------------------------------------------------- */
   //hook : 'wp'
   function ha_sharrre_front_actions() {
-    if ( ! is_single() )
+    if ( !is_single() )
       return;
     //alter the single entry wrapper class
     add_filter( 'hu_single_entry_class', array($this, 'ha_maybe_add_sharrre_class'));
 
     //hook the sharrre content to the single post template
     add_action( 'hu_after_single_entry_inner', array($this, 'ha_maybe_print_sharrre_template') );
+    //scripts
+    add_action( 'wp_enqueue_scripts'    , array( $this, 'ha_addons_scripts' ) );
   }
 
 
   //@param $classes = array of classes
   //hook : hu_single_entry_class
   function ha_maybe_add_sharrre_class( $classes ) {
-    if ( ! ha_are_share_buttons_enabled() )
+    if ( !ha_are_share_buttons_enabled() )
       return $classes;
     $classes[] = 'share';
     return $classes;
@@ -57,7 +56,7 @@ class HA_Sharrre {
 
   //hook : hu_after_single_entry_inner
   function ha_maybe_print_sharrre_template() {
-    if ( ! ha_are_share_buttons_enabled() )
+    if ( !ha_are_share_buttons_enabled() )
       return;
 
     ha_locate_template( 'addons/sharrre/sharrre-template.php', $load = true, $require_once = true );
@@ -69,15 +68,15 @@ class HA_Sharrre {
   /* ------------------------------------------------------------------------- */
   //hook : wp_enqueue_scripts
   function ha_addons_scripts() {
-    if ( is_singular() ) {
-      wp_enqueue_script(
-        'sharrre',
-        sprintf( '%1$saddons/assets/front/js/jQuerySharrre%2$s', HU_AD() -> ha_get_base_url(), (defined('CZR_DEV') && true === CZR_DEV) ? '.js?' . time() : '.min.js' ),
-        array( 'jquery' ),
-        '',
-        true
-      );
-    }
+    if ( !ha_are_share_buttons_enabled() )
+      return;
+    wp_enqueue_script(
+      'sharrre',
+      sprintf( '%1$saddons/assets/front/js/jQuerySharrre%2$s', HU_AD() -> ha_get_base_url(), (defined('CZR_DEV') && true === CZR_DEV) ? '.js?' . time() : '.min.js' ),
+      array( 'jquery' ),
+      '',
+      true
+    );
   }
 
 

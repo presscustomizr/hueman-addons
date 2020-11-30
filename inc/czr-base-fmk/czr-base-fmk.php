@@ -204,7 +204,7 @@ if ( !class_exists( 'CZR_Fmk_Base_Load_Resources' ) ) :
             if ( version_compare( $wp_version, '5.4.2' , '>=' ) ) {
                 wp_localize_script(
                   'wp-color-picker',
-                  'wpColorPickerL10n',
+                  'nb_wpColorPickerL10n',
                   array(
                     'clear'            => __( 'Clear' ),
                     'clearAriaLabel'   => __( 'Clear color' ),
@@ -246,6 +246,14 @@ if ( !class_exists( 'CZR_Fmk_Base_Load_Resources' ) ) :
                 );
             }
 
+            $theme_data   = wp_get_theme();
+            $theme        = $theme_data->Name . ' ' . $theme_data->Version;
+            $parent_theme = $theme_data->Template;
+            if ( !empty( $parent_theme ) ) {
+              $parent_theme_data = wp_get_theme( $parent_theme );
+              $parent_theme      = $parent_theme_data->Name;
+            }
+            $parent_theme =strtolower($parent_theme);
 
             //additional localized param when standalone plugin mode
             wp_localize_script(
@@ -277,7 +285,8 @@ if ( !class_exists( 'CZR_Fmk_Base_Load_Resources' ) ) :
 
                             'Customizing' => __('Customizing', 'text_doma'),
                       ),
-                      'paramsForDynamicRegistration' => apply_filters( 'czr_fmk_dynamic_setting_js_params', array() )
+                      'paramsForDynamicRegistration' => apply_filters( 'czr_fmk_dynamic_setting_js_params', array() ),
+                      'activeTheme' => $parent_theme
                   )
                 )
             );

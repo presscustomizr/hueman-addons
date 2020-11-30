@@ -161,7 +161,7 @@
           }
 
           //setup event listeners
-          $window.scroll( _.throttle( function() {
+          $window.on('scroll', _.throttle( function() {
               if ( $window.width() > 719 ) {
                   shareScroll();
               } else {
@@ -172,7 +172,7 @@
                   })
               }
           }, 50 ) );
-          $window.resize( _.debounce( function() {
+          $window.on('resize', _.debounce( function() {
               if ( $window.width() > 719 ) {
                   shareMove();
               } else {

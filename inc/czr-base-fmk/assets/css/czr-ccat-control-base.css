@@ -384,6 +384,10 @@ input:-ms-input-placeholder {
   height: 24px;
 }
 
+/* Sept 2020 => fix alpha color picker style broken */
+.wp-picker-container .iris-alpha-slider {
+  margin-left:5px!important;
+}
 
 
 
@@ -436,6 +440,7 @@ span.czr-notice {
 }
 .czr-html-after {
   float: left;
+  width: 100%;
 }
 
 .czr-customizer-separator-invisible {
@@ -639,14 +644,14 @@ li#customize-control-tc_theme_options-tc_custom_css textarea {
 }
 
 /* HEADER => HOME AND ADD MODULE BUTTON */
-#customize-header-actions .customize-controls-close {
+.czr-has-home-btn #customize-header-actions .customize-controls-close {
   left: 45px;
 }
 
-.customize-controls-home-or-add, .customize-controls-close {
+.czr-has-home-btn .customize-controls-home-or-add, .customize-controls-close {
   top: -1px;
 }
-.customize-controls-home-or-add {
+.czr-has-home-btn .customize-controls-home-or-add {
     display: block;
     position: absolute;
     left: 0;
@@ -669,20 +674,20 @@ li#customize-control-tc_theme_options-tc_custom_css textarea {
     box-sizing: content-box;
 }
 /* for the Nimble button */
-.customize-controls-home-or-add > .material-icons {
+.czr-has-home-btn .customize-controls-home-or-add > .material-icons {
   line-height: 39px;
   text-align: center;
   display: block;
 }
 
-.customize-controls-home-or-add:before {
+.czr-has-home-btn .customize-controls-home-or-add:before {
     font-size: 17px;
     line-height:45px;
     position: relative;
     top: -4px;
     left: 15px;
 }
-.customize-controls-home-or-add:hover {
+.czr-has-home-btn .customize-controls-home-or-add:hover {
     background: #fff;
     color: #0073aa;
     border-top-color: #0073aa;
@@ -691,11 +696,11 @@ li#customize-control-tc_theme_options-tc_custom_css textarea {
     box-shadow: none;
 }
 /* rtl: home button */
-.rtl.wp-customizer #customize-header-actions .customize-controls-close {
+.czr-has-home-btn .rtl.wp-customizer #customize-header-actions .customize-controls-close {
   right: 45px;
   left: auto;
 }
-.rtl.wp-customizer .customize-controls-home-or-add {
+.czr-has-home-btn .rtl.wp-customizer .customize-controls-home-or-add {
   left: auto;
   right: 0;
   border-right: 0;

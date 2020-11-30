@@ -370,7 +370,7 @@ var SharrrePlatform = SharrrePlatform || (function () {
             total: 0,  //total of sharing
             shorterTotal: true, //show total by k or M when number is to big
             enableHover: true, //disable if you want to personalize hover event with callback
-            enableCounter: true, //disable if you just want use buttons
+            enableCounter: false, //disable if you just want use buttons
             enableTracking: false, //tracking with google analitycs
             defaultUrl: "javascript:void(0);",
             popup: { // Set the popup width and height
@@ -465,7 +465,7 @@ var SharrrePlatform = SharrrePlatform || (function () {
         });
 
         //click event
-        $(this.element).click(function (e) {
+        $(this.element).on('click', function (e) {
             e.preventDefault();
             self.options.click(self, self.options);
             return false;
@@ -489,7 +489,7 @@ var SharrrePlatform = SharrrePlatform || (function () {
 
     /* getSocialJson methode
      ================================================== */
-    Plugin.prototype.getSocialJson = function (name) {
+    Plugin.prototype.getSocialJson = function(name) {
         var self = this,
             count = 0,
             settings = self.platforms[name].settings,
