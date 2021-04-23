@@ -628,7 +628,7 @@ if ( ha_is_skop_on() ) {
     add_action('after_setup_theme', 'hu_load_contextualizer', 30 );
     function hu_load_contextualizer() {
         Contx( array(
-            'base_url_path' => HA_BASE_URL . '/contextualizer'
+            'base_url_path' => HA_BASE_URL . 'contextualizer'
         ) );
     }
 

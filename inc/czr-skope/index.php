@@ -98,6 +98,7 @@ function skp_get_skope( $_requesting_wot = null, $_return_string = true, $reques
     // the id : post id, term id, user id
 
     // if $parts are provided, use them.
+    // Note that the value of skp_get_query_skope() is cached when get the first time for better performance
     $parts    = ( is_array( $requested_parts ) && !empty( $requested_parts ) ) ? $requested_parts : skp_get_query_skope();
 
     // error_log( '<SKOPE PARTS>' );
@@ -301,7 +302,7 @@ function skp_get_query_skope() {
 function skp_get_skope_id( $level = 'local' ) {
     // CACHE THE SKOPE WHEN 'wp' DONE
     // the skope id is used when filtering the options, called hundreds of times.
-    // We'll get hight performances with a cached value instead of using the skp_get_skope_id() function on each call.
+    // We get higher performances with a cached value instead of using the skp_get_skope_id() function on each call.
     $new_skope_ids = array( 'local' => '_skope_not_set_', 'group' => '_skope_not_set_' );
     if ( did_action( 'wp' ) ) {
         if ( empty( Flat_Skop_Base()->current_skope_ids ) ) {
@@ -321,9 +322,27 @@ function skp_get_skope_id( $level = 'local' ) {
     } else {
         $skope_id_to_return = array_key_exists( $level, $new_skope_ids ) ? $new_skope_ids[ $level ] : '_skope_not_set_';
     }
+    // if ( !(bool)did_action( 'wp' ) ) {
+    //     sek_error_log('ACTION WP NOT FIRED', did_action('wp'));
+    // }
+    // Jan 2021, while working on https://github.com/presscustomizr/nimble-builder-pro/issues/81
+    // when customizing and firing this function during ajax calls, the check for did_action('wp') will return 0.
+    // => which will lead to skope_id set to '_skope_not_set_'
+    // in order to prevent this, let's get the skope_id value from the customizer posted value when available.
+    // for the moment only the local skope_is is provided by the customizer post value, in the future it might be useful to also add the group skope_id ( all_pages, all_posts, all_categories, ... )
+    if ( skp_is_customizing() && '_skope_not_set_' === $skope_id_to_return && 'local' === $level && !empty($_POST['local_skope_id']) ) {
+        $skope_id_to_return = $_POST['local_skope_id'];
+    }
+
+    $skope_id_to_return = apply_filters( 'skp_get_skope_id', $skope_id_to_return, $level );
+
+    // At this point, the skope_id should be set
+    if ( '_skope_not_set_' === $skope_id_to_return ) {
+        //error_log( __FUNCTION__ . ' error => skope_id not set for level ' . $level );
+    }
     // error_log('$skope_id_to_return => ' . $level . ' ' . $skope_id_to_return );
     // error_log( print_r( Flat_Skop_Base()->current_skope_ids , true ) );
-    return apply_filters( 'skp_get_skope_id', $skope_id_to_return, $level );
+    return $skope_id_to_return;
 }
 
 //@param args = array(
@@ -636,18 +655,35 @@ if ( !class_exists( 'Flat_Export_Skope_Data_And_Send_To_Panel' ) ) :
                               _export.czr_query_params  = <?php echo wp_json_encode($_czr_query_data); ?>;
                       })( _wpCustomizeSettings );
 
-                      ( function( api, $, _ ) {
-                          $( function() {
-                                api.preview.bind( 'sync', function( events ) {
-                                      api.preview.send( 'czr-new-skopes-synced', {
-                                            czr_new_skopes : _wpCustomizeSettings.czr_new_skopes || [],
-                                            czr_stylesheet : _wpCustomizeSettings.czr_stylesheet || '',
-                                            isChangesetDirty : _wpCustomizeSettings.isChangesetDirty || false,
-                                            skopeGlobalDBOpt : _wpCustomizeSettings.skopeGlobalDBOpt || [],
-                                      } );
-                                });
-                          });
-                      } )( wp.customize, jQuery, _ );
+                      // December 2020 : it may happen that the 'sync' event was already sent and that we missed it
+                      // Typically when the site is slow.
+                      // So we need to check if the "sync" event has fired already ( see customize-base.js, ::bind method )
+                      // For more security, let's introduce a marker and attempt to re-sent after a moment if needed
+                      window.czr_skopes_sent = false;
+                      var _send = function() {
+                            wp.customize.preview.send( 'czr-new-skopes-synced', {
+                                czr_new_skopes : _wpCustomizeSettings.czr_new_skopes || [],
+                                czr_stylesheet : _wpCustomizeSettings.czr_stylesheet || '',
+                                isChangesetDirty : _wpCustomizeSettings.isChangesetDirty || false,
+                                skopeGlobalDBOpt : _wpCustomizeSettings.skopeGlobalDBOpt || [],
+                            } );
+                            window.czr_skopes_sent = true;
+                      };
+
+                      jQuery( function() {
+                          if ( wp.customize.preview.topics && wp.customize.preview.topics.sync && wp.customize.preview.topics.sync.fired() ) {
+                              _send();
+                          } else {
+                              wp.customize.preview.bind( 'sync', function( events ) {
+                                  _send();
+                              });
+                          }
+                          setTimeout( function() {
+                                if ( !window.czr_skopes_sent ) {
+                                    _send();
+                                }
+                          }, 2500 );
+                      });
                   </script>
               <?php
           }

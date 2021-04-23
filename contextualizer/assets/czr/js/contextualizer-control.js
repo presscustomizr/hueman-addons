@@ -1937,9 +1937,10 @@ var CZRSkopeReactMths = CZRSkopeReactMths || {};
                               control_priority += 10;
                               var _do_ = function() {
                                     _.each( _candidates_, function( params ) {
+                                          params = $.extend( true, {}, params );
                                           // If this is a 'czr_module' => make sure that the module type is registered
                                           // Prevents error in Hueman Addons, "czr_slide_module" not found.
-                                          if ( 'czr_module' == params.control_type && ! _.has( api.czrModuleMap, params.module_type ) )
+                                          if ( 'czr_module' == params.control_type && !_.has( api.czrModuleMap, params.module_type ) )
                                             return;
 
                                           // set the skopeID and skopeLevel to the candidate
@@ -1980,21 +1981,25 @@ var CZRSkopeReactMths = CZRSkopeReactMths || {};
                   //
                   var self = this,
                       _id_ = self._generateDynamicSettingId( params.module_set_id, params.skopeId ),//_contextualizer_ui_pro_slider_header_bg_skp__post_post_32
-                      skopeData = _.findWhere( api.czr_currentSkopesCollection(), { skope_id : params.skopeId } ),
+                      skopeData,
                       styleSheetId = api.czr_skopeBase.stylesheet(),
-                      contxSettingId = self.getContxSettingId( params.skopeId, styleSheetId );
+                      contxSettingId;
 
-                  if ( _.isEmpty( skopeData ) ) {
-                        api.errorLog( 'registerContextalizedModuleControlSection => NO SKOPE DATA PROVIDED' );
-                        return;
-                  }
 
-                  if ( ! api.has( contxSettingId ) ) {
-                        api.errorLog( 'registerContextalizedModuleControlSection => the contxSettingId is not registered ' + contxSettingId );
-                        return;
-                  }
+                  _do_register_ = function(params, _id_) {
+                        skopeData = _.findWhere( api.czr_currentSkopesCollection(), { skope_id : params.skopeId } );
+                        contxSettingId = self.getContxSettingId( params.skopeId, styleSheetId );
+                        
+                        if ( _.isEmpty( skopeData ) ) {
+                              api.errorLog( 'registerContextalizedModuleControlSection => NO SKOPE DATA PROVIDED' );
+                              return;
+                        }
 
-                  _do_register_ = function() {
+                        if ( ! api.has( contxSettingId ) ) {
+                              api.errorLog( 'registerContextalizedModuleControlSection => the contxSettingId is not registered ' + contxSettingId );
+                              return;
+                        }
+                        
                         if ( ! api.has( _id_ ) ) {
                               //api.infoLog( "::registerContextalizedModuleControlSection => register new setting id : " + _id_, params.skopeLevel );
                               // ON SETTING CHANGE
@@ -2094,82 +2099,95 @@ var CZRSkopeReactMths = CZRSkopeReactMths || {};
                               });
                         }//if ( ! api.has( _id_ ) ) {}
 
-                        api.CZR_Helpers.register( {
-                              origin : 'contextualizer',
-                              what : 'control',
-                              id : _id_,
-                              label : [
-                                    params.control_label,
-                                    contxLocalizedParams.i18n['in context'],
-                                    ':',
-                                    skopeData.ctx_title
-                              ].join(' '),
-                              type : params.control_type,
-                              module_type : params.module_type,//'czr_background',
-                              section : params.section.id,//'contx_body_bg',
-                              priority : params.control_priority,//'local' === params.skopeLevel ? 10 : 20,//local skope always first
-                              settings : { default : _id_ },
-                              options : {
-                                    skopeLevel : params.skopeLevel,
-                                    skopeId : params.skopeId,
-                                    moduleSetId : params.module_set_id
-                              },
+                        if ( !api.control.has( _id_ ) ) {
+                              api.CZR_Helpers.register( {
+                                    origin : 'contextualizer',
+                                    what : 'control',
+                                    id : _id_,
+                                    label : [
+                                          params.control_label,
+                                          contxLocalizedParams.i18n['in context'],
+                                          ':',
+                                          skopeData.ctx_title
+                                    ].join(' '),
+                                    type : params.control_type,
+                                    module_type : params.module_type,//'czr_background',
+                                    section : params.section.id,//'contx_body_bg',
+                                    priority : params.control_priority,//'local' === params.skopeLevel ? 10 : 20,//local skope always first
+                                    settings : { default : _id_ },
+                                    options : {
+                                          skopeLevel : params.skopeLevel,
+                                          skopeId : params.skopeId,
+                                          moduleSetId : params.module_set_id
+                                    },
 
-                              //track : false,//don't register in the self.registered() => this will prevent this container to be removed when cleaning the registered
-                        }).done( function() {
-                              api.control( _id_, function( _ctrl_ ) {
-                                    _ctrl_.deferred.embedded.done( function() {
-                                          // Print and attach event to a reset link
-                                          _ctrl_.container.find('label')
-                                                .first().find('.customize-control-title')
-                                                .prepend(  '<i title="' + contxLocalizedParams.i18n['Reset'] +'" class="czr-reset fas fa-undo-alt"></i> ' );
+                                    //track : false,//don't register in the self.registered() => this will prevent this container to be removed when cleaning the registered
+                              }).done( function() {
+                                    api.control( _id_, function( _ctrl_ ) {
+                                          _ctrl_.deferred.embedded.done( function() {
+                                                // Print and attach event to a reset link
+                                                _ctrl_.container.find('label')
+                                                      .first().find('.customize-control-title').first()
+                                                      .prepend(  '<i title="' + "merde" + contxLocalizedParams.i18n['Reset'] +'" class="czr-reset fas fa-undo-alt"></i> ' );
 
-                                          _ctrl_.container.on('click', '.czr-reset', function() {
-                                                // Remove the item from the contxSetting collection
-                                                var newContxSettingValue = $.extend( true, [], api( contxSettingId )()  || [] );
-                                                newContxSettingValue = _.filter( newContxSettingValue, function( _item_ ) {
-                                                      return api( _id_ ).moduleSetId != _item_[ 'setting-id' ] && params.skopeId != _item_[ 'skope-id' ];
+                                                _ctrl_.container.on('click', '.czr-reset', function() {
+                                                      // Remove the item from the contxSetting collection
+                                                      var newContxSettingValue = $.extend( true, [], api( contxSettingId )()  || [] );
+                                                      newContxSettingValue = _.filter( newContxSettingValue, function( _item_ ) {
+                                                            return api( _id_ ).moduleSetId != _item_[ 'setting-id' ] && params.skopeId != _item_[ 'skope-id' ];
+                                                      });
+                                                      api( contxSettingId )( newContxSettingValue );
+
+                                                      // Remove the control
+                                                      $.when( api.control( _id_ ).container.remove() ).done( function() {
+                                                            //remove control
+                                                            api.control.remove( _id_ );
+                                                            // Remove the setting
+                                                            if ( api.has( _id_ ) ) {
+                                                                  api.remove( _id_ );
+                                                            }
+                                                            // Reinstantiate the setting and control
+                                                            //self.registerContextalizedModuleControlSection( params.skopeId, params.skopeLevel );
+                                                            self.trigger( 'trigger-skope-refresh' );
+                                                      });
                                                 });
-                                                api( contxSettingId )( newContxSettingValue );
 
-                                                // Remove the control
-                                                $.when( api.control( _id_ ).container.remove() ).done( function() {
-                                                      //remove control
-                                                      api.control.remove( _id_ );
-                                                      // Remove the setting
-                                                      if ( api.has( _id_ ) ) {
-                                                            api.remove( _id_ );
-                                                      }
-                                                      // Reinstantiate the setting and control
-                                                      //self.registerContextalizedModuleControlSection( params.skopeId, params.skopeLevel );
-                                                      self.trigger( 'trigger-skope-refresh' );
-                                                });
-                                          });
+                                                // execute the embeddedComplete callback
+                                                if (  _.isFunction( params.embeddedComplete ) ) {
+                                                      params.embeddedComplete.call( _ctrl_ );
+                                                }
 
-                                          // execute the embeddedComplete callback
-                                          if (  _.isFunction( params.embeddedComplete ) ) {
-                                                params.embeddedComplete.call( _ctrl_ );
-                                          }
-
-                                          // schedule the visibility
-                                          if (  _.isFunction( params.control_visibility ) ) {
-                                                params.control_visibility.call( _ctrl_ );
-                                          }
-                                    });//embedded done
+                                                // schedule the visibility
+                                                if (  _.isFunction( params.control_visibility ) ) {
+                                                      params.control_visibility.call( _ctrl_ );
+                                                }
+                                          });//embedded done
+                                    });
+                                    // api.control( _id_ ).focus({
+                                    //     completeCallback : function() {}
+                                    // });
                               });
-                              // api.control( _id_ ).focus({
-                              //     completeCallback : function() {}
-                              // });
-                        });
+                        }//if ( !api.control.has( params.id ) ) {
                   };//_do_register_()
 
 
-                  // Defer the registration when the parent section gets added to the api
+                  // Defer the registration when the parent section gets added to the api AND EMBEDDED
                   api.section.when( params.section.id, function() {
-                        //console.log('registerContextalizedModuleControlSection => ', _id_ );
-                        _do_register_();
+                        var _sec_ = api.section(params.section.id);
+                        // if section is not embedded yet, wait for the promise to be resolved before registering
+                        // otherwise register
+                        if ( _sec_.deferred && _sec_.deferred.embedded ) {
+                              if ( 'resolved' === _sec_.deferred.embedded.state() ) {
+                                    _do_register_(params, _id_);
+                              } else {
+                                    _sec_.deferred.embedded.done( function() {
+                                          _do_register_(params, _id_);
+                                    });
+                              }
+                        } else {
+                              _do_register_(params, _id_);
+                        }
                   });
-
 
                   // REGISTER A SECTION
                   api.CZR_Helpers.register({

@@ -72,6 +72,7 @@ var CZRSkopeBaseMths = CZRSkopeBaseMths || {};
                                     try {
                                           api.czr_skopeBase.updateSkopeCollection( skope_server_data.czr_new_skopes , preview.channel() );
                                     } catch ( er ) {
+                                          console.log('UPDATE SKOPE COLLECTION ERROR', er);
                                           return;
                                     }
                               }

@@ -5,8 +5,8 @@ Plugin URI: https://wordpress.org/plugins/hueman-addons/
 Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
-Tested up to: 5.6
-Stable tag: 2.3.0
+Tested up to: 5.7
+Stable tag: 2.3.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,10 +37,14 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 [Documentation here](http://docs.presscustomizr.com/article/242-hueman-addons-how-to-set-the-share-bar-options)
 
 == Upgrade Notice ==
-= 2.3.0 =
-Performance improvements. Successfully tested with WP 5.6. Prepared for WP 5.7.
+= 2.3.1 =
+Updated Font Awesome to v5.15.2. Successfully tested with WP 5.7.1.
 
 == Changelog ==
+= 2.3.1 April 23rd 2021 =
+* updated Font Awesome to v5.15.2
+* successfully tested with WP 5.7.1
+
 = 2.3.0 November 30th 2020 =
 * fixed : [performance][Sharrre buttons] include js assets only when relevant, on single 'post' type
 * fixed : [WP5.6][WP5.7] remove jquery-migrate dependencies
