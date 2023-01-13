@@ -331,7 +331,7 @@ function skp_get_skope_id( $level = 'local' ) {
     // in order to prevent this, let's get the skope_id value from the customizer posted value when available.
     // for the moment only the local skope_is is provided by the customizer post value, in the future it might be useful to also add the group skope_id ( all_pages, all_posts, all_categories, ... )
     if ( skp_is_customizing() && '_skope_not_set_' === $skope_id_to_return && 'local' === $level && !empty($_POST['local_skope_id']) ) {
-        $skope_id_to_return = $_POST['local_skope_id'];
+        $skope_id_to_return = sanitize_text_field($_POST['local_skope_id']);
     }
 
     $skope_id_to_return = apply_filters( 'skp_get_skope_id', $skope_id_to_return, $level );
