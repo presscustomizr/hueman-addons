@@ -6,7 +6,7 @@ Tags: hueman theme, hueman, customizer, contextualizer
 Requires at least: 4.7
 Requires PHP: 5.4
 Tested up to: 6.0
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -38,6 +38,9 @@ The plugin has been designed specifically for the Hueman WordPress theme. Lightw
 
 
 == Changelog ==
+= 2.3.3 July 20th 2021 =
+* 100% compatible with WordPress 6.1
+
 = 2.3.2 July 20th 2021 =
 * 100% compatible with WordPress 5.9
 

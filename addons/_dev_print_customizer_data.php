@@ -149,8 +149,8 @@ final class HA_dev_customizer_data {
       if ( false == $post_id || empty( $post_id ) ) {
         if ( isset( $_POST['customize_changeset_uuid'] ) && ! empty($_POST['customize_changeset_uuid']) ) {
           global $wpdb;
-          $title = $_POST['customize_changeset_uuid'];
-          $post_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_name = '" . $title . "'" );
+          $title = sanitize_text_field($_POST['customize_changeset_uuid']);
+          $post_id = $wpdb->get_var( $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_name =  %s",  $title ));
         }
       }
       return $post_id;
